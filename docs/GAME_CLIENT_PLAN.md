@@ -66,6 +66,7 @@ Before implementation, keep the creative target in these docs:
 - `docs/07_COMBAT_MATH_AND_EFFECTIVENESS.md`
 - `docs/08_RARITY_PACKS_AND_COMBINE.md`
 - `docs/09_RESOURCE_COSTING_AND_CARD_VALUE.md`
+- `docs/11_SET_001_CARD_EXPANSION.md`
 
 ## Asset Pipeline
 

@@ -1,0 +1,33 @@
+card_id,rarity,card_type,resonance_cost,affinity_requirement,material_cost_type,material_cost_amount,board_requirement,value_score,target_turn,power_band,costing_note
+concord_arbiter,Rare,Entity,4,2,None,0,two_shielded_allies_for_full_value,10.5,4,strong,Influence payoff requires shield formation
+solar_writ,Uncommon,Anomaly,2,1,None,0,friendly_entity,5.0,2,fair,Shield plus conditional draw on Star world
+purity_ray,Rare,Anomaly,3,1,Plasma,0,enemy_on_corrupted_world,8.0,3,strong,Efficient only against corruption
+helios_reactor,Holo,Structure,4,2,Plasma,1,controlled_star_world,11.5,4,strong,Economy engine with Guardian protection requirement
+carrion_bloom,Uncommon,World,2,0,None,0,empty_neutral_or_controlled_sector,5.5,2,fair,Needs nearby deaths to produce Biomass value
+maw_apostle,Rare,Entity,3,1,Biomass,0,biomass_available_for_full_value,8.0,3,strong,Support body scales Broodlings after consume
+hunger_spiral,Holo,Anomaly,4,2,Biomass,1,corrupted_worlds_and_biomass,11.0,4,strong,Area damage requires prior corruption and Biomass
+brood_bridge,Uncommon,Structure,2,1,None,0,controlled_corrupted_or_organic_world,5.5,2,fair,Movement utility does not create direct stats
+signal_cartographer,Uncommon,Entity,2,1,None,0,None,5.5,2,fair,Scan plus conditional Drone generation
+hardlight_exoshell,Rare,Attachment,2,1,Data,0,friendly_entity_or_drone,6.5,2,strong,Upgrade value highest on Drones
+network_cascade,Holo,Anomaly,4,2,Data,1,connected_machine_worlds,11.5,4,strong,Ready effects require built network
+logic_bastion,Rare,Structure,3,2,Data,0,controlled_machine_world,8.5,3,strong,Defensive aura has positional counterplay
+spore_shepherd,Rare,Entity,3,1,Verdance,0,spore_mark_sources,8.0,3,strong,Needs Spore Mark damage to become efficient
+bloomstep_path,Uncommon,World,2,0,None,0,empty_neutral_or_controlled_sector,5.5,2,fair,Movement terrain for Beast decks
+symbiotic_crown,Holo,Attachment,3,2,Verdance,1,friendly_entity,9.0,3,strong,Healing aura requires survival and adjacency
+rootsnare,Uncommon,Anomaly,2,1,None,0,enemy_near_verdant_world_for_full_value,5.5,2,fair,Control trick relies on terrain
+ash_duelist,Uncommon,Entity,2,1,None,0,None,5.5,2,fair,Fragile Strike First pressure
+molten_graft,Rare,Attachment,2,1,Ember,0,friendly_entity,6.5,2,strong,Strong attack buff offset by self-damage
+forge_riot,Holo,Anomaly,4,2,Ember,1,friendly_entities_that_survive_damage,11.0,4,strong,Board swing requires existing board and risk
+siege_crucible,Rare,Structure,3,2,Ember,0,controlled_crucible_world,8.5,3,strong,Anti-structure line pressure is positional
+rift_cartographer,Uncommon,Entity,2,1,None,0,None,5.5,2,fair,Forecast support with conditional Blink
+event_horizon,Holo,World,3,2,Aether,1,empty_neutral_or_controlled_sector,9.0,3,strong,Control terrain with enemy-entry counterplay
+echo_split,Rare,Anomaly,3,1,Aether,0,friendly_entity,8.0,3,strong,Recall protects value but costs tempo
+star_warden_seal,Rare,Attachment,2,1,Aether,0,friendly_world,6.5,2,strong,World protection and contested Influence tool
+sector_surveyor,Common,Entity,1,0,None,0,None,3.5,1,fair,Cheap information body
+emergency_bulkhead,Common,Structure,1,0,None,0,controlled_world,3.5,1,fair,Temporary protection on fragile structure
+salvage_charter,Uncommon,Anomaly,2,0,None,0,structure_destroyed_for_full_value,5.0,2,fair,Recovery tool after structure loss
+frontier_beacon,Rare,Structure,3,0,None,0,controlled_barren_world,8.0,3,fair,World placement support has no direct combat power
+mercenary_skiff,Uncommon,Entity,2,0,None,0,None,5.5,2,fair,Flexible flyer with Gas discount upside
+crystal_lens,Rare,Attachment,2,0,Crystal,0,friendly_entity,6.0,2,fair,Forecast after attack requires combat survival
+null_zone,Holo,World,3,0,None,0,empty_neutral_or_controlled_sector,8.5,3,strong,Counter-world suppresses terrain multipliers for both sides
+ancient_terraformer,Mythic,Entity,5,0,Aether,1,adjacent_barren_world,13.0,5,strong,Slow payoff converts Barren worlds into faction terrain

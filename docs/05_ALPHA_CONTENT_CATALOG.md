@@ -2,6 +2,8 @@
 
 This is the first playable content script. It is not every card forever. It is the first complete set that proves the game: six factions, six commanders, 5x5 board, worlds, structures, attachments, evolution, and readable tactical play.
 
+For the first deckbuilding expansion after alpha, see `docs/11_SET_001_CARD_EXPANSION.md`.
+
 ## Alpha Content Target
 
 - 6 commanders
