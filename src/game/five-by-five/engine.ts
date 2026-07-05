@@ -1,6 +1,7 @@
 import type { CardDef } from "@/lib/match-engine";
 import {
   buildStructure,
+  canAttackCommander,
   checkVictory,
   influenceGainFor,
   attachToEntity,
@@ -53,6 +54,10 @@ export function startTurn(state: FiveByFiveMatchState, side: Side): FiveByFiveMa
     enemy: side === "enemy" ? refreshedCommander : state.enemy,
     turn: side === "player" ? state.turn + 1 : state.turn,
     log: [...state.log, `${side} starts turn with ${refreshedCommander.resonance} Resonance.`],
+    lastEvents: [
+      { type: "turn", side, turn: side === "player" ? state.turn + 1 : state.turn },
+      { type: "resource", side, resonance: refreshedCommander.resonance },
+    ],
   };
 }
 
@@ -70,6 +75,7 @@ export function endStep(state: FiveByFiveMatchState): FiveByFiveMatchState {
       ...state.log,
       `Influence pulse: player +${playerInfluence}, enemy +${enemyInfluence}.`,
     ],
+    lastEvents: [],
   };
   return checkVictory(next);
 }
@@ -92,6 +98,7 @@ export function deployEntityCard(
       ...state,
       board,
       log: [...state.log, `${owner} deploys ${def.name} to ${state.board[targetIndex].id}.`],
+      lastEvents: [],
     },
     owner,
     def.cost
@@ -116,6 +123,7 @@ export function playWorldCard(
       ...state,
       board,
       log: [...state.log, `${owner} terraforms ${state.board[targetIndex].id} into ${world}.`],
+      lastEvents: [],
     },
     owner,
     def.cost
@@ -140,6 +148,7 @@ export function buildStructureCard(
       ...state,
       board,
       log: [...state.log, `${owner} builds ${def.name} on ${state.board[targetIndex].id}.`],
+      lastEvents: [],
     },
     owner,
     def.cost
@@ -164,6 +173,7 @@ export function attachCardToEntity(
       ...state,
       board,
       log: [...state.log, `${owner} attaches ${def.name} to ${state.board[targetIndex].id}.`],
+      lastEvents: [],
     },
     owner,
     def.cost
@@ -181,6 +191,7 @@ export function moveEntityInMatch(
     ...state,
     board,
     log: [...state.log, `${state.board[fromIndex].entity?.name ?? "Entity"} moves to ${state.board[toIndex].id}.`],
+    lastEvents: [],
   };
 }
 
@@ -201,6 +212,10 @@ export function attackInMatch(
     defender: target,
     defenderWorld: targetSector.world,
   });
+  const targetHpBefore = target.hp;
+  const destroyed = attackResult.hpDamage >= targetHpBefore;
+  const overflowDamage = destroyed ? Math.max(0, attackResult.hpDamage - targetHpBefore) : 0;
+  const defendingCommanderSide = target.owner;
 
   const board = state.board.map((sector) => {
     if (sector.index === attackerIndex) {
@@ -225,15 +240,99 @@ export function attackInMatch(
     return sector;
   });
 
+  const enemy = defendingCommanderSide === "enemy" && overflowDamage > 0
+    ? { ...state.enemy, hp: Math.max(0, state.enemy.hp - overflowDamage) }
+    : state.enemy;
+  const player = defendingCommanderSide === "player" && overflowDamage > 0
+    ? { ...state.player, hp: Math.max(0, state.player.hp - overflowDamage) }
+    : state.player;
+  const events: FiveByFiveMatchState["lastEvents"] = [
+    {
+      type: "attack",
+      attackerIndex,
+      targetIndex,
+      attackerName: attacker.name,
+      targetName: target.name,
+      damage: attackResult.hpDamage,
+      shieldDamage: attackResult.shieldDamage,
+      overflowDamage,
+      destroyed,
+    },
+  ];
+
+  if (destroyed) {
+    events.push({ type: "destroyed", sectorIndex: targetIndex, name: target.name, owner: target.owner });
+  }
+  if (overflowDamage > 0) {
+    events.push({
+      type: "commanderDamage",
+      commander: defendingCommanderSide,
+      sourceIndex: attackerIndex,
+      sourceName: attacker.name,
+      damage: overflowDamage,
+      direct: false,
+    });
+  }
+
   const next = {
     ...state,
     board,
+    player,
+    enemy,
     log: [
       ...state.log,
-      `${attacker.name} hits ${target.name} for ${attackResult.hpDamage} damage.`,
+      `${attacker.name} hits ${target.name} for ${attackResult.hpDamage} damage.${destroyed ? " Target destroyed." : ""}${overflowDamage > 0 ? ` ${overflowDamage} overflow hits commander.` : ""}`,
     ],
+    lastEvents: events,
   };
   return checkVictory(next);
+}
+
+export function attackCommanderInMatch(
+  state: FiveByFiveMatchState,
+  attackerIndex: number
+): FiveByFiveMatchState {
+  if (!canAttackCommander(state.board, attackerIndex)) return state;
+  const attackerSector = state.board[attackerIndex];
+  const attacker = attackerSector.entity;
+  if (!attacker) return state;
+
+  const defendingSide: Side = attacker.owner === "player" ? "enemy" : "player";
+  const damage = attacker.attack;
+  const player = defendingSide === "player"
+    ? { ...state.player, hp: Math.max(0, state.player.hp - damage) }
+    : state.player;
+  const enemy = defendingSide === "enemy"
+    ? { ...state.enemy, hp: Math.max(0, state.enemy.hp - damage) }
+    : state.enemy;
+  const board = state.board.map((sector) =>
+    sector.index === attackerIndex
+      ? {
+          ...sector,
+          entity: {
+            ...attacker,
+            canAttack: false,
+            exhausted: true,
+          },
+        }
+      : sector
+  );
+
+  return checkVictory({
+    ...state,
+    board,
+    player,
+    enemy,
+    log: [...state.log, `${attacker.name} strikes the ${defendingSide} commander for ${damage}.`],
+    lastEvents: [{
+      type: "commanderDamage",
+      commander: defendingSide,
+      sourceIndex: attackerIndex,
+      sourceName: attacker.name,
+      damage,
+      direct: true,
+    }],
+  });
 }
 
 function spendResonance(

@@ -2,6 +2,8 @@ import { Container, Graphics, Text } from "pixi.js";
 import { CARD_DEFS, type CardDef } from "@/lib/match-engine";
 import {
   attackInMatch,
+  attackCommanderInMatch,
+  canAttackCommander,
   createBoardEntity,
   createFiveByFiveMatch,
   deployEntityCard,
@@ -78,6 +80,7 @@ export class BattleScene extends BaseScene {
   private hand = [...STARTING_HAND];
   private selectedCardId: string | null = null;
   private selectedActor: number | null = null;
+  private bgLayer = new Container();
   private boardLayer = new Container();
   private hudLayer = new Container();
   private handLayer = new Container();
@@ -87,14 +90,15 @@ export class BattleScene extends BaseScene {
   private time = 0;
 
   enter(): void {
-    this.container.addChild(this.boardLayer, this.hudLayer, this.handLayer, this.fxLayer);
+    this.container.addChild(this.bgLayer, this.boardLayer, this.hudLayer, this.handLayer, this.fxLayer);
     this.redraw();
   }
 
   update(deltaMS: number): void {
     this.time += deltaMS * 0.001;
     if (this.lastWidth !== this.app.screen.width || this.lastHeight !== this.app.screen.height) this.redraw();
-    this.fxLayer.children.forEach((child, index) => {
+    this.bgLayer.children.forEach((child, index) => {
+      if (index === 0) return;
       child.alpha = 0.55 + Math.sin(this.time * 2 + index) * 0.18;
       child.rotation += deltaMS * 0.00012;
     });
@@ -103,6 +107,7 @@ export class BattleScene extends BaseScene {
   private redraw() {
     this.lastWidth = this.app.screen.width;
     this.lastHeight = this.app.screen.height;
+    this.clearLayer(this.bgLayer);
     this.clearLayer(this.boardLayer);
     this.clearLayer(this.hudLayer);
     this.clearLayer(this.handLayer);
@@ -110,6 +115,7 @@ export class BattleScene extends BaseScene {
     this.drawBackground();
     this.drawHud();
     this.drawBoard();
+    this.drawBattleEvents();
     this.drawHand();
   }
 
@@ -122,14 +128,14 @@ export class BattleScene extends BaseScene {
       .fill({ color: COLORS.cyan, alpha: 0.07 })
       .circle(width * 0.66, height * 0.24, Math.min(width, height) * 0.21)
       .fill({ color: COLORS.fuchsia, alpha: 0.055 });
-    this.fxLayer.addChild(bg);
+    this.bgLayer.addChild(bg);
 
     for (let index = 0; index < 80; index++) {
       const dot = new Graphics()
         .circle(0, 0, index % 9 === 0 ? 1.8 : 1)
         .fill({ color: COLORS.white, alpha: 0.34 + (index % 4) * 0.08 });
       dot.position.set((index * 127) % width, (index * 71) % height);
-      this.fxLayer.addChild(dot);
+      this.bgLayer.addChild(dot);
     }
   }
 
@@ -158,12 +164,17 @@ export class BattleScene extends BaseScene {
     menu.position.set(width - 118, 78);
     const pulse = makeButton("PULSE TURN", Math.min(170, width * 0.28), COLORS.emerald, () => this.pulseTurn());
     pulse.position.set(width - pulse.width - 18, height - 152);
+    const selectedCanStrikeCommander = this.selectedActor !== null && canAttackCommander(this.match.board, this.selectedActor);
+    const direct = makeButton("STRIKE COMMANDER", Math.min(210, width * 0.38), COLORS.rose, () => this.attackCommander());
+    direct.position.set(width - direct.width - 18, height - 208);
+    direct.alpha = selectedCanStrikeCommander ? 1 : 0.34;
+    direct.eventMode = selectedCanStrikeCommander ? "static" : "none";
 
     const logPanel = roundedPanel(Math.min(300, width - 36), 92, 0x030712, 0.72, COLORS.cyan);
     logPanel.position.set(width - logPanel.width - 18, 138);
     const logTitle = label("BATTLE LOG", 9, COLORS.cyan, "900");
     logTitle.position.set(logPanel.x + 12, logPanel.y + 10);
-    this.hudLayer.addChild(top, player, reset, menu, pulse, logPanel, logTitle);
+    this.hudLayer.addChild(top, player, reset, menu, pulse, direct, logPanel, logTitle);
     this.match.log.slice(-4).forEach((entry, index) => {
       const row = label(entry, 10, COLORS.slate, "bold");
       row.position.set(logPanel.x + 12, logPanel.y + 28 + index * 15);
@@ -261,11 +272,75 @@ export class BattleScene extends BaseScene {
       statLabel.anchor.set(0.5);
       statLabel.position.set(size / 2, size * 0.76);
       node.addChild(card, glyph, name, statLabel);
+      if ("exhausted" in occupant && occupant.exhausted) {
+        const spent = label("SPENT", Math.max(8, size * 0.07), COLORS.rose, "900");
+        spent.anchor.set(0.5);
+        spent.position.set(size / 2, size * 0.88);
+        node.addChild(spent);
+      }
     }
 
     const controlColor = sector.control === "player" ? COLORS.emerald : sector.control === "enemy" ? COLORS.fuchsia : sector.control === "contested" ? COLORS.gold : COLORS.slate;
     node.addChild(new Graphics().roundRect(4, size - 7, size - 8, 3, 3).fill({ color: controlColor, alpha: 0.8 }));
     return node;
+  }
+
+  private drawBattleEvents() {
+    if (this.match.lastEvents.length === 0) return;
+    const { width, height } = this.app.screen;
+    const boardSize = Math.min(width - 26, height - 260, 760);
+    const cellGap = Math.max(5, boardSize * 0.012);
+    const cell = (boardSize - cellGap * 4) / 5;
+    const originX = (width - boardSize) / 2;
+    const originY = Math.max(112, (height - boardSize) / 2 - 16);
+
+    for (const event of this.match.lastEvents) {
+      if (event.type === "attack") {
+        const from = this.cellCenter(event.attackerIndex, originX, originY, cell, cellGap);
+        const to = this.cellCenter(event.targetIndex, originX, originY, cell, cellGap);
+        const beam = new Graphics()
+          .moveTo(from.x, from.y)
+          .lineTo(to.x, to.y)
+          .stroke({ color: event.destroyed ? COLORS.rose : COLORS.gold, alpha: 0.72, width: 4 });
+        const burst = new Graphics()
+          .circle(to.x, to.y, Math.max(18, cell * 0.22))
+          .stroke({ color: event.destroyed ? COLORS.rose : COLORS.gold, alpha: 0.7, width: 3 })
+          .circle(to.x, to.y, Math.max(5, cell * 0.07))
+          .fill({ color: event.destroyed ? COLORS.rose : COLORS.gold, alpha: 0.55 });
+        const damage = label(`-${event.damage}`, Math.max(18, cell * 0.2), event.destroyed ? COLORS.rose : COLORS.gold, "900");
+        damage.anchor.set(0.5);
+        damage.position.set(to.x, to.y - cell * 0.34);
+        this.fxLayer.addChild(beam, burst, damage);
+        if (event.overflowDamage > 0) {
+          const overflow = label(`OVERFLOW -${event.overflowDamage}`, Math.max(13, cell * 0.12), COLORS.rose, "900");
+          overflow.anchor.set(0.5);
+          overflow.position.set(width / 2, event.targetIndex < 13 ? 62 : height - 88);
+          this.fxLayer.addChild(overflow);
+        }
+      }
+      if (event.type === "commanderDamage") {
+        const text = label(`${event.direct ? "DIRECT" : "OVERFLOW"} COMMANDER -${event.damage}`, 18, COLORS.rose, "900");
+        text.anchor.set(0.5);
+        text.position.set(width / 2, event.commander === "enemy" ? 56 : height - 92);
+        this.fxLayer.addChild(text);
+      }
+      if (event.type === "destroyed") {
+        const center = this.cellCenter(event.sectorIndex, originX, originY, cell, cellGap);
+        const text = label("DESTROYED", Math.max(12, cell * 0.11), COLORS.rose, "900");
+        text.anchor.set(0.5);
+        text.position.set(center.x, center.y + cell * 0.35);
+        this.fxLayer.addChild(text);
+      }
+    }
+  }
+
+  private cellCenter(index: number, originX: number, originY: number, cell: number, cellGap: number) {
+    const row = Math.floor(index / 5);
+    const col = index % 5;
+    return {
+      x: originX + col * (cell + cellGap) + cell / 2,
+      y: originY + row * (cell + cellGap) + cell / 2,
+    };
   }
 
   private handCard(def: CardDef, width: number, height: number, selected: boolean, disabled: boolean) {
@@ -369,6 +444,15 @@ export class BattleScene extends BaseScene {
       this.selectedActor = null;
       this.redraw();
     }
+  }
+
+  private attackCommander() {
+    if (this.selectedActor === null || !canAttackCommander(this.match.board, this.selectedActor)) return;
+    this.match = attackCommanderInMatch(this.match, this.selectedActor);
+    this.selectedActor = null;
+    this.selectedCardId = null;
+    if (this.match.winner) this.switchScene(this.match.winner === "player" ? "victory" : "defeat");
+    this.redraw();
   }
 
   private playSelectedCard(def: CardDef, targetIndex: number) {

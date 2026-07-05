@@ -124,6 +124,7 @@ export function createFiveByFiveMatch({
     winner: null,
     winCondition: null,
     log: ["The 5x5 living board comes online."],
+    lastEvents: [],
   };
 }
 
@@ -203,6 +204,15 @@ export function legalAttackIndexes(board: SectorState[], fromIndex: number): num
       return manhattanDistance(fromIndex, sector.index) === 1;
     })
     .map((sector) => sector.index);
+}
+
+export function canAttackCommander(board: SectorState[], fromIndex: number): boolean {
+  const entity = board[fromIndex]?.entity;
+  if (!entity || !entity.canAttack || entity.exhausted) return false;
+  return !board.some((sector) => {
+    const target = sector.entity ?? sector.structure;
+    return target && target.owner !== entity.owner;
+  });
 }
 
 export function placeEntity(board: SectorState[], entity: BoardEntity, targetIndex: number): SectorState[] {

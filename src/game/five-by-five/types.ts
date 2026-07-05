@@ -161,6 +161,43 @@ export type CommanderState = {
   influence: number;
 };
 
+export type BattleEvent =
+  | {
+      type: "attack";
+      attackerIndex: number;
+      targetIndex: number;
+      attackerName: string;
+      targetName: string;
+      damage: number;
+      shieldDamage: number;
+      overflowDamage: number;
+      destroyed: boolean;
+    }
+  | {
+      type: "commanderDamage";
+      commander: Side;
+      sourceIndex: number;
+      sourceName: string;
+      damage: number;
+      direct: boolean;
+    }
+  | {
+      type: "destroyed";
+      sectorIndex: number;
+      name: string;
+      owner: Side;
+    }
+  | {
+      type: "turn";
+      side: Side;
+      turn: number;
+    }
+  | {
+      type: "resource";
+      side: Side;
+      resonance: number;
+    };
+
 export type FiveByFiveMatchState = {
   turn: number;
   active: Side;
@@ -171,4 +208,5 @@ export type FiveByFiveMatchState = {
   winner: Side | null;
   winCondition: "conquest" | "ascendancy" | "genesis" | null;
   log: string[];
+  lastEvents: BattleEvent[];
 };
