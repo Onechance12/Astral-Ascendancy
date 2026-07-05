@@ -1,0 +1,37 @@
+card_id,resonance_cost,affinity_requirement,material_requirement,material_amount,expected_turn,baseline_value,actual_value,rarity_pressure,setup_requirement,counterplay_note,pricing_note
+dawn_vanguard_path,2,Solari,Plasma,0,2,4.0,4.4,0.2,Shielded ally line,Pressure shields before XP,Skill value is progression not immediate damage
+aegis_mastery,3,Solari,Plasma,1,3,6.0,7.0,0.5,Shielded entity survives attacks,Remove or silence target,Evolution priced as sidegrade unlock
+sun_crown_relic,4,Solari,Plasma,2,4,8.0,9.4,0.9,Controlled Star worlds,Raid Star economy,Holo relic accelerates research only
+radiant_squire,1,Solari,Plasma,0,1,2.0,2.3,0.1,Shield source needed,Kill before shield trigger,Common starter mastery body
+hive_instinct_path,2,Voidborn,Biomass,0,2,4.0,4.4,0.2,Spawned organisms and Corrupted world,Purify or deny deaths,Skill turns swarm deaths into XP
+apex_molt,3,Voidborn,Biomass,1,3,6.0,7.2,0.5,Biomass and surviving Swarm,Exile or prevent consumption,Evolution is delayed payoff
+hunger_heart_relic,4,Voidborn,Biomass,2,4,8.0,9.6,0.9,Corrupted world death cluster,Purify or avoid adjacency,Holo relic stores memory not raw stats
+gene_thief_larva,1,Voidborn,Biomass,0,1,2.0,2.2,0.1,Needs kill to record data,Block with durable body,Low stat scout for research
+operator_protocol,2,Synthari,Data,0,2,4.0,4.5,0.2,Drone and Machine world,Disrupt scans or terrain,Skill rewards positioning
+drone_to_construct,3,Synthari,Data,1,3,6.0,7.1,0.5,Attached Drone and diagnostics,Destroy attachment target,Evolution unlocks role shift
+logic_core_relic,4,Synthari,Data,2,4,8.0,9.5,0.9,Connected Machine worlds,Break network chain,Holo relic depends on board geometry
+apprentice_assembler,1,Synthari,Data,0,1,2.0,2.4,0.1,Structure or scan target,Remove support unit,Cheap project XP enabler
+symbiote_path,2,Verdant,Verdance,0,2,4.0,4.5,0.2,Healing on living worlds,Deny heal targets,Skill rewards sustain
+beast_bloom_evolution,3,Verdant,Verdance,1,3,6.0,7.0,0.5,Beast moves and heals,Zone out or burst damage,Evolution needs both movement and healing
+seedheart_relic,4,Verdant,Verdance,2,4,8.0,9.5,0.9,Verdant healing memory,Focus heal engines,Holo relic feeds domain projects
+sapling_adept,1,Verdant,Verdance,0,1,2.0,2.3,0.1,Adjacent world spread,Contest world growth,Common world-growth learner
+warrior_foundry_path,2,Crimson,Ember,0,2,4.0,4.6,0.2,Damaged allies survive,Finish damaged units,Skill rewards risky survival
+blooded_weapon_evolution,3,Crimson,Ember,1,3,6.0,7.2,0.5,Attached bearer survives damage,Destroy bearer or attachment,Evolution is volatile sidegrade
+ember_oath_relic,4,Crimson,Ember,2,4,8.0,9.7,0.9,Crucible control changes,Avoid repeated contest,Holo relic feeds metallurgy
+forge_initiate,1,Crimson,Ember,0,1,2.0,2.4,0.1,Damage survival trigger,Kill in one hit,High attack low HP starter
+gatewalker_path,2,Astral,Aether,0,2,4.0,4.5,0.2,Blink access,Anchor or block portals,Skill rewards movement mastery
+echo_self_evolution,3,Astral,Aether,1,3,6.0,7.1,0.5,Entity Blinks twice,Control portal exits,Evolution unlocks Echo sidegrade
+chronicle_relic,4,Astral,Aether,2,4,8.0,9.6,0.9,Forecast actions,Pressure hand and draw,Holo relic creates Card Memory
+novice_gatekeeper,1,Astral,Aether,0,1,2.0,2.3,0.1,Stand near Astral world,Displace or contest sector,Starter portal learner
+commander_training_manual,1,Neutral,Any,0,1,2.0,2.2,0.0,Any field test,Ignore until objective matters,Universal training card
+veteran_badge,2,Neutral,AetherShards,20,2,4.0,4.5,0.2,Unit survives battle,Remove veteran target,Relic is cosmetic first
+world_survey_license,1,Neutral,Tritium,0,1,2.0,2.4,0.1,Unclaimed world,Deny survey tempo,Cheap domain accelerator
+guild_engineer,2,Neutral,Alloy,1,2,4.0,4.8,0.2,Friendly structure present,Kill support or structure,Body plus project XP
+relic_socketing_kit,3,Neutral,Alloy,2,3,6.0,7.3,0.5,Domain project slot,Delay relic economy,Rare project unlocks loadout depth
+ascension_journal,3,Neutral,Aether,1,3,6.0,7.2,0.5,Influence win or boss clear,Contest objectives,Relic tracks commander renown
+training_simulator,4,Neutral,Data,2,4,8.0,9.3,0.8,PvE training mode,No direct PvP pressure,Holo project accelerates mastery
+world_level_charter,3,Neutral,Crystal,1,3,6.0,7.0,0.5,Surveyed world,Contest domain economy,Science starts world level objectives
+class_specialization_token,3,Neutral,Aether,1,3,6.0,7.4,0.6,Commander threshold,Lockout by ruleset,Rare path choice
+artifact_recovery_team,2,Neutral,Tritium,1,2,4.0,4.7,0.2,Destroyed structure nearby,Protect or avoid structure trades,Salvage body creates relic progress
+masterwork_blueprint,5,Neutral,Alloy,3,5,10.0,12.0,1.0,Fully mastered card,Requires long setup,Mythic sidegrade unlock
+domain_ascension_protocol,6,Neutral,Aether,3,6,12.0,14.0,1.0,Level 5 world,Very slow and interruptible,Mythic world transformation

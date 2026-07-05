@@ -1,0 +1,37 @@
+card_id,name,faction,rarity,card_type,cost,attack,hp,damage_school,defense_profile,creature_class,world_affinity,progression_track,level_hook,keywords,board_role
+dawn_vanguard_path,Dawn Vanguard Path,Solari,Uncommon,Skill,2,0,0,Radiant,Lightform,Commander,Star,guardian_mastery,Shielded ally survives attack,CommanderSkill;ShieldXP,Solari defensive path
+aegis_mastery,Aegis Mastery,Solari,Rare,Evolution,3,0,0,Radiant,Lightform,Infantry,Star,guardian_mastery,Survive two attacks while shielded,Evolution;GuardianSidegrade,Unlock Guardian evolution
+sun_crown_relic,Sun-Crown Relic,Solari,Holo,Relic,4,0,0,Radiant,Lightform,Commander,Star,stellar_physics,Control Star worlds during field tests,CommanderRelic;StarResearch,Accelerate Star research
+radiant_squire,Radiant Squire,Solari,Common,Entity,1,1,2,Radiant,Lightform,Infantry,Star,guardian_mastery,Gain Shield in battle,ShieldXP;Trainee,Starter mastery unit
+hive_instinct_path,Hive Instinct Path,Voidborn,Uncommon,Skill,2,0,0,Bio,Chitin,Commander,Corrupted,brood_mastery,Spawned organism dies on Corrupted world,CommanderSkill;BroodXP,Voidborn swarm path
+apex_molt,Apex Molt,Voidborn,Rare,Evolution,3,0,0,Bio,Chitin,Swarm,Organic,brood_mastery,Consume Biomass after survival,Evolution;ApexSidegrade,Unlock Apex organism
+hunger_heart_relic,Hunger-Heart Relic,Voidborn,Holo,Relic,4,0,0,Void,Chitin,Commander,Corrupted,xenobiology,Adjacent entity death stores Biomass memory,CommanderRelic;BiomassMemory,Accelerate corruption ecology
+gene_thief_larva,Gene-Thief Larva,Voidborn,Common,Entity,1,1,1,Bio,Chitin,Swarm,Organic,xenobiology,Destroy target and record defense profile,Study;Trainee,Starter biology unit
+operator_protocol,Operator Protocol,Synthari,Uncommon,Skill,2,0,0,Tech,Machine,Commander,Machine,drone_mastery,Drone scans or moves through Machine world,CommanderSkill;ScanXP,Synthari operator path
+drone_to_construct,Drone-to-Construct Upgrade,Synthari,Rare,Evolution,3,0,0,Tech,Machine,Drone,Machine,drone_mastery,Attached Drone completes diagnostics,Evolution;ConstructSidegrade,Unlock Construct form
+logic_core_relic,Logic Core Relic,Synthari,Holo,Relic,4,0,0,Tech,Machine,Commander,Machine,synthetic_systems,Control connected Machine worlds,CommanderRelic;NetworkXP,Accelerate systems research
+apprentice_assembler,Apprentice Assembler,Synthari,Common,Entity,1,1,2,Tech,Machine,Drone,Machine,project_engineering,Complete scan beside structure,Scan;ProjectXP,Starter engineering unit
+symbiote_path,Symbiote Path,Verdant,Uncommon,Skill,2,0,0,Bio,LivingArmor,Commander,Verdant,symbiosis_mastery,Heal ally on Organic or Verdant world,CommanderSkill;HealXP,Verdant support path
+beast_bloom_evolution,Beast-Bloom Evolution,Verdant,Rare,Evolution,3,0,0,Bio,LivingArmor,Beast,Verdant,symbiosis_mastery,Beast moves and heals on Verdant world,Evolution;Bloomform,Unlock beast sidegrade
+seedheart_relic,Seedheart Relic,Verdant,Holo,Relic,4,0,0,Bio,LivingArmor,Commander,Verdant,xenobotany,Store healing memory on Verdant world,CommanderRelic;HealingMemory,Accelerate Worldroot projects
+sapling_adept,Sapling Adept,Verdant,Common,Entity,1,1,2,Bio,LivingArmor,Caster,Verdant,symbiosis_mastery,World spreads adjacent,WorldSpread;Trainee,Starter world growth unit
+warrior_foundry_path,Warrior Foundry Path,Crimson,Uncommon,Skill,2,0,0,Ember,BloodMetal,Commander,Crucible,warrior_mastery,Damaged ally survives combat,CommanderSkill;SurvivalXP,Crimson survival path
+blooded_weapon_evolution,Blooded Weapon Evolution,Crimson,Rare,Evolution,3,0,0,Ember,BloodMetal,Infantry,Crucible,weapon_mastery,Attached bearer survives damage,Evolution;MasterworkWeapon,Unlock weapon sidegrade
+ember_oath_relic,Ember Oath Relic,Crimson,Holo,Relic,4,0,0,Ember,BloodMetal,Commander,Crucible,war_metallurgy,Sector control changes on Crucible world,CommanderRelic;EmberMemory,Accelerate metallurgy
+forge_initiate,Forge Initiate,Crimson,Common,Entity,1,2,1,Kinetic,BloodMetal,Infantry,Crucible,warrior_mastery,Take damage and survive,SurvivalXP;Trainee,Starter pressure unit
+gatewalker_path,Gatewalker Path,Astral,Uncommon,Skill,2,0,0,Astral,Phase,Commander,Astral,gatewalker_mastery,First Blink each turn,CommanderSkill;BlinkXP,Astral movement path
+echo_self_evolution,Echo-Self Evolution,Astral,Rare,Evolution,3,0,0,Astral,Phase,Caster,Astral,gatewalker_mastery,Blink twice in one battle,Evolution;EchoSidegrade,Unlock Echo form
+chronicle_relic,Chronicle Relic,Astral,Holo,Relic,4,0,0,Astral,Phase,Commander,Astral,temporal_mechanics,Forecast cards during battle,CommanderRelic;CardMemory,Accelerate temporal research
+novice_gatekeeper,Novice Gatekeeper,Astral,Common,Entity,1,1,2,Astral,Phase,Caster,Astral,gatewalker_mastery,End step adjacent to Astral world,BlinkXP;Trainee,Starter portal unit
+commander_training_manual,Commander Training Manual,Neutral,Common,Skill,1,0,0,Kinetic,Unarmored,Commander,Barren,commander_training,Complete any field test,TrainingXP;Starter,Universal commander XP
+veteran_badge,Veteran Badge,Neutral,Uncommon,Relic,2,0,0,Kinetic,Unarmored,Infantry,Barren,card_mastery,Entity survives battle,UnitRelic;CosmeticXP,Mastery cosmetic relic
+world_survey_license,World Survey License,Neutral,Common,Skill,1,0,0,Kinetic,Unarmored,Commander,Barren,world_survey,Survey unclaimed world,Survey;Domain,Reveal world upgrade paths
+guild_engineer,Guild Engineer,Neutral,Uncommon,Entity,2,1,3,Kinetic,Unarmored,Infantry,Barren,project_engineering,End step beside friendly structure,ProjectXP;Builder,Structure support unit
+relic_socketing_kit,Relic Socketing Kit,Neutral,Rare,Project,3,0,0,Tech,Structure,Construct,Machine,relic_mastery,Build domain socket project,Project;RelicSlot,Unlock relic slots
+ascension_journal,Ascension Journal,Neutral,Rare,Relic,3,0,0,Astral,Phase,Commander,Astral,commander_training,Win through Influence or boss clear,CommanderRelic;Renown,Record commander victories
+training_simulator,Training Simulator,Neutral,Holo,Project,4,0,0,Tech,Structure,Construct,Machine,card_mastery,Complete PvE training battle,Project;MasteryXP,Boost PvE mastery gain
+world_level_charter,World Level Charter,Neutral,Rare,Science,3,0,0,Kinetic,Unarmored,Caster,Barren,world_advancement,Complete survey and choose objective,Science;WorldLevel,Start world level objective
+class_specialization_token,Class Specialization Token,Neutral,Rare,Skill,3,0,0,Astral,Phase,Commander,Astral,commander_training,Reach commander specialization threshold,Specialization;Choice,Choose commander class path
+artifact_recovery_team,Artifact Recovery Team,Neutral,Uncommon,Entity,2,1,2,Kinetic,Unarmored,Infantry,Barren,relic_mastery,Structure destroyed nearby,RelicDiscovery;Salvage,Find relic fragments
+masterwork_blueprint,Masterwork Blueprint,Neutral,Mythic,Project,5,0,0,Tech,Structure,Construct,Machine,card_mastery,Fully master one eligible card,Project;Sidegrade,Unlock masterwork sidegrade
+domain_ascension_protocol,Domain Ascension Protocol,Neutral,Mythic,Evolution,6,0,0,Astral,Phase,Commander,Astral,world_advancement,Reach level 5 world,Evolution;AscendantWorld,Begin world ascension

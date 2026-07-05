@@ -70,6 +70,8 @@ Before implementation, keep the creative target in these docs:
 - `docs/12_5X5_ENGINE_IMPLEMENTATION.md`
 - `docs/13_SET_002_WORLDS_AWAKEN.md`
 - `docs/14_SCIENCE_ENGINEERING_PROGRESSION.md`
+- `docs/15_RPG_GAME_SYSTEMS_AUDIT.md`
+- `docs/16_SET_004_RPG_FOUNDATIONS.md`
 
 ## Asset Pipeline
 

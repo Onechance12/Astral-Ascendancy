@@ -149,12 +149,12 @@ export default function PackOpener({ onClose }: { onClose: () => void }) {
             <div className="grid grid-cols-5 gap-2">
               {cards.map((card, i) => {
                 const revealed = i <= revealIdx;
-                const isWorldCard = ["planet", "development", "crew"].includes(card.category);
+                const isWorldCard = ["planet", "development", "crew", "world", "structure", "attachment", "science", "project", "skill", "relic", "evolution"].includes(card.category);
                 const color = isWorldCard
-                  ? (card.category === "planet" ? "#fbbf24" : card.category === "development" ? "#22d3ee" : "#34d399")
+                  ? (card.category === "planet" ? "#fbbf24" : card.category === "development" ? "#22d3ee" : card.category === "world" ? "#67e8f9" : card.category === "structure" ? "#a78bfa" : card.category === "attachment" ? "#fb923c" : card.category === "science" ? "#38bdf8" : card.category === "project" ? "#34d399" : card.category === "skill" ? "#facc15" : card.category === "relic" ? "#c084fc" : card.category === "evolution" ? "#4ade80" : "#34d399")
                   : (FACTION_COLOR[card.faction || ""] || "#94a3b8");
                 const glyph = isWorldCard
-                  ? (card.category === "planet" ? "🪐" : card.category === "development" ? "⚡" : "👥")
+                  ? (card.category === "planet" ? "🪐" : card.category === "development" ? "⚡" : card.category === "world" ? "⬢" : card.category === "structure" ? "▣" : card.category === "attachment" ? "⚙" : card.category === "science" ? "⌬" : card.category === "project" ? "▤" : card.category === "skill" ? "✦" : card.category === "relic" ? "◆" : card.category === "evolution" ? "↟" : "👥")
                   : (FACTION_GLYPH[card.faction || ""] || "?");
                 const rarityColor = RARITY_COLOR[card.rarity] || "rgba(148,163,184,0.5)";
                 const isHighRarity = ["Holo", "Mythic", "Singularity"].includes(card.rarity);

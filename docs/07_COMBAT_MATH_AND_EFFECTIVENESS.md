@@ -53,6 +53,9 @@ Initial balance tables live in:
 - `docs/balance/engineering_projects.csv`
 - `docs/balance/set003_science_engineering.csv`
 - `docs/balance/set003_resource_costs.csv`
+- `docs/balance/set004_rpg_foundations.csv`
+- `docs/balance/set004_resource_costs.csv`
+- `docs/balance/rpg_progression_tracks.csv`
 
 These are design tables first. Later, implementation can import the same data or translate it into versioned game data.
 

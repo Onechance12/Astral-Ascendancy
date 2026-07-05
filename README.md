@@ -36,7 +36,7 @@ The browser is where the game runs. The player-facing experience should feel lik
 
 Design-first direction:
 
-- Lock the design bible in `docs/00_NORTH_STAR.md` through `docs/08_RARITY_PACKS_AND_COMBINE.md`
+- Lock the design bible in `docs/00_NORTH_STAR.md` through `docs/16_SET_004_RPG_FOUNDATIONS.md`
 - Move combat from the existing 3-lane prototype toward a 5x5 living tactical board
 - Make world cards visibly terraform sectors
 - Make structures produce risk/reward on controlled worlds
@@ -44,6 +44,7 @@ Design-first direction:
 - Define combat math through spreadsheet-style balance tables for damage types, resistances, terrain/world modifiers, and stat budgets
 - Define rarity, pack reveal, crafting, duplicate protection, and card combine rules before monetization work
 - Define Resonance, Affinity, materials, Influence, world costs, and per-card value scores before implementation
+- Define the RPG progression model for commander levels, card mastery, world levels, science, engineering, relics, skills, and evolutions before making those systems battle-ready
 
 First implementation milestone after design approval:
 

@@ -47,6 +47,8 @@ Design docs:
 - `docs/11_SET_001_CARD_EXPANSION.md`
 - `docs/13_SET_002_WORLDS_AWAKEN.md`
 - `docs/14_SCIENCE_ENGINEERING_PROGRESSION.md`
+- `docs/15_RPG_GAME_SYSTEMS_AUDIT.md`
+- `docs/16_SET_004_RPG_FOUNDATIONS.md`
 
 Balance sheets:
 
@@ -72,6 +74,9 @@ Balance sheets:
 - `docs/balance/engineering_projects.csv`
 - `docs/balance/set003_science_engineering.csv`
 - `docs/balance/set003_resource_costs.csv`
+- `docs/balance/set004_rpg_foundations.csv`
+- `docs/balance/set004_resource_costs.csv`
+- `docs/balance/rpg_progression_tracks.csv`
 
 Updated index docs:
 
@@ -87,6 +92,8 @@ Updated index docs:
 - Combat math is no longer loose. Damage schools, defense profiles, terrain, and examples exist.
 - Rarity has an economy model with crafting and duplicate protection.
 - Every alpha card has a resource-cost/value row.
+- RPG progression now has an explicit audit across battle, worlds, commander levels, card mastery, relics, skills, evolutions, and PvP fairness.
+- Set 004 seeds the catalog with non-battle-ready RPG foundation cards.
 - The design protects free-to-play trust by making chase cards craftable/earnable and avoiding paid-only power.
 
 ## Important Gaps Before Implementation
@@ -118,6 +125,10 @@ These should be resolved before large code work:
    - `start` currently uses Bun.
    - Production DB direction is Postgres, but prototype remains SQLite.
    - CI is not yet defined.
+
+9. RPG progression needs implementation scaffolding.
+   - Set 004 exists as design/catalog data.
+   - The engine still needs field-test events, mastery records, world XP, commander XP, relic slots, evolution unlocks, and PvP normalization rules before these cards become battle-ready.
 
 ## Recommended Next Commits
 

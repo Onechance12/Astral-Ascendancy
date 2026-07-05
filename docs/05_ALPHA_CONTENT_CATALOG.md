@@ -8,6 +8,10 @@ For the second board-development expansion, see `docs/13_SET_002_WORLDS_AWAKEN.m
 
 For science, engineering, and faction advancement systems, see `docs/14_SCIENCE_ENGINEERING_PROGRESSION.md`.
 
+For the RPG-style interaction audit across battle, worlds, commander levels, card mastery, relics, skills, and evolutions, see `docs/15_RPG_GAME_SYSTEMS_AUDIT.md`.
+
+For the first RPG foundation card expansion, see `docs/16_SET_004_RPG_FOUNDATIONS.md`.
+
 ## Alpha Content Target
 
 - 6 commanders

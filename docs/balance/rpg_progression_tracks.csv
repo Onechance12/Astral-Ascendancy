@@ -1,0 +1,19 @@
+track_id,display_name,scope,primary_factions,xp_source,level_1,level_2,level_3,level_4,level_5,pvp_rule
+commander_training,Commander Training,Commander,All,Field tests and boss clears,Loadout tip,Skill point,Relic slot,Specialization node,Signature cosmetic,Normalize raw stats
+guardian_mastery,Guardian Mastery,CardAndCommander,Solari,Shielded allies surviving attacks,Animated shield frame,Guardian sidegrade objective,Formation bonus in PvE,Star temple mission,Dawn Vanguard cosmetic,Sidegrade only
+brood_mastery,Brood Mastery,CardAndCommander,Voidborn,Spawned organisms dying or consuming Biomass,Brood frame,Apex sidegrade objective,Biomass memory boost in PvE,Hive mission,Apex aura cosmetic,Sidegrade only
+drone_mastery,Drone Mastery,CardAndCommander,Synthari,Drone scans and Machine movement,Diagnostic frame,Construct sidegrade objective,Machine network PvE node,Compiler mission,Operator aura cosmetic,Sidegrade only
+symbiosis_mastery,Symbiosis Mastery,CardAndCommander,Verdant,Healing and Verdant world spread,Living frame,Bloomform objective,Healing memory boost in PvE,Worldroot mission,Symbiote aura cosmetic,Sidegrade only
+warrior_mastery,Warrior Mastery,CardAndCommander,Crimson,Damage survived and structure raids,Scarred frame,Warrior sidegrade objective,Ember survival PvE node,Foundry mission,Crucible aura cosmetic,Sidegrade only
+weapon_mastery,Weapon Mastery,CardAndAttachment,Crimson,Attached bearers surviving damage,Weapon glow,Masterwork weapon objective,Forge project discount in PvE,Relic weapon mission,Masterwork cosmetic,Sidegrade only
+gatewalker_mastery,Gatewalker Mastery,CardAndCommander,Astral,Blink and portal movement,Portal frame,Echo sidegrade objective,Forecast memory boost in PvE,Gate mission,Echo aura cosmetic,Sidegrade only
+stellar_physics,Stellar Physics,Science,Solari,Star worlds and shield field tests,Reveal Star traits,Shield research project,Purification trial,Solar reactor upgrade,Ascendant star doctrine,Research choices only
+xenobiology,Xenobiology,Science,Voidborn;Verdant,Biomass healing and organism field tests,Reveal living traits,Adaptation project,Controlled mutation trial,Organism sidegrade,Ascendant biology doctrine,Research choices only
+synthetic_systems,Synthetic Systems,Science,Synthari,Scans drones and Machine networks,Reveal machine traits,Fabricator project,Network trial,Construct sidegrade,Ascendant systems doctrine,Research choices only
+war_metallurgy,War Metallurgy,Science,Crimson,Damage survival weapons and structures,Reveal alloy traits,Forge project,Stress test trial,Masterwork sidegrade,Ascendant war doctrine,Research choices only
+temporal_mechanics,Temporal Mechanics,Science,Astral,Forecast Blink and portal events,Reveal temporal traits,Calibration project,Stasis trial,Echo sidegrade,Ascendant time doctrine,Research choices only
+project_engineering,Project Engineering,Domain,All,Structures labs and engineering cards,Project queue,Second project slot,Automation assist,Prototype safety,Domain engineering title,Domain only
+world_survey,World Survey,World,All,Survey actions and campaign exploration,Type revealed,Resource trait,Upgrade objective,Hazard profile,Specialization choice,Domain only
+world_advancement,World Advancement,World,All,World XP projects and campaign events,Surveyed,Settled,Industrialized,Awakened,Ascendant,Domain and PvE only
+relic_mastery,Relic Mastery,Collection,All,Relic discovery socketing and salvage,Relic lore,Socket recipe,Relic animation,Relic mission,Relic aura cosmetic,Cosmetic and loadout only
+card_mastery,Card Mastery,Collection,All,Using and winning with cards,Animated frame,Lore page,Alt art,Sidegrade blueprint eligibility,Signature visual,Cosmetic and sidegrade only

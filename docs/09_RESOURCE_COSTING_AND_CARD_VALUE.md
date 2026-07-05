@@ -414,6 +414,8 @@ Resource/costing tables:
 - `docs/balance/set001_resource_costs.csv`
 - `docs/balance/set002_resource_costs.csv`
 - `docs/balance/set003_resource_costs.csv`
+- `docs/balance/set004_resource_costs.csv`
+- `docs/balance/rpg_progression_tracks.csv`
 - `docs/balance/science_tracks.csv`
 - `docs/balance/engineering_projects.csv`
 

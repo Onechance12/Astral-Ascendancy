@@ -15,6 +15,9 @@ export type CardCategory =
   | "attachment"
   | "science"
   | "project"
+  | "skill"
+  | "relic"
+  | "evolution"
   | "planet"
   | "development"
   | "crew";
