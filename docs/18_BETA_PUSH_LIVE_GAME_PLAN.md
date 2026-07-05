@@ -78,6 +78,10 @@ A beta player should have something meaningful to do in three session lengths:
 
 The player should leave the game with timers running and a reason to come back.
 
+The daily briefing should become the ritual that connects these session lengths. It should inspect what changed while the player was gone, rank the highest-value next action, and explain that action in the player's faction voice.
+
+See `docs/20_DAILY_BRIEFING_STRATEGY_FOUNDATION.md`.
+
 ## The Core Loop
 
 ```txt
@@ -409,6 +413,7 @@ The beta should not implement every dream system. It should prove the living loo
 ### Must Have
 
 - `/play` game-client entry remains.
+- Daily briefing analyzer using real account state.
 - Deck license ladder.
 - PvE campaign path.
 - PvP tiered queue foundation.
@@ -421,6 +426,7 @@ The beta should not implement every dream system. It should prove the living loo
 - First study assignment.
 - First resource assignment.
 - First deck unavailable state.
+- First personalized recommended action.
 
 ### Should Have
 
@@ -430,6 +436,8 @@ The beta should not implement every dream system. It should prove the living loo
 - Basic field-test progress.
 - Assignment completion notifications.
 - Deck power meter tied to license legality.
+- Faction-specific briefing language.
+- Return report for completed assignments and harvestable resources.
 
 ### Not For First Beta
 
@@ -518,6 +526,7 @@ Goal:
 - Add asset availability service.
 - Add create/claim assignment APIs.
 - Show active assignments in Domain/Operations.
+- Feed assignment state into the daily briefing analyzer.
 
 Exit criteria:
 
@@ -525,6 +534,7 @@ Exit criteria:
 - Asset becomes unavailable.
 - Timer completes.
 - Player claims reward.
+- Briefing prioritizes ready assignments and empty timer slots.
 
 ### Beta 2: Deck License Ladder
 
@@ -535,6 +545,7 @@ Goal:
 - Add unlock requirements.
 - Add Starter -> Skirmish unlock celebration.
 - Add earned saved deck slot rewards.
+- Feed near-unlock state into the daily briefing analyzer.
 
 Exit criteria:
 
@@ -543,6 +554,7 @@ Exit criteria:
 - Completing requirements unlocks Skirmish.
 - Reward pack is granted.
 - Extra deck slot is granted and explained.
+- Briefing can recommend the fastest legal path to the next license.
 
 ### Beta 3: World Study And Resource Expansion
 

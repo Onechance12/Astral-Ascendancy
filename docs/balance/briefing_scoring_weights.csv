@@ -1,0 +1,13 @@
+signal_id,display_name,base_weight,urgency_weight,progress_weight,retention_weight,teaching_weight,notes
+claim_reward,Claimable reward,100,30,20,35,10,Always high because claiming creates immediate satisfaction
+blocked_play,Blocked play path,95,35,15,20,25,Deck busy or no legal deck must be explained first
+near_unlock,Near unlock,85,25,40,30,20,One action from license rank campaign or slot unlock should dominate
+timer_empty,No active timer,75,20,15,45,25,Starting a timer is core daily retention
+resource_ready,Harvest available,70,20,10,35,15,Domain progress should be visible each login
+daily_close,Daily objective close,65,15,30,35,15,Finishing dailies creates daily habit
+story_available,Campaign chapter available,55,10,20,25,35,Story teaches faction identity
+deck_improvement,Deck improvement path,50,10,25,20,30,Deck builder advice matters but should not block every session
+world_upgrade,Affordable world upgrade,48,10,25,25,20,World growth builds long-term attachment
+pack_available,Pack open available,45,15,10,40,10,Packs are excitement but should not consume all strategy
+pvp_available,PvP queue ready,35,5,20,20,15,Advisory until multiplayer is fully authoritative
+social_available,Social action ready,25,5,10,25,10,Later retention layer after core loop

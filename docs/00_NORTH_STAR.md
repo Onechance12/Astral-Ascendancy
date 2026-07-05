@@ -22,6 +22,7 @@ When a player clicks Play, it should feel like a game client launches inside the
 - Faction-colored attacks, damage, shields, particles, and death effects
 - Pack opening as a ritual, not a button
 - Domain/base as a living alien place, not a spreadsheet
+- Daily command briefings that read the player's actual faction, cards, worlds, timers, decks, and unlocks before giving advice
 
 ## Design Pillars
 
@@ -132,6 +133,7 @@ The next creative direction is to evolve it into a real game client:
 - Rarity, crafting, and duplicate combine systems that create collection excitement without paid-only power
 - Resource and card-value math that makes every card powerful for a specific reason
 - Faction commanders with visible identity
+- Strategic daily briefing analyzer
 - Galaxy map campaign
 - Pack opening ritual
 - Living alien domain/base
@@ -148,5 +150,8 @@ Before code changes, the design target is:
 - Combat math and effectiveness tables defined
 - Resource costing and card value tables defined
 - Alpha prototype scope defined
+- Daily briefing source-of-truth and recommendation rules defined
 
 Implementation should start only after those documents are accepted as the creative foundation.
+
+See `docs/20_DAILY_BRIEFING_STRATEGY_FOUNDATION.md`.

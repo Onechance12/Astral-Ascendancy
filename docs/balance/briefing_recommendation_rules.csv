@@ -1,0 +1,16 @@
+rule_id,priority_band,trigger_context,condition,primary_action,player_value,faction_variant,avoid_if
+claim_ready_assignment,critical,assignment_state,Any assignment status ready,Claim completed assignment,Immediate reward and frees asset,Use faction return language,None
+active_deck_busy,critical,assignment_state;deck_state,Active deck assigned active or ready,Select another deck or claim return,Prevents failed battle entry,Frame as deployed fleet status,No other decks
+no_active_assignment,high,assignment_state,No active assignment exists,Start best available assignment,Starts comeback timer,Choose resource by faction need,Player has no planet
+near_skirmish_unlock,high,license_state,Skirmish progress within 1 action,Start resource or study assignment,Unlocks next deck tier soon,Faction mentor explains first expansion,License already unlocked
+near_veteran_unlock,high,license_state,Skirmish unlocked and Veteran within 1 action,Run rescue operation,Pushes RPG progression and deck commitment,Faction frames it as field command,No available deck
+harvest_ready,high,domain_state,Pending resource total greater than zero,Harvest domain resources,Immediate currency and resource feedback,Use world resource language,None
+no_legal_deck,high,deck_state;license_state,No deck legal for unlocked tier,Open deck builder,Unblocks battle loop,Faction suggests core archetype,Player has no collection
+daily_quest_close,medium,quest_state,Any daily quest over 50 percent complete,Play objective match,Completes daily reward,Faction frames objective,Quest already claimable
+campaign_next,medium,campaign_state,Next campaign chapter available,Play next campaign chapter,Advances story and cards,Use faction campaign voice,Active deck busy
+upgrade_world_available,medium,domain_state,Planet upgrade affordable,Upgrade best matching world,Improves long-term production,Use faction resource fit,No structure path
+open_pack_available,medium,commander_state,Shards greater than or equal pack cost,Open Signal Pack,Collection excitement and new options,Faction calls it a signal cache,Player saving for explicit goal
+build_second_deck,medium,deck_state;assignment_state,Only one deck exists and rescue unlocked,Build backup deck,Supports busy deck strategy,Faction recommends secondary archetype,Deck slots full
+pvp_rank_available,low,pvp_state;deck_state,Legal ranked deck available,Queue ranked tier,Skill progression and rank rewards,Faction frames proving ground,No server-authoritative match flow
+tribe_contribution,low,community_state,User in tribe with active mission,Contribute to tribe mission,Social retention and group identity,Faction banner language,No tribe
+science_direction,low,science_state;domain_state,Study unlocked and faction resource exists,Start faction science study,Long-term unlock direction,Faction science voice,Science not implemented yet

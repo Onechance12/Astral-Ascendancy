@@ -1,0 +1,19 @@
+context_id,source_type,source_name,exists_now,briefing_value,missing_gap,next_foundation_step
+commander_state,prisma,Commander,yes,Faction resources stats season and active deck,No last login or streak,Add LoginStreak later
+collection_state,prisma,UserCard,yes,Owned cards copy counts crafting and deck gaps,No per-copy availability or mastery,Add CardInstance later
+deck_state,prisma,Deck,yes,Active deck tier legality and deck readiness,No saved slot capacity model,Add DeckSlotEntitlement
+license_state,prisma,DeckLicense,yes,Near unlocks tier gates and teaching flow,Rewards not routed through inbox,Add reward inbox grant path
+assignment_state,prisma,Assignment,yes,Completed timers busy decks and next mission prompts,No per-type capacity persistence,Add ActionCapacityEntitlement
+quest_state,prisma,Quest and UserQuest,yes,Daily and weekly objectives,No briefing priority or reroll rules,Add recommendation scoring
+campaign_state,prisma,Campaign and CampaignProgress,yes,Next story chapter and faction arc,Incomplete seed coverage for all factions,Expand faction campaigns
+domain_state,prisma,Planet and DevelopmentProgress,yes,Harvest upgrades world advice and resource bottlenecks,No world XP science or hazard state,Add WorldProgress and ScienceProgress
+operation_state,prisma,Operation and OperationProgress,yes,Limited events and rescue/bounty advice,No reward inbox or event calendar,Add RewardInbox and EventSchedule later
+pvp_state,prisma,PvpRank Queue Match Invite,yes,Ranked tier readiness invites and ladder goals,No live battle authority yet,Use as advisory only in MVP
+community_state,prisma,Friend Tribe TribeMission,yes,Social prompts and tribe contribution,No online presence,Add presence later
+faction_catalog,static,FACTIONS and LANDING_FACTIONS,yes,Faction voice lore playstyle and art,Static only no story state,Map to briefing templates
+card_catalog,static,CARD_DEFS and world cards,yes,Card role rarity and faction fit,No role tags for every card,Add card strategic tags
+balance_tables,docs_csv,docs balance folder,yes,Thresholds costs ranks resources and progression,Not loaded by runtime yet,Mirror key rules into TS config or parser
+return_snapshot,future,Login return state,no,What changed while away,No model,Add LoginStreak and BriefingHistory
+reward_inbox,future,RewardInbox,no,Claimable rewards and reveal rituals,No model,Add RewardInbox before advanced rewards
+science_state,future,ScienceProgress,no,Research and study recommendations,No persisted science,Add ScienceProgress
+card_instances,future,CardInstance,no,Copy-level busy state and RPG growth,Only aggregate counts exist,Add CardInstance migration
