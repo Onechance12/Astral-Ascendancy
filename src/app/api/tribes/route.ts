@@ -64,6 +64,9 @@ export async function POST(req: NextRequest) {
   }
 
   const slug = slugify(name);
+  if (slug.length < 3) {
+    return NextResponse.json({ error: "tribe name needs at least 3 letters or numbers" }, { status: 400 });
+  }
   const existing = await db.tribe.findUnique({ where: { slug } });
   if (existing) {
     return NextResponse.json({ error: "tribe name is already taken" }, { status: 409 });

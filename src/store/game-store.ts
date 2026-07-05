@@ -345,8 +345,19 @@ export const useGame = create<GameState>((set, get) => ({
   },
 
   findMultiplayerMatch: async () => {
-    // stub — real implementation in multiplayer task
+    const deckId = get().activeDeckId ?? get().decks[0]?.id;
+    if (!deckId) return;
     set({ multiplayerStatus: "queueing" });
+    try {
+      const res = await fetch("/api/pvp/queue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deckId, queueType: "unranked" }),
+      });
+      if (!res.ok) set({ multiplayerStatus: "idle" });
+    } catch {
+      set({ multiplayerStatus: "idle" });
+    }
   },
   cancelMatchmaking: () => set({ multiplayerStatus: "idle" }),
 }));

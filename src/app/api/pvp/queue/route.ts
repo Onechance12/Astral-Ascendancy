@@ -45,23 +45,25 @@ export async function POST(req: NextRequest) {
     data: { status: "canceled" },
   });
 
-  const rank = await db.pvpRank.upsert({
-    where: {
-      userId_season_queueType_tier: {
-        userId: session.user.id,
-        season: "alpha",
-        queueType: queueType === "ranked" ? "ranked" : "unranked",
-        tier: validation.requestedTier,
-      },
-    },
-    update: {},
-    create: {
-      userId: session.user.id,
-      season: "alpha",
-      queueType: queueType === "ranked" ? "ranked" : "unranked",
-      tier: validation.requestedTier,
-    },
-  });
+  const rank = queueType === "ranked"
+    ? await db.pvpRank.upsert({
+        where: {
+          userId_season_queueType_tier: {
+            userId: session.user.id,
+            season: "alpha",
+            queueType: "ranked",
+            tier: validation.requestedTier,
+          },
+        },
+        update: {},
+        create: {
+          userId: session.user.id,
+          season: "alpha",
+          queueType: "ranked",
+          tier: validation.requestedTier,
+        },
+      })
+    : null;
 
   const queueEntry = await db.pvpQueueEntry.create({
     data: {
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest) {
       queueType,
       tier: validation.requestedTier,
       powerScore: power.score,
-      rating: rank.rating,
+      rating: rank?.rating ?? 1000,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     },
   });

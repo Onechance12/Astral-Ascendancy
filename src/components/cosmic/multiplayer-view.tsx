@@ -61,7 +61,7 @@ export default function MultiplayerView() {
       return;
     }
     if (queueType === "friendly" || queueType === "training") {
-      toast.message("Friendly invites and training simulations are scaffolded next.");
+      toast.message("Friendly invites and training simulations are planned for the next PvP UI pass.");
       return;
     }
 
@@ -227,7 +227,7 @@ export default function MultiplayerView() {
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Friends</p>
             <h3 className="mt-1 font-black text-foreground">Online allies and direct duels</h3>
             <p className="mt-2 text-xs leading-snug text-foreground/65">
-              Friend requests, direct challenges, recent opponents, and spectate hooks now have API scaffolding.
+              Friend requests, direct challenges, recent opponents, and spectate hooks now have server endpoints.
             </p>
             <Button variant="outline" className="mt-3 w-full border-white/15 bg-white/5" onClick={() => toast.message("Friends panel API is ready; full UI is next.")}>
               Open Friends

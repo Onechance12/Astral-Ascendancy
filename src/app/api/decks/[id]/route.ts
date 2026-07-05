@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { analyzeDeckPower } from "@/lib/pvp";
+import { analyzeDeckPower, validateDeckCardIds } from "@/lib/pvp";
 
 // PATCH /api/decks/[id] — update deck (rename, cards) or set active
 // DELETE /api/decks/[id] — delete deck
@@ -21,6 +21,10 @@ export async function PATCH(
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
   const nextCardDefIds = Array.isArray(body.cardDefIds) ? body.cardDefIds : JSON.parse(deck.cardDefIds);
+  const deckValidation = validateDeckCardIds(nextCardDefIds, { minCards: 10, maxCards: 20 });
+  if (!deckValidation.ok) {
+    return NextResponse.json({ error: deckValidation.errors[0], validation: deckValidation }, { status: 400 });
+  }
   const power = analyzeDeckPower(nextCardDefIds);
 
   // activating a deck: deactivate all others first

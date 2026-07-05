@@ -1,7 +1,7 @@
 tier_id,display_name,min_score,max_score,queue_policy,allowed_progression,player_fantasy,notes
-starter,Starter,0,599,Protected ranked and casual,No evolved cards no relics no commander skills,Learning the board safely,New-player safe bracket
-skirmish,Skirmish,600,1199,Ranked and casual,Basic rarity pressure and simple attachments,First real deck identity,Most early PvP decks land here
-veteran,Veteran,1200,2199,Ranked and casual,Evolved cards relics and faction skills allowed,Progressed strategy decks,Core competitive bracket
-ascendant,Ascendant,2200,3599,Ranked and casual,Advanced evolutions armor skills and strong synergy,High-power earned decks,Serious ranked meta begins here
-mythic,Mythic,3600,5399,Ranked and casual,Masterwork cards high-rarity relics and ascendant worlds,Elite collection power,Strict matchmaking required
-open_war,Open War,5400,999999,Opt-in ranked casual and events,No power cap,Anything goes,Explicit opt-in only
+starter,Starter,0,999,Protected ranked and casual,No evolved cards no relics no commander skills,Learning the board safely,New-player safe bracket
+skirmish,Skirmish,1000,1799,Ranked and casual,Basic rarity pressure and simple attachments,First real deck identity,Most early PvP decks land here
+veteran,Veteran,1800,2999,Ranked and casual,Evolved cards relics and faction skills allowed,Progressed strategy decks,Core competitive bracket
+ascendant,Ascendant,3000,4499,Ranked and casual,Advanced evolutions armor skills and strong synergy,High-power earned decks,Serious ranked meta begins here
+mythic,Mythic,4500,6499,Ranked and casual,Masterwork cards high-rarity relics and ascendant worlds,Elite collection power,Strict matchmaking required
+open_war,Open War,6500,999999,Opt-in ranked casual and events,No power cap,Anything goes,Explicit opt-in only

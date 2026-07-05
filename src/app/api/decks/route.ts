@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { analyzeDeckPower } from "@/lib/pvp";
+import { analyzeDeckPower, validateDeckCardIds } from "@/lib/pvp";
 
 // GET /api/decks — all decks for the logged-in user
 export async function GET() {
@@ -46,8 +46,9 @@ export async function POST(req: NextRequest) {
   if (!name?.trim() || !factionId || !Array.isArray(cardDefIds)) {
     return NextResponse.json({ error: "missing fields" }, { status: 400 });
   }
-  if (cardDefIds.length < 10 || cardDefIds.length > 20) {
-    return NextResponse.json({ error: "deck must be 10-20 cards" }, { status: 400 });
+  const deckValidation = validateDeckCardIds(cardDefIds, { minCards: 10, maxCards: 20 });
+  if (!deckValidation.ok) {
+    return NextResponse.json({ error: deckValidation.errors[0], validation: deckValidation }, { status: 400 });
   }
   const power = analyzeDeckPower(cardDefIds);
 

@@ -87,3 +87,40 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, friend });
 }
+
+export async function PATCH(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const body = await req.json().catch(() => ({}));
+  const friendId = typeof body.friendId === "string" ? body.friendId : "";
+  const action = typeof body.action === "string" ? body.action : "";
+  if (!friendId || !["accept", "decline", "cancel", "block"].includes(action)) {
+    return NextResponse.json({ error: "friendId and valid action are required" }, { status: 400 });
+  }
+
+  const friend = await db.friend.findUnique({ where: { id: friendId } });
+  if (!friend || (friend.requesterId !== session.user.id && friend.addresseeId !== session.user.id)) {
+    return NextResponse.json({ error: "friend request not found" }, { status: 404 });
+  }
+
+  if (action === "accept" && friend.addresseeId !== session.user.id) {
+    return NextResponse.json({ error: "only the recipient can accept" }, { status: 403 });
+  }
+  if (action === "cancel" && friend.requesterId !== session.user.id) {
+    return NextResponse.json({ error: "only the sender can cancel" }, { status: 403 });
+  }
+
+  const status = action === "accept" ? "accepted" : action === "block" ? "blocked" : "declined";
+  const updated = await db.friend.update({
+    where: { id: friend.id },
+    data: {
+      status,
+      acceptedAt: action === "accept" ? new Date() : null,
+    },
+  });
+
+  return NextResponse.json({ ok: true, friend: updated });
+}

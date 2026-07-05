@@ -38,12 +38,12 @@ export const PVP_DECK_TIERS: Array<{
   max: number;
   description: string;
 }> = [
-  { id: "starter", name: "Starter", min: 0, max: 599, description: "New-player safe decks with no serious progression pressure." },
-  { id: "skirmish", name: "Skirmish", min: 600, max: 1199, description: "Early constructed decks with simple synergies." },
-  { id: "veteran", name: "Veteran", min: 1200, max: 2199, description: "Evolved cards, relics, and faction skills start to matter." },
-  { id: "ascendant", name: "Ascendant", min: 2200, max: 3599, description: "Advanced armor, skills, worlds, and high-synergy decks." },
-  { id: "mythic", name: "Mythic", min: 3600, max: 5399, description: "Elite progression decks with strict matchmaking." },
-  { id: "open_war", name: "Open War", min: 5400, max: Number.MAX_SAFE_INTEGER, description: "No cap. Anything goes by explicit opt-in." },
+  { id: "starter", name: "Starter", min: 0, max: 999, description: "New-player safe decks with no serious progression pressure." },
+  { id: "skirmish", name: "Skirmish", min: 1000, max: 1799, description: "Early constructed decks with simple synergies." },
+  { id: "veteran", name: "Veteran", min: 1800, max: 2999, description: "Evolved cards, relics, and faction skills start to matter." },
+  { id: "ascendant", name: "Ascendant", min: 3000, max: 4499, description: "Advanced armor, skills, worlds, and high-synergy decks." },
+  { id: "mythic", name: "Mythic", min: 4500, max: 6499, description: "Elite progression decks with strict matchmaking." },
+  { id: "open_war", name: "Open War", min: 6500, max: Number.MAX_SAFE_INTEGER, description: "No cap. Anything goes by explicit opt-in." },
 ];
 
 const RARITY_SCORE: Record<string, number> = {
@@ -88,6 +88,7 @@ export function analyzeDeckPower(cardDefIds: string[]): DeckPowerBreakdown {
   const cards = cardDefIds
     .map((defId) => CARD_DEFS.find((card) => card.defId === defId))
     .filter((card): card is CardDef => Boolean(card));
+  const knownCardIds = cards.map((card) => card.defId);
 
   const scoredCards = cards.map((card) => {
     const statScore = card.type === "Entity" ? card.attack * 7 + card.hp * 5 : 0;
@@ -108,7 +109,7 @@ export function analyzeDeckPower(cardDefIds: string[]): DeckPowerBreakdown {
     };
   });
 
-  const duplicatePressure = duplicatePowerPressure(cardDefIds);
+  const duplicatePressure = duplicatePowerPressure(knownCardIds);
   const synergyPressure = synergyPowerPressure(cards);
   const score = Math.round(scoredCards.reduce((sum, card) => sum + card.score, 0) + duplicatePressure + synergyPressure);
   const tier = getDeckTier(score);
@@ -146,12 +147,11 @@ export function validateDeckForQueue(
   requestedTier?: PvpDeckTier
 ): QueueValidation {
   const analysis = analyzeDeckPower(cardDefIds);
+  const cardErrors = validateDeckCardIds(cardDefIds, { minCards: 10, maxCards: 30 }).errors;
   const targetTier = requestedTier ?? analysis.tier;
-  const errors: string[] = [];
+  const errors: string[] = [...cardErrors];
   const warnings: string[] = [];
 
-  if (cardDefIds.length < 10) errors.push("Deck needs at least 10 cards.");
-  if (cardDefIds.length > 30) errors.push("Deck is above the long-term PvP cap of 30 cards.");
   if (queueType === "ranked" && tierIndex(analysis.tier) > tierIndex(targetTier)) {
     errors.push(`This deck is ${analysis.tierName}, which is above the selected ${tierDisplayName(targetTier)} queue.`);
   }
@@ -173,6 +173,30 @@ export function validateDeckForQueue(
   };
 }
 
+export function validateDeckCardIds(
+  cardDefIds: unknown,
+  opts: { minCards?: number; maxCards?: number } = {}
+): { ok: boolean; errors: string[]; unknownIds: string[] } {
+  const minCards = opts.minCards ?? 10;
+  const maxCards = opts.maxCards ?? 20;
+  const errors: string[] = [];
+
+  if (!Array.isArray(cardDefIds)) {
+    return { ok: false, errors: ["Deck cards must be an array."], unknownIds: [] };
+  }
+
+  const ids = cardDefIds.filter((id): id is string => typeof id === "string");
+  if (ids.length !== cardDefIds.length) errors.push("Deck contains invalid card identifiers.");
+  if (ids.length < minCards) errors.push(`Deck needs at least ${minCards} cards.`);
+  if (ids.length > maxCards) errors.push(`Deck cannot exceed ${maxCards} cards.`);
+
+  const known = new Set(CARD_DEFS.map((card) => card.defId));
+  const unknownIds = Array.from(new Set(ids.filter((id) => !known.has(id))));
+  if (unknownIds.length) errors.push(`Deck contains unknown cards: ${unknownIds.join(", ")}.`);
+
+  return { ok: errors.length === 0, errors, unknownIds };
+}
+
 function duplicatePowerPressure(cardDefIds: string[]) {
   const counts = new Map<string, number>();
   for (const id of cardDefIds) counts.set(id, (counts.get(id) ?? 0) + 1);
@@ -185,6 +209,7 @@ function duplicatePowerPressure(cardDefIds: string[]) {
 }
 
 function synergyPowerPressure(cards: CardDef[]) {
+  if (cards.length === 0) return 0;
   const factions = new Set(cards.map((card) => card.faction));
   const worlds = cards.filter((card) => card.type === "World").length;
   const structures = cards.filter((card) => card.type === "Structure").length;
@@ -215,4 +240,3 @@ function buildDeckPowerReasons(cards: CardDef[], duplicatePressure: number, syne
 
   return reasons;
 }
-
