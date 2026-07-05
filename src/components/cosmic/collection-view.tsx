@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useGame } from "@/store/game-store";
-import { FACTIONS } from "@/lib/game-data";
+import { FACTIONS, LANDING_FACTIONS } from "@/lib/game-data";
 import { CARD_DEFS } from "@/lib/match-engine";
 import { ALL_WORLD_CARDS } from "@/lib/world-cards";
 import { SHARD_COST, SHARD_DUST, type Rarity } from "@/lib/progression";
@@ -12,10 +12,10 @@ import { useCardDetail, CardDetailDialog } from "@/components/cosmic/card-detail
 import { cn } from "@/lib/utils";
 
 const FACTION_COLOR: Record<string, string> = Object.fromEntries(
-  FACTIONS.map((f) => [f.id, f.accent])
+  [...LANDING_FACTIONS, ...FACTIONS].map((f) => [f.id, f.accent])
 );
 const FACTION_GLYPH: Record<string, string> = Object.fromEntries(
-  FACTIONS.map((f) => [f.id, f.glyph])
+  [...LANDING_FACTIONS, ...FACTIONS].map((f) => [f.id, f.glyph])
 );
 
 const RARITY_COLOR: Record<string, string> = {
@@ -86,7 +86,7 @@ export default function CollectionView() {
           name: d.name,
           faction: d.faction,
           type: d.type,
-          category: d.type === "Anomaly" ? "anomaly" : "entity",
+          category: d.type.toLowerCase(),
           cost: d.cost,
           attack: d.attack,
           hp: d.hp,
@@ -185,7 +185,7 @@ export default function CollectionView() {
         </div>
         <div className="flex gap-1.5 overflow-x-auto pb-1 scroll-cosmic">
           <FilterChip label="All" active={filter === "all"} onClick={() => setFilter("all")} />
-          {FACTIONS.map((f) => (
+          {LANDING_FACTIONS.map((f) => (
             <FilterChip key={f.id} label={`${f.glyph} ${f.short}`} active={filter === f.id} onClick={() => setFilter(f.id)} />
           ))}
         </div>
@@ -233,6 +233,12 @@ export default function CollectionView() {
                   </div>
                 ) : c.category === "anomaly" ? (
                   <div className="px-1 pb-1 text-right text-[8px] font-bold text-violet-300">✺ Spell</div>
+                ) : c.category === "world" ? (
+                  <div className="px-1 pb-1 text-right text-[8px] font-bold text-cyan-300">⬢ World</div>
+                ) : c.category === "structure" ? (
+                  <div className="px-1 pb-1 text-right text-[8px] font-bold text-purple-300">▣ Structure</div>
+                ) : c.category === "attachment" ? (
+                  <div className="px-1 pb-1 text-right text-[8px] font-bold text-orange-300">⚙ Attach</div>
                 ) : (
                   <div className="px-1 pb-1 text-right text-[8px] font-bold text-amber-300">
                     {c.category === "planet" ? "🪐 Planet" : c.category === "development" ? "⚡ Tech" : "👥 Crew"}

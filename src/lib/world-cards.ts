@@ -7,7 +7,15 @@ import { CARD_DEFS } from "./match-engine";
 import { STRUCTURE_DEFS, PLANET_TYPES, productionRate as baseProductionRate } from "./resources";
 
 // ---------- Card categories ----------
-export type CardCategory = "entity" | "anomaly" | "planet" | "development" | "crew";
+export type CardCategory =
+  | "entity"
+  | "anomaly"
+  | "world"
+  | "structure"
+  | "attachment"
+  | "planet"
+  | "development"
+  | "crew";
 
 // ---------- Planet card definitions ----------
 export type PlanetCardDef = {
@@ -342,7 +350,7 @@ export function getCardCategory(defId: string): CardCategory {
   if (DEVELOPMENT_CARD_DEFS.some((c) => c.defId === defId)) return "development";
   if (CREW_CARD_DEFS.some((c) => c.defId === defId)) return "crew";
   const def = CARD_DEFS.find((c) => c.defId === defId);
-  if (def) return def.type === "Anomaly" ? "anomaly" : "entity";
+  if (def) return def.type.toLowerCase() as CardCategory;
   return "entity";
 }
 

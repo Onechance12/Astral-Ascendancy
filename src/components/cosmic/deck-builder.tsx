@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useGame } from "@/store/game-store";
 import { FACTIONS } from "@/lib/game-data";
-import { CARD_DEFS } from "@/lib/match-engine";
+import { CARD_DEFS, PLAYABLE_CARD_DEFS } from "@/lib/match-engine";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -36,7 +36,7 @@ export default function DeckBuilder() {
 
   if (!commander) return null;
 
-  const availableCards = CARD_DEFS.filter((c) => c.faction === factionId || c.faction === "quantum");
+  const availableCards = PLAYABLE_CARD_DEFS.filter((c) => c.faction === factionId || c.faction === "quantum");
   const countOf = (defId: string) => selected.filter((x) => x === defId).length;
 
   const add = (defId: string) => {

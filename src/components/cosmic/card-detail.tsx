@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 import { CARD_DEFS, type MatchCard } from "@/lib/match-engine";
 import { ALL_WORLD_CARDS, getCardCategory } from "@/lib/world-cards";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { FACTIONS } from "@/lib/game-data";
+import { FACTIONS, LANDING_FACTIONS } from "@/lib/game-data";
 import { cn } from "@/lib/utils";
 
 const FACTION_COLOR: Record<string, string> = Object.fromEntries(
-  FACTIONS.map((f) => [f.id, f.accent])
+  [...LANDING_FACTIONS, ...FACTIONS].map((f) => [f.id, f.accent])
 );
 const FACTION_GLYPH: Record<string, string> = Object.fromEntries(
-  FACTIONS.map((f) => [f.id, f.glyph])
+  [...LANDING_FACTIONS, ...FACTIONS].map((f) => [f.id, f.glyph])
 );
 const FACTION_NAME: Record<string, string> = Object.fromEntries(
-  FACTIONS.map((f) => [f.id, f.name])
+  [...LANDING_FACTIONS, ...FACTIONS].map((f) => [f.id, f.name])
 );
 
 const RARITY_COLOR: Record<string, string> = {
@@ -32,6 +32,12 @@ const ATTACK_TYPE_COLOR: Record<string, string> = {
   Psychic: "#a78bfa",
   Biological: "#34d399",
   Quantum: "#22d3ee",
+  Radiant: "#fbbf24",
+  Void: "#e879f9",
+  Tech: "#22d3ee",
+  Bio: "#34d399",
+  Kinetic: "#fb923c",
+  Astral: "#93c5fd",
 };
 
 const ATTACK_TYPE_ICON: Record<string, string> = {
@@ -40,6 +46,12 @@ const ATTACK_TYPE_ICON: Record<string, string> = {
   Psychic: "🧠",
   Biological: "☣",
   Quantum: "⬡",
+  Radiant: "☼",
+  Void: "☣",
+  Tech: "▦",
+  Bio: "✦",
+  Kinetic: "⚔",
+  Astral: "◌",
 };
 
 const KEYWORD_DESC: Record<string, string> = {
@@ -98,7 +110,7 @@ export function useCardDetail() {
         name: battleDef.name,
         faction: battleDef.faction,
         type: battleDef.type,
-        category: battleDef.type === "Anomaly" ? "anomaly" : "entity",
+        category: battleDef.type.toLowerCase(),
         cost: battleDef.cost,
         attack: battleDef.attack,
         hp: battleDef.hp,
@@ -145,12 +157,18 @@ export function CardDetailDialog({
 }) {
   if (!card) return null;
 
-  const isWorldCard = ["planet", "development", "crew"].includes(card.category);
+  const isWorldCard = ["planet", "development", "crew", "world", "structure", "attachment"].includes(card.category);
   const color = isWorldCard
     ? card.category === "planet"
       ? "#fbbf24"
       : card.category === "development"
       ? "#22d3ee"
+      : card.category === "world"
+      ? FACTION_COLOR[card.faction] || "#22d3ee"
+      : card.category === "structure"
+      ? "#a78bfa"
+      : card.category === "attachment"
+      ? "#fb923c"
       : "#34d399"
     : FACTION_COLOR[card.faction] || "#94a3b8";
   const glyph = isWorldCard
@@ -158,6 +176,12 @@ export function CardDetailDialog({
       ? "🪐"
       : card.category === "development"
       ? "⚡"
+      : card.category === "world"
+      ? "⬢"
+      : card.category === "structure"
+      ? "▣"
+      : card.category === "attachment"
+      ? "⚙"
       : "👥"
     : FACTION_GLYPH[card.faction] || "?";
   const rarityColor = RARITY_COLOR[card.rarity] || "#94a3b8";
@@ -184,7 +208,7 @@ export function CardDetailDialog({
             {isWorldCard ? card.category : card.type}
           </span>
           {/* cost orb */}
-          {!isWorldCard && (
+          {!["planet", "development", "crew"].includes(card.category) && (
             <span className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-sm font-extrabold text-black" style={{ background: color }}>
               {card.cost}
             </span>

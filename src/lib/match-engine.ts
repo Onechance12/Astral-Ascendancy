@@ -7,9 +7,20 @@
 
 export type Side = "player" | "enemy";
 
-export type CardType = "Entity" | "Anomaly";
-export type AttackType = "Energy" | "Physical" | "Psychic" | "Biological" | "Quantum";
-export type PlanetType = "star" | "organic" | "mineral" | "gas" | "anomaly" | "barren";
+export type CardType = "Entity" | "Anomaly" | "World" | "Structure" | "Attachment";
+export type AttackType =
+  | "Energy"
+  | "Physical"
+  | "Psychic"
+  | "Biological"
+  | "Quantum"
+  | "Radiant"
+  | "Void"
+  | "Tech"
+  | "Bio"
+  | "Kinetic"
+  | "Astral";
+export type PlanetType = "star" | "organic" | "mineral" | "gas" | "anomaly" | "barren" | "machine" | "verdant" | "crucible" | "astral" | "corrupted";
 
 export type MatchCard = {
   uid: string;
@@ -97,7 +108,7 @@ let logCounter = 0;
 const logId = () => ++logCounter;
 
 // ---------- Card definitions (playable) ----------
-type CardDef = {
+export type CardDef = {
   defId: string;
   name: string;
   faction: string;
@@ -114,6 +125,8 @@ type CardDef = {
   keyword?: MatchCard["keyword"];
   shieldValue?: number;
   evolvesTo?: MatchCard["evolvesTo"];
+  battleReady?: boolean;
+  catalogSet?: "prototype" | "set001";
 };
 
 export const CARD_DEFS: CardDef[] = [
@@ -168,7 +181,54 @@ export const CARD_DEFS: CardDef[] = [
   { defId: "surge", name: "Resonance Surge", faction: "quantum", type: "Anomaly", cost: 1, attack: 0, hp: 0, text: "Gain 2 Resonance. Draw a card at the end of your turn.", art: "/cards/faction-quantum.png", rarity: "Common", attackType: "Quantum", lore: "The Architects don't waste energy. They recycle it. This is the recycling." },
   { defId: "rewind", name: "Temporal Rewind", faction: "quantum", type: "Anomaly", cost: 3, attack: 0, hp: 0, text: "Return a destroyed Entity from your void to your hand. It costs 2 less.", art: "/cards/faction-quantum.png", rarity: "Rare", attackType: "Quantum", lore: "The Architects perceive time non-linearly. To them, death is just a temporary inconvenience." },
   { defId: "collapse", name: "Probability Collapse", faction: "quantum", type: "Anomaly", cost: 5, attack: 0, hp: 0, text: "Destroy the enemy Entity with the highest attack. If tied, destroy both.", art: "/cards/faction-quantum.png", rarity: "Mythic", attackType: "Quantum", lore: "All possibilities exist until observed. The Architects observe the possibility where your best unit is dead. They select it." },
+
+  // ===================== SET 001 CATALOG EXPANSION =====================
+  // These are collection/deckbuilding definitions for the 5x5 client.
+  // Keep battleReady=false until the living-board engine supports worlds, structures,
+  // attachments, affinity, materials, and non-lane targeting.
+  { defId: "concord_arbiter", name: "Concord Arbiter", faction: "solari", type: "Entity", cost: 4, attack: 2, hp: 6, text: "Guardian. At end step, if this is adjacent to two shielded allies, gain 1 Influence.", art: "/cards/faction-solari.png", rarity: "Rare", attackType: "Radiant", keyword: "Guardian", lore: "The Concord does not vote with voices alone. Some laws arrive armored in daylight.", battleReady: false, catalogSet: "set001" },
+  { defId: "solar_writ", name: "Solar Writ", faction: "solari", type: "Anomaly", cost: 2, attack: 0, hp: 0, text: "Give an ally Shield 1. If it is on a Star world, draw a card.", art: "/cards/faction-solari.png", rarity: "Uncommon", attackType: "Radiant", lore: "A treaty written in plasma still burns after the ink is gone.", battleReady: false, catalogSet: "set001" },
+  { defId: "purity_ray", name: "Purity Ray", faction: "solari", type: "Anomaly", cost: 3, attack: 0, hp: 0, text: "Deal 3 Radiant damage to an enemy on a Corrupted world. Purify that sector if the enemy dies.", art: "/cards/faction-solari.png", rarity: "Rare", attackType: "Radiant", lore: "The Solari call it mercy. The Voidborn call it starvation.", battleReady: false, catalogSet: "set001" },
+  { defId: "helios_reactor", name: "Helios Reactor", faction: "solari", type: "Structure", cost: 4, attack: 0, hp: 6, text: "Build on Star world. Start of turn: gain 1 temporary Resonance. If protected by a Guardian, gain Plasma.", art: "/cards/faction-solari.png", rarity: "Holo", attackType: "Radiant", lore: "A pocket sunrise chained to a battlefield grid.", battleReady: false, catalogSet: "set001" },
+
+  { defId: "carrion_bloom", name: "Carrion Bloom", faction: "voidborn", type: "World", cost: 2, attack: 0, hp: 0, text: "Terraform a sector into Organic world. Whenever an entity dies adjacent, place Biomass here.", art: "/cards/faction-voidborn.png", rarity: "Uncommon", attackType: "Bio", lore: "Where others see a grave, the swarm sees soil.", battleReady: false, catalogSet: "set001" },
+  { defId: "maw_apostle", name: "Maw Apostle", faction: "voidborn", type: "Entity", cost: 3, attack: 2, hp: 4, text: "When this consumes Biomass, adjacent Broodlings gain +1 attack this turn.", art: "/cards/faction-voidborn.png", rarity: "Rare", attackType: "Void", lore: "It preaches in hunger. The sermon always ends with teeth.", battleReady: false, catalogSet: "set001" },
+  { defId: "hunger_spiral", name: "Hunger Spiral", faction: "voidborn", type: "Anomaly", cost: 4, attack: 0, hp: 0, text: "Consume up to 3 Biomass. Deal that much Void damage to all enemies on Corrupted worlds.", art: "/cards/faction-voidborn.png", rarity: "Holo", attackType: "Void", lore: "The swarm learned geometry only so it could draw appetite.", battleReady: false, catalogSet: "set001" },
+  { defId: "brood_bridge", name: "Brood Bridge", faction: "voidborn", type: "Structure", cost: 2, attack: 0, hp: 4, text: "Build on Corrupted or Organic world. Your Broodlings may move through this sector without stopping.", art: "/cards/faction-voidborn.png", rarity: "Uncommon", attackType: "Bio", lore: "A bridge, if bridges pulsed and remembered the shape of prey.", battleReady: false, catalogSet: "set001" },
+
+  { defId: "signal_cartographer", name: "Signal Cartographer", faction: "synthari", type: "Entity", cost: 2, attack: 1, hp: 3, text: "Scan a sector. If it is a Machine world, create a 1/1 Drone in hand.", rarity: "Uncommon", attackType: "Tech", lore: "It maps terrain by asking the grid what it wants to become.", battleReady: false, catalogSet: "set001" },
+  { defId: "hardlight_exoshell", name: "Hardlight Exoshell", faction: "synthari", type: "Attachment", cost: 2, attack: 0, hp: 0, text: "Attached entity gets +1/+2. If attached to a Drone, it becomes a Construct.", rarity: "Rare", attackType: "Tech", lore: "Armor made from a decision the machine refuses to retract.", battleReady: false, catalogSet: "set001" },
+  { defId: "network_cascade", name: "Network Cascade", faction: "synthari", type: "Anomaly", cost: 4, attack: 0, hp: 0, text: "For each connected Machine world you control, ready one Drone or attached entity.", rarity: "Holo", attackType: "Tech", lore: "One signal becomes a strategy. One strategy becomes a swarm of perfect moves.", battleReady: false, catalogSet: "set001" },
+  { defId: "logic_bastion", name: "Logic Bastion", faction: "synthari", type: "Structure", cost: 3, attack: 0, hp: 5, text: "Build on Machine world. Adjacent allies have +1 flat armor against Kinetic and Bio damage.", rarity: "Rare", attackType: "Tech", lore: "The wall does not block attacks. It proves them inefficient.", battleReady: false, catalogSet: "set001" },
+
+  { defId: "spore_shepherd", name: "Spore Shepherd", faction: "verdant", type: "Entity", cost: 3, attack: 2, hp: 4, text: "When a Spore Mark damages an enemy, heal a friendly entity for 1.", rarity: "Rare", attackType: "Bio", lore: "It tends wounds and infections with the same gentle hands.", battleReady: false, catalogSet: "set001" },
+  { defId: "bloomstep_path", name: "Bloomstep Path", faction: "verdant", type: "World", cost: 2, attack: 0, hp: 0, text: "Terraform a sector into Verdant world. The first friendly Beast moving from this sector each turn gains Scout.", rarity: "Uncommon", attackType: "Bio", lore: "The road grows under the feet of those the forest accepts.", battleReady: false, catalogSet: "set001" },
+  { defId: "symbiotic_crown", name: "Symbiotic Crown", faction: "verdant", type: "Attachment", cost: 3, attack: 0, hp: 0, text: "Attached entity gains Regenerate 1. Whenever it heals, adjacent allies gain +1 HP this turn.", rarity: "Holo", attackType: "Bio", lore: "The crown does not rule the host. It negotiates with every cell.", battleReady: false, catalogSet: "set001" },
+  { defId: "rootsnare", name: "Rootsnare", faction: "verdant", type: "Anomaly", cost: 2, attack: 0, hp: 0, text: "Slow an enemy on or adjacent to a Verdant world. Apply Spore Mark.", rarity: "Uncommon", attackType: "Bio", lore: "The battlefield reaches up and asks the invader to stay.", battleReady: false, catalogSet: "set001" },
+
+  { defId: "ash_duelist", name: "Ash Duelist", faction: "crimson", type: "Entity", cost: 2, attack: 3, hp: 1, text: "Strike First. If damaged, gains Shield Pierce this turn.", rarity: "Uncommon", attackType: "Kinetic", keyword: "StrikeFirst", lore: "Every scar is a signed challenge.", battleReady: false, catalogSet: "set001" },
+  { defId: "molten_graft", name: "Molten Graft", faction: "crimson", type: "Attachment", cost: 2, attack: 0, hp: 0, text: "Attached entity gets +2 attack. At end step, deal 1 damage to it.", rarity: "Rare", attackType: "Kinetic", lore: "The weapon joins the body by burning away the border.", battleReady: false, catalogSet: "set001" },
+  { defId: "forge_riot", name: "Forge Riot", faction: "crimson", type: "Anomaly", cost: 4, attack: 0, hp: 0, text: "Deal 1 damage to all friendly entities. For each that survives, deal 1 damage to the nearest enemy.", rarity: "Holo", attackType: "Kinetic", lore: "The Crucible does not ask for discipline. It asks who is still standing.", battleReady: false, catalogSet: "set001" },
+  { defId: "siege_crucible", name: "Siege Crucible", faction: "crimson", type: "Structure", cost: 3, attack: 0, hp: 5, text: "Build on Crucible world. End of turn: if an enemy structure is in the same row or column, deal 2 damage to it.", rarity: "Rare", attackType: "Kinetic", lore: "A factory that manufactures pressure until something breaks.", battleReady: false, catalogSet: "set001" },
+
+  { defId: "rift_cartographer", name: "Rift Cartographer", faction: "astral", type: "Entity", cost: 2, attack: 1, hp: 3, text: "Forecast 1. If the forecasted card is a World, this may Blink.", rarity: "Uncommon", attackType: "Astral", lore: "They do not draw maps. They persuade distance to confess.", battleReady: false, catalogSet: "set001" },
+  { defId: "event_horizon", name: "Event Horizon", faction: "astral", type: "World", cost: 3, attack: 0, hp: 0, text: "Terraform a sector into Astral world. The first enemy entering this sector each turn is slowed.", rarity: "Holo", attackType: "Astral", lore: "A doorway that punishes anyone who believes in straight lines.", battleReady: false, catalogSet: "set001" },
+  { defId: "echo_split", name: "Echo Split", faction: "astral", type: "Anomaly", cost: 3, attack: 0, hp: 0, text: "Return a friendly entity to hand. Create a 1/1 Echo token on its previous sector.", rarity: "Rare", attackType: "Astral", lore: "One soldier leaves. The possibility of them remains angry.", battleReady: false, catalogSet: "set001" },
+  { defId: "star_warden_seal", name: "Star-Warden Seal", faction: "astral", type: "Attachment", cost: 2, attack: 0, hp: 0, text: "Attached world cannot be corrupted. If attached to an Astral world, gain 1 Influence when it is contested and you retain control.", rarity: "Rare", attackType: "Astral", lore: "Some doors are locked by promising the stars they will not open.", battleReady: false, catalogSet: "set001" },
+
+  { defId: "sector_surveyor", name: "Sector Surveyor", faction: "neutral", type: "Entity", cost: 1, attack: 1, hp: 2, text: "When deployed, reveal the world type of a hidden or neutral sector.", rarity: "Common", attackType: "Kinetic", lore: "Cheap suit. Brave heart. Excellent scanner.", battleReady: false, catalogSet: "set001" },
+  { defId: "emergency_bulkhead", name: "Emergency Bulkhead", faction: "neutral", type: "Structure", cost: 1, attack: 0, hp: 3, text: "Build on any controlled world. Adjacent allies take 1 less damage from the next attack this turn.", rarity: "Common", attackType: "Kinetic", lore: "Not elegant. Very alive-making.", battleReady: false, catalogSet: "set001" },
+  { defId: "salvage_charter", name: "Salvage Charter", faction: "neutral", type: "Anomaly", cost: 2, attack: 0, hp: 0, text: "Draw a card. If a structure was destroyed this turn, gain 1 material matching its world.", rarity: "Uncommon", attackType: "Kinetic", lore: "The fine print says wreckage is a form of opportunity.", battleReady: false, catalogSet: "set001" },
+  { defId: "frontier_beacon", name: "Frontier Beacon", faction: "neutral", type: "Structure", cost: 3, attack: 0, hp: 4, text: "Build on a Barren world. Adjacent empty sectors count as controlled for world placement only.", rarity: "Rare", attackType: "Kinetic", lore: "First comes the signal. Then the claim. Then the war.", battleReady: false, catalogSet: "set001" },
+  { defId: "mercenary_skiff", name: "Mercenary Skiff", faction: "neutral", type: "Entity", cost: 2, attack: 2, hp: 2, text: "Flying. Costs 1 less if you control a Gas world.", rarity: "Uncommon", attackType: "Kinetic", keyword: "Flying", lore: "It goes anywhere, provided the payment clears before launch.", battleReady: false, catalogSet: "set001" },
+  { defId: "crystal_lens", name: "Crystal Lens", faction: "neutral", type: "Attachment", cost: 2, attack: 0, hp: 0, text: "Attached entity gains Forecast 1 after it attacks.", rarity: "Rare", attackType: "Astral", lore: "A future is easier to hit once it starts shining.", battleReady: false, catalogSet: "set001" },
+  { defId: "null_zone", name: "Null Zone", faction: "neutral", type: "World", cost: 3, attack: 0, hp: 0, text: "Terraform a sector into Barren world. This sector ignores terrain attack multipliers.", rarity: "Holo", attackType: "Kinetic", lore: "The loudest magic in the galaxy is sometimes silence.", battleReady: false, catalogSet: "set001" },
+  { defId: "ancient_terraformer", name: "Ancient Terraformer", faction: "neutral", type: "Entity", cost: 5, attack: 3, hp: 6, text: "At end step, you may convert an adjacent Barren world into a basic world matching your commander faction.", rarity: "Mythic", attackType: "Astral", lore: "It remembers when planets were wet clay and stars were negotiable.", battleReady: false, catalogSet: "set001" },
 ];
+
+export const PLAYABLE_CARD_DEFS = CARD_DEFS.filter(
+  (card) => card.battleReady !== false && (card.type === "Entity" || card.type === "Anomaly")
+);
 
 const PLAYER_DECK_IDS = [
   "acolyte", "acolyte", "broodling", "broodling", "shardling",
@@ -256,16 +316,18 @@ export function enemyAttackTarget(i: number, sectors: Sector[]): number | "comma
 function buildDeck(ids: string[]): MatchCard[] {
   return ids
     .map((defId) => {
-      const def = CARD_DEFS.find((d) => d.defId === defId)!;
+      const def = PLAYABLE_CARD_DEFS.find((d) => d.defId === defId)!;
       return instantiate(def, "player");
     })
     .sort(() => Math.random() - 0.5);
 }
 
 export function buildDeckFromIds(ids: string[], side: Side): MatchCard[] {
-  return ids
+  const playableIds = ids.filter((defId) => PLAYABLE_CARD_DEFS.some((d) => d.defId === defId));
+  const finalIds = playableIds.length > 0 ? playableIds : PLAYER_DECK_IDS;
+  return finalIds
     .map((defId) => {
-      const def = CARD_DEFS.find((d) => d.defId === defId) || CARD_DEFS[0];
+      const def = PLAYABLE_CARD_DEFS.find((d) => d.defId === defId) || PLAYABLE_CARD_DEFS[0];
       return instantiate(def, side);
     })
     .sort(() => Math.random() - 0.5);
@@ -463,11 +525,12 @@ export function canPlay(state: MatchState, handIdx: number): boolean {
   const card = p.hand[handIdx];
   if (!card) return false;
   if (card.cost > p.resonance) return false;
+  if (card.type !== "Entity" && card.type !== "Anomaly") return false;
   if (card.type === "Entity") {
     // need at least one deploy target across columns
     return [0, 1, 2].some((col) => deployTargetFor("player", col, state.sectors) !== null);
   }
-  return true;
+  return card.type === "Anomaly";
 }
 
 export function playCard(state: MatchState, handIdx: number, col: number): MatchState {
@@ -484,11 +547,13 @@ export function playCard(state: MatchState, handIdx: number, col: number): Match
     const placed = { ...card, justDeployed: true, canAttack: card.keyword === "StrikeFirst" };
     next.sectors[target] = placed;
     next.log.push({ id: logId(), side: "player", text: `Deployed ${card.name} to lane ${col + 1}.` });
-  } else {
+  } else if (card.type === "Anomaly") {
     // anomaly
     p.resonance -= card.cost;
     p.hand.splice(handIdx, 1);
     resolveAnomaly(next, card, "player", "enemy");
+  } else {
+    return next;
   }
   next.selectedHandIdx = null;
   return next;
@@ -732,7 +797,7 @@ export function runEnemyTurn(state: MatchState): MatchState {
   // 1. play affordable cards (entities prefer lane with fewest player blockers; anomalies prefer smite/voidpulse)
   let guard = 0;
   while (guard++ < 12) {
-    const playableIdx = e.hand.findIndex((c) => c.cost <= e.resonance);
+    const playableIdx = e.hand.findIndex((c) => c.cost <= e.resonance && (c.type === "Entity" || c.type === "Anomaly"));
     if (playableIdx === -1) break;
     const card = e.hand[playableIdx];
     if (card.type === "Entity") {
@@ -763,7 +828,7 @@ export function runEnemyTurn(state: MatchState): MatchState {
       e.hand.splice(playableIdx, 1);
       next.sectors[target] = { ...card, justDeployed: true, canAttack: false };
       next.log.push({ id: logId(), side: "enemy", text: `${e.name} deploys ${card.name} to lane ${best.col + 1}.` });
-    } else {
+    } else if (card.type === "Anomaly") {
       // HARD AI: hold Smite until it's lethal; others cast freely
       if (next.difficulty === "hard" && card.defId === "smite" && next.player.hp > 3) {
         // skip this card this turn (leave in hand)
@@ -773,6 +838,8 @@ export function runEnemyTurn(state: MatchState): MatchState {
       e.hand.splice(playableIdx, 1);
       resolveAnomaly(next, card, "enemy", "player");
       if (next.phase === "over") return next;
+    } else {
+      break;
     }
   }
   // 2. attack with every enemy unit that can
