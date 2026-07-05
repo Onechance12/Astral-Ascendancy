@@ -159,7 +159,7 @@ export function CardDetailDialog({
 }) {
   if (!card) return null;
 
-  const isWorldCard = ["planet", "development", "crew", "world", "structure", "attachment"].includes(card.category);
+  const isWorldCard = ["planet", "development", "crew", "world", "structure", "attachment", "science", "project"].includes(card.category);
   const color = isWorldCard
     ? card.category === "planet"
       ? "#fbbf24"
@@ -171,6 +171,10 @@ export function CardDetailDialog({
       ? "#a78bfa"
       : card.category === "attachment"
       ? "#fb923c"
+      : card.category === "science"
+      ? "#38bdf8"
+      : card.category === "project"
+      ? "#34d399"
       : "#34d399"
     : FACTION_COLOR[card.faction] || "#94a3b8";
   const glyph = isWorldCard
@@ -184,6 +188,10 @@ export function CardDetailDialog({
       ? "▣"
       : card.category === "attachment"
       ? "⚙"
+      : card.category === "science"
+      ? "⌬"
+      : card.category === "project"
+      ? "▤"
       : "👥"
     : FACTION_GLYPH[card.faction] || "?";
   const rarityColor = RARITY_COLOR[card.rarity] || "#94a3b8";

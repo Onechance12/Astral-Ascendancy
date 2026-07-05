@@ -1,0 +1,33 @@
+card_id,name,faction,rarity,card_type,cost,attack,hp,damage_school,defense_profile,creature_class,world_affinity,structure_class,keywords,science_track,board_role
+stellar_spectrometry,Stellar Spectrometry,Solari,Uncommon,Science,2,0,0,Radiant,Lightform,Caster,Star,None,Research;Reveal,stellar_physics,Reveal Star resources and progress Stellar Physics
+shield_harmonics_lab,Shield Harmonics Lab,Solari,Rare,Project,3,0,0,Radiant,Structure,Construct,Star,Laboratory,ShieldResearch;Project,stellar_physics,Improve shield field tests
+corona_engineering,Corona Engineering,Solari,Holo,Science,4,0,0,Radiant,Lightform,Caster,Star,None,Purify;Research,stellar_physics,Unlock anti-corruption tests
+dawn_reactor_blueprint,Dawn Reactor Blueprint,Solari,Rare,Project,3,0,0,Radiant,Structure,Construct,Star,Reactor,PlasmaProduction;Blueprint,stellar_physics,Star reactor engineering plan
+adaptive_genomics,Adaptive Genomics,Voidborn,Rare,Science,3,0,0,Bio,Chitin,Caster,Organic,None,Evolution;Research,xenobiology,Organism adaptation research
+brood_incubator_array,Brood Incubator Array,Voidborn,Holo,Project,4,0,0,Bio,Structure,Construct,Corrupted,Nest,Spawn;Project,xenobiology,Brood production engineering
+corruption_trial,Corruption Trial,Voidborn,Uncommon,Science,2,0,0,Void,Chitin,Caster,Corrupted,None,Corrupt;FieldTest,xenobiology,Study corruption spread safely
+biomass_pressure_vat,Biomass Pressure Vat,Voidborn,Rare,Project,3,0,0,Bio,Structure,Construct,Organic,Refinery,BiomassProduction;Project,xenobiology,Biomass conversion facility
+autonomous_diagnostics,Autonomous Diagnostics,Synthari,Uncommon,Science,2,0,0,Tech,Machine,Caster,Machine,None,Scan;Research,synthetic_systems,Machine network diagnostic research
+drone_fabricator_patent,Drone Fabricator Patent,Synthari,Rare,Project,3,0,0,Tech,Structure,Construct,Machine,Foundry,DroneProduction;Blueprint,synthetic_systems,Drone production project
+quantum_compiler,Quantum Compiler,Synthari,Holo,Science,4,0,0,Tech,Machine,Caster,Machine,None,Automation;Research,synthetic_systems,Automation and prediction science
+hardlight_proving_ground,Hardlight Proving Ground,Synthari,Rare,Project,3,0,0,Tech,Structure,Construct,Machine,Laboratory,AttachmentResearch;Project,synthetic_systems,Attachment testing facility
+xenobotany_survey,Xenobotany Survey,Verdant,Uncommon,Science,2,0,0,Bio,LivingArmor,Caster,Verdant,None,Research;Heal,xenobiology,Study alien plant healing
+spore_culture_lab,Spore Culture Lab,Verdant,Rare,Project,3,0,0,Bio,Structure,Construct,Verdant,Laboratory,SporeResearch;Project,xenobiology,Spore and healing lab
+living_armor_grafting,Living Armor Grafting,Verdant,Holo,Science,4,0,0,Bio,LivingArmor,Caster,Verdant,None,AttachmentResearch;Regenerate,xenobiology,Living armor science
+worldroot_irrigation,Worldroot Irrigation,Verdant,Rare,Project,3,0,0,Bio,Structure,Construct,Verdant,Nursery,VerdanceProduction;Project,planetary_engineering,Verdant world upgrade infrastructure
+metallurgy_trials,Metallurgy Trials,Crimson,Uncommon,Science,2,0,0,Ember,BloodMetal,Caster,Crucible,None,FieldTest;ArmorBreak,war_metallurgy,Weapon and armor testing
+siege_engine_works,Siege Engine Works,Crimson,Holo,Project,4,0,0,Kinetic,Structure,Construct,Crucible,Foundry,Siege;Project,war_metallurgy,Structure damage engineering
+ember_stress_test,Ember Stress Test,Crimson,Rare,Science,3,0,0,Ember,BloodMetal,Caster,Crucible,None,SelfDamage;Research,war_metallurgy,Damage survival science
+blood_metal_refinery,Blood-Metal Refinery,Crimson,Rare,Project,3,0,0,Ember,Structure,Construct,Crucible,Refinery,EmberProduction;Project,war_metallurgy,Ember and Alloy refinery
+temporal_hypothesis,Temporal Hypothesis,Astral,Uncommon,Science,2,0,0,Astral,Phase,Caster,Astral,None,Forecast;Research,temporal_mechanics,Forecast and time research
+portal_calibration_rig,Portal Calibration Rig,Astral,Rare,Project,3,0,0,Astral,Structure,Construct,Astral,Gate,BlinkSupport;Project,temporal_mechanics,Safer portal engineering
+stasis_safety_chamber,Stasis Safety Chamber,Astral,Rare,Project,3,0,0,Astral,Structure,Construct,Astral,Laboratory,Stasis;Safety,temporal_mechanics,Stasis control lab
+relativity_engine,Relativity Engine,Astral,Mythic,Science,5,0,0,Astral,Phase,Caster,Astral,None,Blink;GenesisResearch,temporal_mechanics,High-end portal science
+field_test_charter,Field Test Charter,Neutral,Common,Science,1,0,0,Kinetic,Unarmored,Caster,Barren,None,FieldTest;Research,field_methodology,Generic test objective card
+engineering_academy,Engineering Academy,Neutral,Rare,Project,3,0,0,Kinetic,Structure,Construct,Barren,Laboratory,ProjectDiscount;Crew,field_methodology,Project training facility
+prototype_bay,Prototype Bay,Neutral,Uncommon,Project,2,0,0,Tech,Structure,Construct,Barren,Laboratory,Prototype;Project,field_methodology,Experimental card testing bay
+planetary_survey_lab,Planetary Survey Lab,Neutral,Uncommon,Project,2,0,0,Kinetic,Structure,Construct,Barren,Observatory,Survey;Reveal,planetary_engineering,World survey and terraforming setup
+materials_exchange,Materials Exchange,Neutral,Rare,Project,3,0,0,Kinetic,Structure,Construct,Barren,Refinery,ConvertMaterial;Project,planetary_engineering,Material conversion economy
+safety_review,Safety Review,Neutral,Common,Science,1,0,0,Kinetic,Unarmored,Caster,Barren,None,Refund;Safety,field_methodology,Reduce prototype failure risk
+expedition_grants,Expedition Grants,Neutral,Uncommon,Science,2,0,0,Kinetic,Unarmored,Caster,Gas,None,Operations;Tritium,logistics_operations,Campaign and operations research
+tech_salvage_rights,Tech Salvage Rights,Neutral,Rare,Science,3,0,0,Tech,Unarmored,Caster,Machine,None,Salvage;Research,field_methodology,Turn destroyed tech into research

@@ -413,5 +413,8 @@ Resource/costing tables:
 - `docs/balance/world_resource_costs.csv`
 - `docs/balance/set001_resource_costs.csv`
 - `docs/balance/set002_resource_costs.csv`
+- `docs/balance/set003_resource_costs.csv`
+- `docs/balance/science_tracks.csv`
+- `docs/balance/engineering_projects.csv`
 
 These tables should be considered the design source of truth for resource tuning.

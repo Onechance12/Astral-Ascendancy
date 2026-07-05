@@ -69,6 +69,7 @@ Before implementation, keep the creative target in these docs:
 - `docs/11_SET_001_CARD_EXPANSION.md`
 - `docs/12_5X5_ENGINE_IMPLEMENTATION.md`
 - `docs/13_SET_002_WORLDS_AWAKEN.md`
+- `docs/14_SCIENCE_ENGINEERING_PROGRESSION.md`
 
 ## Asset Pipeline
 

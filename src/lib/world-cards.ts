@@ -13,6 +13,8 @@ export type CardCategory =
   | "world"
   | "structure"
   | "attachment"
+  | "science"
+  | "project"
   | "planet"
   | "development"
   | "crew";

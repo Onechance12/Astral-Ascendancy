@@ -239,6 +239,10 @@ export default function CollectionView() {
                   <div className="px-1 pb-1 text-right text-[8px] font-bold text-purple-300">▣ Structure</div>
                 ) : c.category === "attachment" ? (
                   <div className="px-1 pb-1 text-right text-[8px] font-bold text-orange-300">⚙ Attach</div>
+                ) : c.category === "science" ? (
+                  <div className="px-1 pb-1 text-right text-[8px] font-bold text-sky-300">⌬ Science</div>
+                ) : c.category === "project" ? (
+                  <div className="px-1 pb-1 text-right text-[8px] font-bold text-emerald-300">▤ Project</div>
                 ) : (
                   <div className="px-1 pb-1 text-right text-[8px] font-bold text-amber-300">
                     {c.category === "planet" ? "🪐 Planet" : c.category === "development" ? "⚡ Tech" : "👥 Crew"}

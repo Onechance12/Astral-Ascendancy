@@ -6,6 +6,8 @@ For the first deckbuilding expansion after alpha, see `docs/11_SET_001_CARD_EXPA
 
 For the second board-development expansion, see `docs/13_SET_002_WORLDS_AWAKEN.md`.
 
+For science, engineering, and faction advancement systems, see `docs/14_SCIENCE_ENGINEERING_PROGRESSION.md`.
+
 ## Alpha Content Target
 
 - 6 commanders

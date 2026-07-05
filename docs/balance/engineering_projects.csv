@@ -1,0 +1,21 @@
+project_id,name,science_track,required_level,resource_cost_type,resource_cost_amount,secondary_cost_type,secondary_cost_amount,domain_effect,battle_effect,counterplay_or_limit
+solar_reactor_array,Solar Reactor Array,stellar_physics,2,Plasma,120,Alloy,40,Star structures produce 25 percent more Plasma,One Star structure may gain temporary Resonance once per match,Requires Star world and can be raided in domain events
+shield_harmonics_lab,Shield Harmonics Lab,stellar_physics,2,Plasma,90,Crystal,30,Shield cards gain research XP faster,First shield on a Star sector is plus one stronger,Does not stack with duplicate labs
+purification_observatory,Purification Observatory,stellar_physics,3,Plasma,150,Aether,45,Corruption cleanup projects cost less,Once per match purify a controlled Star-adjacent sector,Requires field test completion
+brood_incubator_array,Brood Incubator Array,xenobiology,2,Biomass,120,Verdance,40,Organic and Corrupted structures produce 20 percent more Biomass,First organism death near a Corrupted world stores Biomass,Can be disabled by purge operations
+adaptive_genomics_lab,Adaptive Genomics Lab,xenobiology,3,Biomass,160,Data,50,Voidborn and Verdant evolution projects unlock,One organism can adapt a terrain bonus after field test,Requires repeated organism survival
+spore_culture_greenhouse,Spore Culture Greenhouse,xenobiology,2,Verdance,100,Biomass,30,Verdant healing projects cost less,Spore Mark cards gain bonus research progress,Weak to Ember events
+drone_fabricator,Drone Fabricator,synthetic_systems,2,Data,120,Alloy,60,Machine structures can queue Drone production,Connected Machine worlds can create a 1/1 Drone trial token,Requires Machine network
+hardlight_proving_ground,Hardlight Proving Ground,synthetic_systems,3,Data,160,Crystal,60,Attachment research progresses faster,First Synthari attachment each match refunds one Data,Limited to once per match
+network_diagnostics_core,Network Diagnostics Core,synthetic_systems,2,Data,90,Aether,25,Scans reveal richer resource data,Relay worlds can preview control pressure,Countered by corruption and signal-jam events
+siege_engine_works,Siege Engine Works,war_metallurgy,2,Ember,130,Alloy,70,Crimson structures unlock siege modules,First structure attack each match deals plus one damage,Requires Crucible or Mineral world
+blood_metal_foundry,Blood-Metal Foundry,war_metallurgy,3,Ember,170,Crystal,50,Weapon attachments can be upgraded cosmetically,Damage-survival cards gain Ember field-test progress,Healing-heavy opponents reduce value
+stress_test_arena,Stress Test Arena,war_metallurgy,2,Ember,100,Biomass,25,Crimson field tests complete faster,Once per match a damaged ally can gain plus one attack,Can backfire in campaign events
+portal_calibration_rig,Portal Calibration Rig,temporal_mechanics,2,Aether,120,Data,40,Astral gate projects cost less,First Blink each match does not exhaust if from Astral world,Requires gate control
+timeglass_laboratory,Timeglass Laboratory,temporal_mechanics,3,Aether,160,Crystal,70,Forecast cards gain research progress faster,Once per match Forecast one extra card,Limited to Astral commander or Astral world
+stasis_safety_chamber,Stasis Safety Chamber,temporal_mechanics,2,Aether,100,Plasma,30,Stasis effects become safer in campaign,Failed Stasis field tests refund partial Aether,Does not increase PvP lockdown duration
+terraforming_bay,Terraforming Bay,planetary_engineering,2,Alloy,120,Tritium,50,World upgrade costs reduced by 15 percent,One Barren world can be converted cheaper,Requires surveyed Barren world
+materials_exchange,Materials Exchange,planetary_engineering,1,Data,60,Alloy,20,Convert small amounts of one material to another,No direct battle effect,Exchange rate intentionally inefficient
+expedition_launchpad,Expedition Launchpad,logistics_operations,2,Tritium,120,Data,30,Campaign travel and operation costs reduced,Scout movement field tests progress faster,Requires Gas or Barren world
+prototype_bay,Prototype Bay,field_methodology,1,Data,80,Aether,20,Science and Project cards gain research XP,Prototype cards can be tested in special PvE rules,No direct PvP power
+engineering_academy,Engineering Academy,field_methodology,2,Alloy,100,Data,50,Projects build 10 percent faster,Crew assigned to labs gain bonus output,Requires active crew slot

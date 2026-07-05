@@ -307,6 +307,32 @@ Tritium:
 - Gas-world production.
 - Used for ships, operations, campaign travel, future raids.
 
+## Science and Engineering
+
+Worlds should advance through research, not only produce resources.
+
+Science turns repeated play into civilization progress:
+
+- Star worlds support Stellar Physics, shield labs, and purification research.
+- Organic, Corrupted, and Verdant worlds support Xenobiology, spores, regeneration, and organism evolution.
+- Machine worlds support Synthetic Systems, drones, scans, and automation.
+- Crucible worlds support War Metallurgy, stress testing, siege engines, and forge upgrades.
+- Astral worlds support Temporal Mechanics, Forecast, Blink, Stasis, and portal calibration.
+- Barren, Mineral, and Gas worlds support Planetary Engineering, logistics, surveying, and resource conversion.
+
+Engineering projects are buildable upgrades that consume resources and require science progress.
+
+Examples:
+
+- Solar Reactor Array: improves Star structure Plasma output.
+- Brood Incubator Array: improves organism spawn infrastructure.
+- Drone Fabricator: unlocks Machine-world drone production.
+- Worldroot Irrigation: improves Verdant healing and spread.
+- Siege Engine Works: improves Crimson structure damage.
+- Portal Calibration Rig: improves Astral movement safety.
+
+For the full system, see `docs/14_SCIENCE_ENGINEERING_PROGRESSION.md`.
+
 ## Structures
 
 Structures should feel powerful only if protected.

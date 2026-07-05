@@ -56,7 +56,7 @@ export type CreatureClass =
   | "Caster"
   | "Commander";
 
-export type CardKind = "Entity" | "World" | "Structure" | "Attachment" | "Anomaly";
+export type CardKind = "Entity" | "World" | "Structure" | "Attachment" | "Anomaly" | "Science" | "Project";
 
 export type SectorControl = Side | "neutral" | "contested";
 
