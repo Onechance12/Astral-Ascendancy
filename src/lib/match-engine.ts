@@ -784,6 +784,7 @@ export function attackWith(state: MatchState, sectorIdx: number): MatchState {
     const dmg = attacker.attack;
     next.enemy.hp = Math.max(0, next.enemy.hp - dmg);
     next.log.push({ id: logId(), side: "player", text: `${attacker.name} strikes ${next.enemy.name} for ${dmg}.` });
+    next.sectors[sectorIdx] = { ...attacker, canAttack: false };
     // Lifedrain
     if (attacker.keyword === "Lifedrain") {
       const heal = Math.min(dmg, next.player.maxHp - next.player.hp);
@@ -811,36 +812,16 @@ export function attackWith(state: MatchState, sectorIdx: number): MatchState {
     }
 
     // Defender takes damage (through Shield) — defender fights back
-    const atkResult = applyDamage(attacker, defDmg);
+    applyDamage(attacker, defDmg);
 
     if (defender.hp <= 0) {
+      const excessDmg = Math.max(0, -defender.hp);
       next.sectors[target] = null;
       next.log.push({ id: logId(), side: "system", text: `${defender.name} is destroyed.` });
 
-      // Overwhelm: excess damage to next unit in lane
-      const excessDmg = -defender.hp;
-      if (attacker.keyword === "Overwhelm" && excessDmg > 0) {
-        // find next enemy unit below the defender in the same column
-        const col = colOf(target);
-        for (let row = rowOf(target) + 1; row < ROWS; row++) {
-          const j = idxOf(row, col);
-          const nextUnit = next.sectors[j];
-          if (nextUnit && nextUnit.ownerSide === "enemy") {
-            const overResult = applyDamage(nextUnit, excessDmg);
-            next.log.push({ id: logId(), side: "system", text: `Overwhelm hits ${nextUnit.name} for ${excessDmg}.` });
-            if (nextUnit.hp <= 0) {
-              next.sectors[j] = null;
-              next.log.push({ id: logId(), side: "system", text: `${nextUnit.name} is destroyed.` });
-            }
-            break;
-          }
-        }
-      }
-
-      // Trample: excess damage to commander
-      if (attacker.keyword === "Trample" && excessDmg > 0) {
+      if (excessDmg > 0) {
         next.enemy.hp = Math.max(0, next.enemy.hp - excessDmg);
-        next.log.push({ id: logId(), side: "system", text: `Trample deals ${excessDmg} excess to ${next.enemy.name}.` });
+        next.log.push({ id: logId(), side: "system", text: `${excessDmg} breakthrough damage hits ${next.enemy.name}.` });
       }
     }
 
@@ -1005,20 +986,20 @@ function enemyAttack(state: MatchState, sectorIdx: number): MatchState {
     const defender = next.sectors[target]!;
     const atkDmg = attacker.attack;
     const defDmg = defender.attack;
-    defender.hp -= atkDmg;
-    attacker.hp -= defDmg;
+    applyDamage(defender, atkDmg);
+    applyDamage(attacker, defDmg);
     next.log.push({
       id: logId(),
       side: "enemy",
       text: `${attacker.name} (${atkDmg}) clashes ${defender.name} (${defDmg}).`,
     });
     if (defender.hp <= 0) {
+      const excessDmg = Math.max(0, -defender.hp);
       next.sectors[target] = null;
-      if (attacker.keyword === "Trample") {
-        const dmg = Math.max(0, -defender.hp);
-        if (dmg > 0) {
-          next.player.hp = Math.max(0, next.player.hp - dmg);
-        }
+      next.log.push({ id: logId(), side: "system", text: `${defender.name} is destroyed.` });
+      if (excessDmg > 0) {
+        next.player.hp = Math.max(0, next.player.hp - excessDmg);
+        next.log.push({ id: logId(), side: "system", text: `${excessDmg} breakthrough damage hits ${next.player.name}.` });
       }
     }
     if (attacker.hp <= 0) {

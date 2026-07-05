@@ -80,16 +80,25 @@ export default function MatchBoard() {
     <div className="relative">
       {/* lane labels + enemy commander target indicator */}
       <div className="mb-2 flex items-center justify-between px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        <span>Sector Grid · 3 lanes</span>
+        <span>Sector Grid · 3 lanes · 1 strike per unit</span>
         {attackTarget === "commander" && (
           <span className="animate-pulse rounded-full bg-rose-500/20 px-2 py-0.5 text-rose-300">
-            ⚠ Strike the enemy Commander
+            Direct strike open
           </span>
         )}
       </div>
 
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 p-3 sm:p-4">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/50 p-3 shadow-[inset_0_0_50px_rgba(20,184,166,0.08)] sm:p-4">
+        <div className="nebula-radial absolute inset-0 opacity-50" />
         <div className="grid-pattern absolute inset-0 rounded-2xl opacity-30" />
+        <div className="absolute inset-3 grid grid-cols-3 gap-2 sm:gap-3">
+          {[0, 1, 2].map((lane) => (
+            <div
+              key={lane}
+              className="rounded-xl border border-white/[0.04] bg-gradient-to-b from-rose-500/[0.05] via-cyan-400/[0.03] to-emerald-400/[0.05]"
+            />
+          ))}
+        </div>
 
         {/* the 3x3 grid */}
         <div className="relative grid grid-cols-3 gap-2 sm:gap-3">
@@ -133,7 +142,7 @@ export default function MatchBoard() {
         <span className="flex items-center gap-1">
           <span className="h-2 w-2 rounded-full bg-emerald-400/40 ring-1 ring-emerald-400" /> Deployable
         </span>
-        <span>· Tap a ⚔ unit, then tap it again (or its target) to strike</span>
+        <span>Tap a ready unit once. Defender dies first; excess damage hits life.</span>
       </div>
     </div>
   );
@@ -160,17 +169,20 @@ function SectorCell({
   const color = cell ? FACTION_COLOR[cell.faction] : "#ffffff";
   const glyph = cell ? FACTION_GLYPH[cell.faction] : "";
   const row = rowOf(index);
+  const hpPct = cell ? Math.max(0, Math.min(100, (cell.hp / cell.maxHp) * 100)) : 0;
+  const spent = !!cell && cell.ownerSide === "player" && !cell.canAttack && !cell.justDeployed;
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        "relative flex aspect-square flex-col items-center justify-center rounded-lg border p-1 transition-all duration-200 sm:aspect-[4/5]",
-        cell ? "bg-white/[0.06]" : "bg-white/[0.015]",
+        "relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-xl border p-1 transition-all duration-200 sm:aspect-[4/5]",
+        cell ? "bg-white/[0.07]" : "bg-black/25",
         isDeployable && "bg-emerald-400/10 hover:bg-emerald-400/20",
         isAttacker && "scale-[1.04]",
         dimmed && "opacity-40",
-        isAttackTarget && "ring-2 ring-rose-400"
+        isAttackTarget && "ring-2 ring-rose-400",
+        spent && "saturate-50"
       )}
       style={{
         borderColor: isAttacker
@@ -179,8 +191,12 @@ function SectorCell({
           ? "rgba(52,211,153,0.6)"
           : isAttackTarget
           ? "rgba(244,63,94,0.7)"
-          : "rgba(255,255,255,0.08)",
-        boxShadow: isAttacker ? `0 0 22px ${color}66` : undefined,
+          : "rgba(255,255,255,0.1)",
+        boxShadow: isAttacker
+          ? `0 0 28px ${color}88, inset 0 0 24px ${color}22`
+          : cell
+          ? `inset 0 0 22px ${color}18`
+          : undefined,
       }}
       aria-label={`Lane ${colOfLabel(index)}, row ${row + 1}`}
     >
@@ -192,14 +208,34 @@ function SectorCell({
       {cell ? (
         <div
           className={cn(
-            "flex h-full w-full flex-col items-center justify-center gap-0.5",
+            "relative flex h-full w-full flex-col items-center justify-center gap-0.5",
             cell.justDeployed && (cell.ownerSide === "player" ? "animate-deploy-in" : "animate-deploy-in-enemy"),
             cell.evolved && cell.justDeployed === false && "animate-evolve-burst"
           )}
         >
+          {cell.art && (
+            <img
+              src={cell.art}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover opacity-35 mix-blend-screen"
+              draggable={false}
+            />
+          )}
+          <div
+            className="absolute inset-0 opacity-70"
+            style={{
+              background: `radial-gradient(circle at 50% 42%, ${color}35, transparent 42%), linear-gradient(180deg, transparent, rgba(0,0,0,0.55))`,
+            }}
+          />
+          {cell.canAttack && cell.ownerSide === "player" && (
+            <span
+              className="absolute inset-2 rounded-full border border-dashed opacity-70 animate-spin-slow"
+              style={{ borderColor: color }}
+            />
+          )}
           <div
             className={cn(
-              "flex h-7 w-7 items-center justify-center rounded-md text-base sm:h-9 sm:w-9 sm:text-xl",
+              "relative z-10 flex h-8 w-8 items-center justify-center rounded-md text-base sm:h-10 sm:w-10 sm:text-xl",
               isAttacker && "animate-attack-lunge"
             )}
             style={{
@@ -211,15 +247,23 @@ function SectorCell({
             {glyph}
           </div>
           <div
-            className="flex items-center gap-1 rounded px-1 text-[9px] font-bold tabular-nums text-black sm:text-[10px]"
+            className="relative z-10 max-w-full truncate px-1 text-center text-[8px] font-black uppercase tracking-wide text-white/80 sm:text-[9px]"
+          >
+            {cell.name}
+          </div>
+          <div
+            className="relative z-10 flex items-center gap-1 rounded px-1 text-[9px] font-bold tabular-nums text-black shadow sm:text-[10px]"
             style={{ background: color }}
           >
             <span>{cell.attack}</span>
             <span className="opacity-60">/</span>
             <span>{cell.hp}</span>
           </div>
+          <div className="relative z-10 h-1 w-10 overflow-hidden rounded-full bg-black/60 sm:w-12">
+            <span className="block h-full rounded-full" style={{ width: `${hpPct}%`, background: color }} />
+          </div>
           {/* status flags */}
-          <div className="flex h-3 items-center gap-0.5">
+          <div className="relative z-10 flex h-3 items-center gap-0.5">
             {cell.evolved && (
               <span className="text-[8px] font-bold text-amber-300" title="Evolved">↟</span>
             )}
@@ -235,6 +279,9 @@ function SectorCell({
             {cell.keyword === "Trample" && (
               <span className="text-[8px] text-fuchsia-300">⚣</span>
             )}
+            {spent && (
+              <span className="rounded bg-white/10 px-1 text-[7px] font-bold uppercase tracking-wide text-white/55">spent</span>
+            )}
           </div>
           {/* damage tint if wounded */}
           {cell.hp < cell.maxHp && (
@@ -243,7 +290,7 @@ function SectorCell({
           {/* strike hint on selected attacker */}
           {isAttacker && (
             <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 rounded-full bg-emerald-400 px-1.5 text-[8px] font-bold text-emerald-950 shadow">
-              TAP TO STRIKE
+              STRIKE
             </span>
           )}
         </div>
