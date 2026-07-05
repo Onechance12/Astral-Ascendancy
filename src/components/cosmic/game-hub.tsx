@@ -1,0 +1,327 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useGame } from "@/store/game-store";
+import { FACTIONS } from "@/lib/game-data";
+import { CARD_DEFS } from "@/lib/match-engine";
+import { Button } from "@/components/ui/button";
+import QuestsPanel from "@/components/cosmic/quests-panel";
+import { cn } from "@/lib/utils";
+
+const FACTION_COLOR: Record<string, string> = Object.fromEntries(
+  FACTIONS.map((f) => [f.id, f.accent])
+);
+const FACTION_GLYPH: Record<string, string> = Object.fromEntries(
+  FACTIONS.map((f) => [f.id, f.glyph])
+);
+const FACTION_ART: Record<string, string> = Object.fromEntries(
+  FACTIONS.map((f) => [f.id, f.art ?? ""])
+);
+
+export default function GameHub() {
+  const commander = useGame((s) => s.commander);
+  const stats = useGame((s) => s.stats);
+  const decks = useGame((s) => s.decks);
+  const activeDeckId = useGame((s) => s.activeDeckId);
+  const difficulty = useGame((s) => s.difficulty);
+  const playMatch = useGame((s) => s.playMatch);
+  const exitToLanding = useGame((s) => s.exitToLanding);
+  const logout = useGame((s) => s.logout);
+  const setView = useGame((s) => s.setView);
+  const setDifficulty = useGame((s) => s.setDifficulty);
+  const setActiveDeck = useGame((s) => s.setActiveDeck);
+  const setPackOpen = useGame((s) => s.setPackOpen);
+
+  if (!commander) return null;
+
+  const f = FACTIONS.find((x) => x.id === commander.factionId)!;
+  const color = FACTION_COLOR[commander.factionId];
+  const winRate = stats.matches > 0 ? Math.round((stats.wins / stats.matches) * 100) : 0;
+  const activeDeck = decks.find((d) => d.id === activeDeckId);
+
+  return (
+    <div className="mx-auto w-full max-w-5xl px-3 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:pb-6 sm:pt-[max(1.5rem,env(safe-area-inset-top))]">
+      {/* top bar */}
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <button
+          onClick={exitToLanding}
+          className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-foreground/70 transition hover:bg-white/10"
+        >
+          ← Site
+        </button>
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+          Commander Hub
+        </p>
+        <button
+          onClick={logout}
+          className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-foreground/70 transition hover:bg-white/10"
+        >
+          Sign out
+        </button>
+      </div>
+
+      {/* commander hero card */}
+      <div
+        className="relative overflow-hidden rounded-2xl border p-5 sm:p-6"
+        style={{
+          borderColor: `${color}44`,
+          background: `linear-gradient(135deg, ${f.accentSoft}, rgba(255,255,255,0.02) 70%)`,
+        }}
+      >
+        {FACTION_ART[commander.factionId] && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 opacity-20 bg-cover bg-center"
+            style={{ backgroundImage: `url(${FACTION_ART[commander.factionId]})` }}
+          />
+        )}
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-3xl sm:h-20 sm:w-20 sm:text-4xl"
+              style={{ background: `${color}22`, color, boxShadow: `0 0 30px ${f.glow}` }}
+            >
+              {FACTION_GLYPH[commander.factionId]}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+                Commander · {commander.title}
+              </p>
+              <h1 className="truncate text-2xl font-black sm:text-3xl" style={{ color }}>
+                {commander.name}
+              </h1>
+              <p className="mt-0.5 truncate text-xs text-foreground/70 sm:text-sm">
+                {f.name} · {f.playstyle}
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={playMatch}
+            className="shrink-0 bg-emerald-400 px-6 py-3 text-sm font-bold text-emerald-950 shadow-[0_0_30px_rgba(52,211,153,0.4)] hover:bg-emerald-300"
+          >
+            ▶ Play vs AI
+          </Button>
+        </div>
+      </div>
+
+      {/* stats row */}
+      <div className="mt-4 grid grid-cols-3 gap-2.5 sm:gap-4">
+        <StatCard label="Wins" value={stats.wins} accent="#34d399" />
+        <StatCard label="Losses" value={stats.losses} accent="#fb7185" />
+        <StatCard label="Win Rate" value={`${winRate}%`} accent="#fbbf24" />
+      </div>
+
+      {/* season pass + shards bar */}
+      <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-3">
+        {/* season tier badge */}
+        <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-amber-400/30 to-fuchsia-400/20">
+          <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Tier</span>
+          <span className="text-lg font-black text-amber-300">{commander.seasonTier}</span>
+        </div>
+        {/* season xp progress */}
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center justify-between text-[10px]">
+            <span className="font-bold uppercase tracking-widest text-muted-foreground">Convergence Season</span>
+            <span className="tabular-nums text-amber-300">{commander.seasonXp % 100}/100 XP</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-black/40">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-amber-400 to-fuchsia-400 transition-all duration-500"
+              style={{ width: `${(commander.seasonXp % 100)}%` }}
+            />
+          </div>
+        </div>
+        {/* shards */}
+        <div className="flex shrink-0 flex-col items-center rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5">
+          <span className="flex items-center gap-1 text-sm font-black tabular-nums text-cyan-300">
+            <span className="text-xs">◈</span>{commander.shards}
+          </span>
+          <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Shards</span>
+        </div>
+      </div>
+
+      {/* match setup: difficulty + active deck */}
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {/* difficulty */}
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            AI Difficulty
+          </p>
+          <div className="flex gap-1.5">
+            {(["easy", "normal", "hard"] as const).map((d) => (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={cn(
+                  "flex-1 rounded-lg border px-2 py-1.5 text-xs font-bold capitalize transition",
+                  difficulty === d
+                    ? "border-emerald-400/40 bg-emerald-400/15 text-emerald-300"
+                    : "border-white/10 bg-white/5 text-foreground/60 hover:bg-white/10"
+                )}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* active deck */}
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Active Deck
+          </p>
+          {decks.length === 0 ? (
+            <button
+              onClick={() => setView("deckbuilder")}
+              className="w-full rounded-lg border border-dashed border-white/15 px-2 py-1.5 text-xs text-foreground/60 transition hover:bg-white/5"
+            >
+              + Build your first deck
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <select
+                value={activeDeckId || ""}
+                onChange={(e) => setActiveDeck(e.target.value || null)}
+                className="min-w-0 flex-1 rounded-lg border border-white/10 bg-background/60 px-2 py-1.5 text-xs text-foreground"
+              >
+                {decks.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} ({d.cardDefIds.length})
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setView("deckbuilder")}
+                className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-foreground/70 hover:bg-white/10"
+              >
+                Edit
+              </button>
+            </div>
+          )}
+          {!activeDeck && decks.length > 0 && (
+            <p className="mt-1 text-[10px] text-amber-300/70">Using default deck — select one above</p>
+          )}
+        </div>
+      </div>
+
+      {/* nav grid: pack / campaigns / collection / operations / deck / history / multiplayer */}
+      <div className="mt-4 grid grid-cols-3 gap-2.5 sm:gap-4">
+        <NavCard
+          icon="✦"
+          label="Open Pack"
+          desc="100 ◈ · 5 cards"
+          onClick={() => setPackOpen(true)}
+          highlight={commander.shards >= 100}
+        />
+        <NavCard
+          icon="📖"
+          label="Campaigns"
+          desc="Story chapters"
+          onClick={() => setView("campaign")}
+        />
+        <NavCard
+          icon="🃏"
+          label="Collection"
+          desc="Cards & crafting"
+          onClick={() => setView("collection")}
+        />
+        <NavCard
+          icon="🪐"
+          label="Domain"
+          desc="Planets & resources"
+          onClick={() => setView("domain")}
+        />
+        <NavCard
+          icon="✦"
+          label="Operations"
+          desc="Live events"
+          onClick={() => setView("operations")}
+        />
+        <NavCard
+          icon="🂠"
+          label="Deck Builder"
+          desc={`${decks.length} saved`}
+          onClick={() => setView("deckbuilder")}
+        />
+        <NavCard
+          icon="📜"
+          label="Match History"
+          desc={`${stats.matches} played`}
+          onClick={() => setView("profile")}
+        />
+        <NavCard
+          icon="⚔"
+          label="Multiplayer"
+          desc="Find a match"
+          onClick={() => setView("multiplayer")}
+        />
+      </div>
+
+      {/* quests panel */}
+      <div className="mt-4">
+        <QuestsPanel />
+      </div>
+
+      {/* how to play compact */}
+      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+        <h2 className="mb-2 text-sm font-bold">Beta Quick Rules</h2>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] text-muted-foreground sm:grid-cols-3">
+          <span><span className="text-emerald-300">◈</span> Resonance ramps +1/turn</span>
+          <span><span className="text-emerald-300">⚔</span> Tap unit, tap again to strike</span>
+          <span><span className="text-amber-300">↟</span> Survive a turn → evolve</span>
+          <span><span className="text-amber-300">✦</span> 20 Influence = Ascension win</span>
+          <span><span className="text-amber-300">✺</span> Turn 5: Convergence Event</span>
+          <span><span className="text-rose-300">♥</span> 0 HP = Conquest loss</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, accent }: { label: string; value: string | number; accent: string }) {
+  return (
+    <div
+      className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-center sm:p-4"
+      style={{ boxShadow: `inset 0 0 24px ${accent}10` }}
+    >
+      <p className="text-2xl font-black tabular-nums sm:text-3xl" style={{ color: accent }}>
+        {value}
+      </p>
+      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground sm:text-[11px]">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function NavCard({
+  icon,
+  label,
+  desc,
+  onClick,
+  muted,
+  highlight,
+}: {
+  icon: string;
+  label: string;
+  desc: string;
+  onClick: () => void;
+  muted?: boolean;
+  highlight?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex flex-col items-center gap-1 rounded-xl border p-3 text-center transition hover:bg-white/[0.05]",
+        highlight
+          ? "border-emerald-400/40 bg-emerald-400/10 shadow-[0_0_20px_rgba(52,211,153,0.2)]"
+          : "border-white/10 bg-white/[0.02]",
+        muted && "opacity-60"
+      )}
+    >
+      <span className="text-2xl">{icon}</span>
+      <span className="text-xs font-bold">{label}</span>
+      <span className="text-[10px] text-muted-foreground">{desc}</span>
+    </button>
+  );
+}

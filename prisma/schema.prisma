@@ -1,0 +1,270 @@
+// Astral Ascendancy — Prisma schema
+// Beta-2: accounts, commander, match history, decks, collection, currency,
+// quests, campaigns, operations, season pass.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  commander     Commander?
+  matches       MatchRecord[]
+  decks         Deck[]
+  cards         UserCard[]
+  quests        UserQuest[]
+  campaignProg  CampaignProgress[]
+  opProg        OperationProgress[]
+  planets       Planet[]
+  developments  DevelopmentProgress[]
+}
+
+// A player's in-game identity (chosen at signup)
+model Commander {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String   // e.g. "Zharvox"
+  title       String   // e.g. "Herald of Dawn"
+  factionId   String   // solari | voidborn | crystalline | reavers | quantum
+
+  wins        Int      @default(0)
+  losses      Int      @default(0)
+  matches     Int      @default(0)
+  influence   Int      @default(0) // total Cosmic Influence earned (Ascension attempts)
+
+  // progression economy
+  shards      Int      @default(0)  // Aether Shards (crafting currency)
+  seasonXp    Int      @default(0)  // current-season XP
+  seasonTier  Int      @default(0)  // current-season tier
+  collectionLevel Int  @default(0)  // rises with unique cards acquired
+  pityCounter Int      @default(0)  // wins since last Rare+ drop (hard pity at 10)
+  premiumPass Boolean  @default(false)
+
+  // infrastructure resources
+  plasma      Int      @default(0)  // ☀ energy from stars (Solari)
+  biomass     Int      @default(0)  // ☣ organic matter (Voidborn)
+  crystals    Int      @default(0)  // ◆ minerals (Crystalline)
+  tritium     Int      @default(0)  // ⚔ fuel from gas giants (Reavers + travel)
+  quantumCores Int     @default(0)  // ⬡ AI/compute (Quantum)
+  lastHarvest DateTime @default(now()) // last time passive resources were collected
+
+  activeDeckId String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MatchRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commanderName String
+  factionId   String
+  enemyName   String
+  enemyFactionId String
+  result      String   // "win" | "loss"
+  turns       Int
+  playerHpLeft Int
+  enemyHpLeft  Int
+  mode        String   @default("conquest") // conquest | ascension | multiplayer | campaign
+  difficulty  String   @default("normal")   // easy | normal | hard
+  playedAt    DateTime @default(now())
+
+  // rewards granted for this match (for display)
+  dropCardDefId String?
+  shardsEarned  Int     @default(0)
+  seasonXpEarned Int    @default(0)
+}
+
+model Deck {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  factionId   String
+  cardDefIds  String   // JSON array of defId strings
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ---------- Collection ----------
+// One row per unique card def the user owns. `count` = copies.
+model UserCard {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defId       String   // references CARD_DEFS defId
+  count       Int      @default(1)
+  source      String   @default("drop") // drop | craft | quest | campaign | operation | starter
+  acquiredAt  DateTime @default(now())
+
+  @@unique([userId, defId])
+  @@index([userId])
+}
+
+// ---------- Quests ----------
+model Quest {
+  id          String   @id @default(cuid())
+  kind        String   // "daily" | "weekly" | "story"
+  type        String   // quest trigger type: win | deploy | cast | faction_win | capture | campaign
+  target      Int      // numeric goal
+  title       String
+  description String
+  rewardShards Int     @default(0)
+  rewardCardDefId String? // optional card reward
+  rewardPackRarity String? // optional pack rarity
+  factionId   String?  // optional faction filter
+  createdAt   DateTime @default(now())
+
+  userQuests  UserQuest[]
+}
+
+model UserQuest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questId     String
+  quest       Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  progress    Int      @default(0)
+  completed   Boolean  @default(false)
+  claimed     Boolean  @default(false)
+  assignedAt  DateTime @default(now())
+  expiresAt   DateTime?  // null = no expiry (story quests)
+
+  @@unique([userId, questId, assignedAt])
+  @@index([userId])
+}
+
+// ---------- Campaigns (Story) ----------
+model Campaign {
+  id          String   @id @default(cuid())
+  factionId   String
+  chapter     Int      // 1..5
+  title       String
+  intro       String   // narrative intro shown before the match
+  outro       String   // narrative outro shown after victory
+  enemyName   String
+  enemyFactionId String
+  enemyDeckIds String  // JSON array of defIds for the enemy
+  enemyHp     Int      @default(12)
+  rewardCardDefIds String // JSON array of defIds granted on completion
+  rewardShards Int     @default(0)
+  rewardQuestId String? // optional quest to auto-complete
+  createdAt   DateTime @default(now())
+
+  progress    CampaignProgress[]
+
+  @@unique([factionId, chapter])
+}
+
+model CampaignProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+
+  @@unique([userId, campaignId])
+  @@index([userId])
+}
+
+// ---------- Operations (limited-time events: Rescue / Bounty) ----------
+model Operation {
+  id          String   @id @default(cuid())
+  type        String   // "rescue" | "bounty"
+  name        String
+  lore        String
+  target      Int      // numeric goal (e.g. wins needed)
+  factionId   String?
+  rewardCardDefIds String // JSON array — the "captured/rescued" cards
+  rewardShards Int     @default(0)
+  rewardCommanderTitle String? // flavor title granted
+  startsAt    DateTime @default(now())
+  endsAt      DateTime
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  progress    OperationProgress[]
+}
+
+model OperationProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  operationId String
+  operation   Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  progress    Int      @default(0)
+  completed   Boolean  @default(false)
+  claimed     Boolean  @default(false)
+  joinedAt    DateTime @default(now())
+
+  @@unique([userId, operationId])
+  @@index([userId])
+}
+
+// ---------- Infrastructure: Planets & Structures ----------
+// A player owns planets in their sector. Each planet can host one structure.
+model Planet {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String   // e.g. "Vrellis Prime"
+  planetType  String   // star | organic | mineral | gas | anomaly | barren
+  sector      String   @default("home") // home | conquered sector name
+  slot        Int      // position in sector (0-5)
+  structureType String? // solar_harvester | biomass_farm | crystal_mine | gas_refinery | quantum_array | null
+  structureLevel Int   @default(0) // 0 = no structure, 1-5 = built levels
+  lastCollect DateTime @default(now())
+  claimedAt   DateTime @default(now())
+  sourceCardDefId String? // which planet card was used to claim this (null = starter)
+
+  // crew assignment (one crew card per planet)
+  crewCardDefId String? // defId of the assigned crew card
+  crewAssignedAt DateTime?
+
+  @@index([userId])
+}
+
+// ---------- Developments (tech tree, activated from cards) ----------
+model DevelopmentProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  devCardDefId String  // the development card defId
+  activatedAt DateTime @default(now())
+
+  @@unique([userId, devCardDefId])
+  @@index([userId])
+}
+
+// Structure definitions (static, not per-user) — stored as a config table
+// so we can query costs/rates without hardcoding
+model StructureDef {
+  id          String   @id @default(cuid())
+  type        String   @unique // solar_harvester | biomass_farm | crystal_mine | gas_refinery | quantum_array
+  name        String
+  glyph       String
+  resourceType String  // plasma | biomass | crystals | tritium | quantumCores
+  description String
+  baseRate    Int      // resource per hour at level 1
+  baseCostShards Int   // cost to build (level 0 → 1)
+  baseCostResource Int // cost in same resource type to build
+  createdAt   DateTime @default(now())
+}
