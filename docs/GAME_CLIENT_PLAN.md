@@ -67,6 +67,7 @@ Before implementation, keep the creative target in these docs:
 - `docs/08_RARITY_PACKS_AND_COMBINE.md`
 - `docs/09_RESOURCE_COSTING_AND_CARD_VALUE.md`
 - `docs/11_SET_001_CARD_EXPANSION.md`
+- `docs/12_5X5_ENGINE_IMPLEMENTATION.md`
 
 ## Asset Pipeline
 
