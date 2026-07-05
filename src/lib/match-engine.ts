@@ -495,6 +495,9 @@ export type DeckData = {
   factionId: string;
   cardDefIds: string[];
   isActive: boolean;
+  powerScore?: number;
+  powerTier?: string;
+  format?: string;
 };
 
 // ---------- create a new match ----------

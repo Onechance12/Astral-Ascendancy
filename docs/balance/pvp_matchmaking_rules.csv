@@ -1,0 +1,6 @@
+queue_type,tier_rule,rating_window_start,rating_window_expansion,deck_power_gap,new_player_protection,rank_impact,reward_profile
+ranked,Exact tier only,120,40 per 30 seconds,Same tier required,Strict for first 20 PvP matches,Full,Rank points mastery XP drops tribe contribution
+unranked,Same tier preferred adjacent tier optional,300,100 per 20 seconds,Max 35 percent score gap,Moderate for first 20 PvP matches,None,Normal drops mastery XP reduced tribe contribution
+friendly,Chosen by invite sender,Unlimited,None,Chosen rule set,None,None,Minimal anti-farm rewards
+training,Player selected,None,None,None,None,None,Reduced mastery XP no economy abuse
+event,Format-defined,Format-defined,Format-defined,Format-defined,Format-defined,Event-specific,Event rewards

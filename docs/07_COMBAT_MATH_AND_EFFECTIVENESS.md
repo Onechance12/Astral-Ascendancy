@@ -56,6 +56,9 @@ Initial balance tables live in:
 - `docs/balance/set004_rpg_foundations.csv`
 - `docs/balance/set004_resource_costs.csv`
 - `docs/balance/rpg_progression_tracks.csv`
+- `docs/balance/pvp_deck_tiers.csv`
+- `docs/balance/pvp_rank_ladder.csv`
+- `docs/balance/pvp_matchmaking_rules.csv`
 
 These are design tables first. Later, implementation can import the same data or translate it into versioned game data.
 

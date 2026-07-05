@@ -1,0 +1,8 @@
+rank_id,display_name,min_rating,max_rating,division_count,season_reward_theme,matchmaking_note
+bronze_orbit,Bronze Orbit,0,999,5,starter packs and shards,Wide rating protection for new players
+silver_orbit,Silver Orbit,1000,1399,5,shards and common cosmetics,Normal expansion window
+gold_orbit,Gold Orbit,1400,1799,5,rare cosmetic and pack rewards,Core active ladder
+platinum_constellation,Platinum Constellation,1800,2199,5,holo cosmetics and relic fragments,Narrower expansion window
+diamond_constellation,Diamond Constellation,2200,2599,5,mythic cosmetic track,Prioritize rating quality
+ascendant,Ascendant,2600,3199,3,animated banners and titles,High-skill tier-specific ladder
+singularity,Singularity,3200,999999,1,seasonal chase cosmetics,Top ladder placement only

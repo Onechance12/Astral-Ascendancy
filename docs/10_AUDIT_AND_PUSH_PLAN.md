@@ -49,6 +49,7 @@ Design docs:
 - `docs/14_SCIENCE_ENGINEERING_PROGRESSION.md`
 - `docs/15_RPG_GAME_SYSTEMS_AUDIT.md`
 - `docs/16_SET_004_RPG_FOUNDATIONS.md`
+- `docs/17_PVP_RANKED_COMMUNITY_SYSTEMS.md`
 
 Balance sheets:
 
@@ -77,6 +78,9 @@ Balance sheets:
 - `docs/balance/set004_rpg_foundations.csv`
 - `docs/balance/set004_resource_costs.csv`
 - `docs/balance/rpg_progression_tracks.csv`
+- `docs/balance/pvp_deck_tiers.csv`
+- `docs/balance/pvp_rank_ladder.csv`
+- `docs/balance/pvp_matchmaking_rules.csv`
 
 Updated index docs:
 
@@ -94,6 +98,7 @@ Updated index docs:
 - Every alpha card has a resource-cost/value row.
 - RPG progression now has an explicit audit across battle, worlds, commander levels, card mastery, relics, skills, evolutions, and PvP fairness.
 - Set 004 seeds the catalog with non-battle-ready RPG foundation cards.
+- PvP now has a ranked/unranked/friendly/event plan where deck tiers organize progression power and ranks measure skill inside each bracket.
 - The design protects free-to-play trust by making chase cards craftable/earnable and avoiding paid-only power.
 
 ## Important Gaps Before Implementation
@@ -129,6 +134,10 @@ These should be resolved before large code work:
 9. RPG progression needs implementation scaffolding.
    - Set 004 exists as design/catalog data.
    - The engine still needs field-test events, mastery records, world XP, commander XP, relic slots, evolution unlocks, and PvP normalization rules before these cards become battle-ready.
+
+10. PvP needs live service work.
+   - Deck power, ranks, queues, friends, and tribes now have scaffolding.
+   - Real-time opponent pairing, battle sync, server-authoritative result validation, and anti-abuse checks are still future work.
 
 ## Recommended Next Commits
 

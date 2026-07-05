@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useGame } from "@/store/game-store";
 import { FACTIONS } from "@/lib/game-data";
 import { CARD_DEFS, PLAYABLE_CARD_DEFS } from "@/lib/match-engine";
+import { analyzeDeckPower } from "@/lib/pvp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -33,6 +34,7 @@ export default function DeckBuilder() {
   const [name, setName] = useState("My Deck");
   const [factionId, setFactionId] = useState(commander?.factionId || "solari");
   const [selected, setSelected] = useState<string[]>([]);
+  const selectedPower = useMemo(() => analyzeDeckPower(selected), [selected]);
 
   if (!commander) return null;
 
@@ -158,6 +160,9 @@ export default function DeckBuilder() {
           )}
         >
           {selected.length}/{MAX_CARDS} cards (min {MIN_CARDS})
+        </span>
+        <span className="rounded-full bg-cyan-400/15 px-2.5 py-1 text-xs font-bold text-cyan-300">
+          {selectedPower.tierName} · {selectedPower.score} power
         </span>
         <div className="ml-auto flex gap-1.5">
           {editingId && (

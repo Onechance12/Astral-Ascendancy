@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { analyzeDeckPower } from "@/lib/pvp";
 
 // PATCH /api/decks/[id] — update deck (rename, cards) or set active
 // DELETE /api/decks/[id] — delete deck
@@ -19,6 +20,8 @@ export async function PATCH(
   if (!deck || deck.userId !== session.user.id) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
+  const nextCardDefIds = Array.isArray(body.cardDefIds) ? body.cardDefIds : JSON.parse(deck.cardDefIds);
+  const power = analyzeDeckPower(nextCardDefIds);
 
   // activating a deck: deactivate all others first
   if (body.isActive === true) {
@@ -32,7 +35,10 @@ export async function PATCH(
     where: { id },
     data: {
       name: typeof body.name === "string" ? body.name.trim().slice(0, 40) : undefined,
-      cardDefIds: Array.isArray(body.cardDefIds) ? JSON.stringify(body.cardDefIds) : undefined,
+      cardDefIds: Array.isArray(body.cardDefIds) ? JSON.stringify(nextCardDefIds) : undefined,
+      powerScore: power.score,
+      powerTier: power.tier,
+      powerVersion: power.version,
       isActive: typeof body.isActive === "boolean" ? body.isActive : undefined,
     },
   });
@@ -52,6 +58,9 @@ export async function PATCH(
       factionId: updated.factionId,
       cardDefIds: JSON.parse(updated.cardDefIds),
       isActive: updated.isActive,
+      format: updated.format,
+      powerScore: updated.powerScore,
+      powerTier: updated.powerTier,
     },
   });
 }

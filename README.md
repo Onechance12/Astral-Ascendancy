@@ -45,6 +45,7 @@ Design-first direction:
 - Define rarity, pack reveal, crafting, duplicate protection, and card combine rules before monetization work
 - Define Resonance, Affinity, materials, Influence, world costs, and per-card value scores before implementation
 - Define the RPG progression model for commander levels, card mastery, world levels, science, engineering, relics, skills, and evolutions before making those systems battle-ready
+- Define PvP as ranked/unranked/friendly/event queues where deck tiers organize progression power instead of flattening the RPG systems
 
 First implementation milestone after design approval:
 

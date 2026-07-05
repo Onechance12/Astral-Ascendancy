@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { analyzeDeckPower } from "@/lib/pvp";
 
 // GET /api/decks — all decks for the logged-in user
 export async function GET() {
@@ -20,6 +21,9 @@ export async function GET() {
       factionId: d.factionId,
       cardDefIds: JSON.parse(d.cardDefIds),
       isActive: d.isActive,
+      format: d.format,
+      powerScore: d.powerScore,
+      powerTier: d.powerTier,
       createdAt: d.createdAt,
       updatedAt: d.updatedAt,
     })),
@@ -45,6 +49,7 @@ export async function POST(req: NextRequest) {
   if (cardDefIds.length < 10 || cardDefIds.length > 20) {
     return NextResponse.json({ error: "deck must be 10-20 cards" }, { status: 400 });
   }
+  const power = analyzeDeckPower(cardDefIds);
 
   const deck = await db.deck.create({
     data: {
@@ -52,6 +57,9 @@ export async function POST(req: NextRequest) {
       name: name.trim().slice(0, 40),
       factionId,
       cardDefIds: JSON.stringify(cardDefIds),
+      powerScore: power.score,
+      powerTier: power.tier,
+      powerVersion: power.version,
       isActive: false,
     },
   });
@@ -63,6 +71,9 @@ export async function POST(req: NextRequest) {
       factionId: deck.factionId,
       cardDefIds,
       isActive: deck.isActive,
+      format: deck.format,
+      powerScore: deck.powerScore,
+      powerTier: deck.powerTier,
     },
   });
 }

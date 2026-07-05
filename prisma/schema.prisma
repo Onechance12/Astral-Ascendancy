@@ -28,6 +28,16 @@ model User {
   opProg        OperationProgress[]
   planets       Planet[]
   developments  DevelopmentProgress[]
+  pvpRanks      PvpRank[]
+  pvpQueue      PvpQueueEntry[]
+  pvpMatchesAsA PvpMatch[] @relation("PvpMatchPlayerA")
+  pvpMatchesAsB PvpMatch[] @relation("PvpMatchPlayerB")
+  sentInvites   PvpMatchInvite[] @relation("InviteSender")
+  receivedInvites PvpMatchInvite[] @relation("InviteRecipient")
+  friendRequestsSent Friend[] @relation("FriendRequester")
+  friendRequestsReceived Friend[] @relation("FriendAddressee")
+  foundedTribes Tribe[] @relation("TribeFounder")
+  tribeMemberships TribeMember[]
 }
 
 // A player's in-game identity (chosen at signup)
@@ -96,10 +106,174 @@ model Deck {
   factionId   String
   cardDefIds  String   // JSON array of defId strings
   isActive    Boolean  @default(false)
+  format      String   @default("standard") // standard | event | campaign | open_war
+  powerScore  Int      @default(0)
+  powerTier   String   @default("starter") // starter | skirmish | veteran | ascendant | mythic | open_war
+  powerVersion String  @default("pvp-v1")
+  pvpLocked   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([userId])
+  @@index([userId, powerTier])
+}
+
+// ---------- PvP ----------
+model PvpRank {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  season      String   @default("alpha")
+  queueType   String   @default("ranked") // ranked | event
+  tier        String   // starter | skirmish | veteran | ascendant | mythic | open_war
+  rankName    String   @default("Bronze Orbit")
+  division    Int      @default(5)
+  rating      Int      @default(1000)
+  peakRating  Int      @default(1000)
+  wins        Int      @default(0)
+  losses      Int      @default(0)
+  streak      Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, season, queueType, tier])
+  @@index([tier, rating])
+}
+
+model PvpQueueEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deckId      String
+  queueType   String   // ranked | unranked | event
+  tier        String
+  powerScore  Int
+  rating      Int      @default(1000)
+  status      String   @default("queued") // queued | matched | canceled | expired
+  matchId     String?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+  matchedAt   DateTime?
+
+  @@index([queueType, tier, status, rating])
+  @@index([userId, status])
+}
+
+model PvpMatch {
+  id          String   @id @default(cuid())
+  season      String   @default("alpha")
+  queueType   String   // ranked | unranked | friendly | event
+  tier        String
+  status      String   @default("created") // created | active | reported | finalized | void
+  playerAId   String
+  playerA     User     @relation("PvpMatchPlayerA", fields: [playerAId], references: [id], onDelete: Cascade)
+  playerBId   String
+  playerB     User     @relation("PvpMatchPlayerB", fields: [playerBId], references: [id], onDelete: Cascade)
+  playerADeckId String
+  playerBDeckId String
+  playerAPower Int
+  playerBPower Int
+  playerARatingBefore Int @default(1000)
+  playerBRatingBefore Int @default(1000)
+  playerARatingAfter  Int?
+  playerBRatingAfter  Int?
+  winnerUserId String?
+  resultReason String?
+  createdAt   DateTime @default(now())
+  startedAt   DateTime?
+  endedAt     DateTime?
+
+  @@index([queueType, tier, status])
+  @@index([playerAId, createdAt])
+  @@index([playerBId, createdAt])
+}
+
+model PvpMatchInvite {
+  id          String   @id @default(cuid())
+  senderId    String
+  sender      User     @relation("InviteSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User     @relation("InviteRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  deckId      String?
+  ruleSet     String   @default("tier_cap") // open_power | tier_cap | starter | draft | experimental
+  tierCap     String?
+  status      String   @default("pending") // pending | accepted | declined | canceled | expired
+  message     String?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+  respondedAt DateTime?
+
+  @@index([recipientId, status])
+  @@index([senderId, status])
+}
+
+// ---------- Friends And Tribes ----------
+model Friend {
+  id          String   @id @default(cuid())
+  requesterId String
+  requester   User     @relation("FriendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addresseeId String
+  addressee   User     @relation("FriendAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  status      String   @default("pending") // pending | accepted | declined | blocked
+  createdAt   DateTime @default(now())
+  acceptedAt  DateTime?
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@index([requesterId, status])
+}
+
+model Tribe {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  emblemGlyph String   @default("✦")
+  factionBanner String?
+  privacy     String   @default("invite") // open | invite | closed
+  founderId   String
+  founder     User     @relation("TribeFounder", fields: [founderId], references: [id], onDelete: Cascade)
+  memberLimit Int      @default(50)
+  xp          Int      @default(0)
+  influence   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     TribeMember[]
+  missions    TribeMission[]
+
+  @@index([founderId])
+}
+
+model TribeMember {
+  id          String   @id @default(cuid())
+  tribeId     String
+  tribe       Tribe    @relation(fields: [tribeId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String   @default("member") // founder | officer | member
+  contribution Int     @default(0)
+  joinedAt    DateTime @default(now())
+
+  @@unique([tribeId, userId])
+  @@index([userId])
+}
+
+model TribeMission {
+  id          String   @id @default(cuid())
+  tribeId     String
+  tribe       Tribe    @relation(fields: [tribeId], references: [id], onDelete: Cascade)
+  season      String   @default("alpha")
+  type        String   // ranked_wins | influence | event_boss | resource_drive
+  title       String
+  target      Int
+  progress    Int      @default(0)
+  reward      String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  endsAt      DateTime?
+
+  @@index([tribeId, active])
 }
 
 // ---------- Collection ----------
