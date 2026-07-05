@@ -38,6 +38,8 @@ model User {
   friendRequestsReceived Friend[] @relation("FriendAddressee")
   foundedTribes Tribe[] @relation("TribeFounder")
   tribeMemberships TribeMember[]
+  assignments   Assignment[]
+  deckLicenses  DeckLicense[]
 }
 
 // A player's in-game identity (chosen at signup)
@@ -116,6 +118,49 @@ model Deck {
 
   @@index([userId])
   @@index([userId, powerTier])
+}
+
+// ---------- Beta Live-Game Loop ----------
+model Assignment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // resource | study | rescue | training | defense | expedition | project
+  title       String
+  status      String   @default("active") // active | ready | claimed | canceled
+  assetType   String   // crew | card | deck | world | project
+  cardDefId   String?
+  deckId      String?
+  planetId    String?
+  description String?
+  rewardsJson String   @default("{}")
+  startedAt   DateTime @default(now())
+  completesAt DateTime
+  claimedAt   DateTime?
+  canceledAt  DateTime?
+
+  @@index([userId, status, completesAt])
+  @@index([userId, deckId, status])
+  @@index([userId, cardDefId, status])
+  @@index([userId, planetId, status])
+}
+
+model DeckLicense {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  licenseId   String   // starter | skirmish | veteran | ascendant | mythic | open_war
+  deckTier    String
+  unlocked    Boolean  @default(false)
+  progress    Int      @default(0)
+  target      Int      @default(1)
+  unlockedAt  DateTime?
+  rewardClaimed Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, licenseId])
+  @@index([userId, deckTier])
 }
 
 // ---------- PvP ----------

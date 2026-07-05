@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { isDeckBusy, listDeckLicenses } from "@/lib/beta-progression";
 import { analyzeDeckPower, type PvpDeckTier, type PvpQueueType, validateDeckForQueue } from "@/lib/pvp";
 
 export async function POST(req: NextRequest) {
@@ -23,12 +24,21 @@ export async function POST(req: NextRequest) {
   if (!deck || deck.userId !== session.user.id) {
     return NextResponse.json({ error: "deck not found" }, { status: 404 });
   }
+  const busyDeck = await isDeckBusy(session.user.id, deck.id);
+  if (busyDeck) {
+    return NextResponse.json({ error: `deck is assigned to ${busyDeck.title}` }, { status: 409 });
+  }
 
   const cardDefIds = JSON.parse(deck.cardDefIds) as string[];
   const power = analyzeDeckPower(cardDefIds);
   const validation = validateDeckForQueue(cardDefIds, queueType, requestedTier ?? power.tier);
   if (!validation.ok) {
     return NextResponse.json({ error: "deck is not legal for this queue", validation, power }, { status: 400 });
+  }
+  const licenses = await listDeckLicenses(session.user.id);
+  const license = licenses.find((entry) => entry.deckTier === validation.requestedTier);
+  if (queueType === "ranked" && !license?.unlocked) {
+    return NextResponse.json({ error: `${license?.displayName ?? validation.requestedTier} is locked`, validation, power }, { status: 403 });
   }
 
   await db.deck.update({

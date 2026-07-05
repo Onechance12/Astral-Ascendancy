@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useGame } from "@/store/game-store";
 import { FACTIONS } from "@/lib/game-data";
-import { CARD_DEFS } from "@/lib/match-engine";
 import { Button } from "@/components/ui/button";
 import QuestsPanel from "@/components/cosmic/quests-panel";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const FACTION_COLOR: Record<string, string> = Object.fromEntries(
@@ -17,6 +17,30 @@ const FACTION_GLYPH: Record<string, string> = Object.fromEntries(
 const FACTION_ART: Record<string, string> = Object.fromEntries(
   FACTIONS.map((f) => [f.id, f.art ?? ""])
 );
+
+type Assignment = {
+  id: string;
+  type: string;
+  title: string;
+  status: "active" | "ready";
+  assetType: string;
+  deckId: string | null;
+  cardDefId: string | null;
+  planetId: string | null;
+  description: string | null;
+  rewards: Record<string, unknown>;
+  completesAt: string;
+};
+
+type DeckLicense = {
+  licenseId: string;
+  displayName: string;
+  deckTier: string;
+  unlocked: boolean;
+  progress: number;
+  target: number;
+  reward: string;
+};
 
 export default function GameHub() {
   const commander = useGame((s) => s.commander);
@@ -31,13 +55,79 @@ export default function GameHub() {
   const setDifficulty = useGame((s) => s.setDifficulty);
   const setActiveDeck = useGame((s) => s.setActiveDeck);
   const setPackOpen = useGame((s) => s.setPackOpen);
+  const hydrateSession = useGame((s) => s.hydrateSession);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [licenses, setLicenses] = useState<DeckLicense[]>([]);
+  const [assignmentBusy, setAssignmentBusy] = useState<string | null>(null);
+  const activeDeck = decks.find((d) => d.id === activeDeckId) ?? decks[0];
+
+  const loadBetaStatus = useCallback(() => {
+    void Promise.all([
+      fetch("/api/assignments").then((r) => (r.ok ? r.json() : { assignments: [] })),
+      fetch("/api/deck-licenses").then((r) => (r.ok ? r.json() : { licenses: [] })),
+    ]).then(([assignmentData, licenseData]) => {
+      setAssignments(assignmentData.assignments || []);
+      setLicenses(licenseData.licenses || []);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!commander) return;
+    loadBetaStatus();
+    const interval = setInterval(loadBetaStatus, 15000);
+    return () => clearInterval(interval);
+  }, [commander, loadBetaStatus]);
 
   if (!commander) return null;
 
   const f = FACTIONS.find((x) => x.id === commander.factionId)!;
   const color = FACTION_COLOR[commander.factionId];
   const winRate = stats.matches > 0 ? Math.round((stats.wins / stats.matches) * 100) : 0;
-  const activeDeck = decks.find((d) => d.id === activeDeckId);
+  const activeDeckAssignment = activeDeck
+    ? assignments.find((assignment) => assignment.deckId === activeDeck.id && (assignment.status === "active" || assignment.status === "ready"))
+    : null;
+  const canPlayActiveDeck = !activeDeckAssignment;
+
+  const startAssignment = async (type: "resource" | "study" | "rescue") => {
+    if (type === "rescue" && !activeDeck) {
+      toast.error("Build or activate a deck before sending a rescue operation");
+      setView("deckbuilder");
+      return;
+    }
+    setAssignmentBusy(type);
+    try {
+      const res = await fetch("/api/assignments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, deckId: type === "rescue" ? activeDeck?.id : undefined }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(data.error || "Could not start assignment");
+        return;
+      }
+      toast.success(`${data.assignment?.title || "Assignment"} started`);
+      loadBetaStatus();
+    } finally {
+      setAssignmentBusy(null);
+    }
+  };
+
+  const claimAssignment = async (assignmentId: string) => {
+    const res = await fetch("/api/assignments", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ assignmentId, action: "claim" }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(data.error || "Assignment is not ready");
+      return;
+    }
+    toast.success("Assignment rewards claimed");
+    hydrateSession();
+    loadBetaStatus();
+  };
 
   return (
     <div className="mx-auto w-full max-w-5xl px-3 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:pb-6 sm:pt-[max(1.5rem,env(safe-area-inset-top))]">
@@ -96,12 +186,18 @@ export default function GameHub() {
             </div>
           </div>
           <Button
-            onClick={playMatch}
+            onClick={canPlayActiveDeck ? playMatch : undefined}
+            disabled={!canPlayActiveDeck}
             className="shrink-0 bg-emerald-400 px-6 py-3 text-sm font-bold text-emerald-950 shadow-[0_0_30px_rgba(52,211,153,0.4)] hover:bg-emerald-300"
           >
-            ▶ Play vs AI
+            {canPlayActiveDeck ? "▶ Play vs AI" : "Deck Away"}
           </Button>
         </div>
+        {activeDeckAssignment && (
+          <p className="relative mt-3 rounded-lg border border-amber-300/20 bg-amber-300/10 px-3 py-2 text-xs font-bold text-amber-200">
+            {activeDeck?.name} is assigned to {activeDeckAssignment.title}. Returns {formatTimeLeft(activeDeckAssignment.completesAt)}.
+          </p>
+        )}
       </div>
 
       {/* stats row */}
@@ -138,6 +234,97 @@ export default function GameHub() {
           </span>
           <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Shards</span>
         </div>
+      </div>
+
+      {/* beta live loop */}
+      <div className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
+        <section className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">Assignments</p>
+              <h2 className="text-sm font-black text-foreground">Live Galaxy Clock</h2>
+            </div>
+            <span className="rounded-md bg-white/10 px-2 py-1 text-[10px] font-bold text-foreground/60">
+              {assignments.length} active
+            </span>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3">
+            <AssignmentAction
+              label="Gather"
+              desc="30m resource run"
+              color="#34d399"
+              disabled={assignmentBusy !== null}
+              onClick={() => startAssignment("resource")}
+            />
+            <AssignmentAction
+              label="Study"
+              desc="45m world survey"
+              color="#38bdf8"
+              disabled={assignmentBusy !== null}
+              onClick={() => startAssignment("study")}
+            />
+            <AssignmentAction
+              label="Rescue"
+              desc="60m deck away"
+              color="#fbbf24"
+              disabled={assignmentBusy !== null || !activeDeck || Boolean(activeDeckAssignment)}
+              onClick={() => startAssignment("rescue")}
+            />
+          </div>
+
+          <div className="mt-3 space-y-2">
+            {assignments.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-white/10 p-3 text-xs text-muted-foreground">
+                No assignments running. Send a crew, study a world, or deploy a deck so the galaxy keeps moving while you are away.
+              </p>
+            ) : (
+              assignments.slice(0, 3).map((assignment) => (
+                <div key={assignment.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold text-foreground">{assignment.title}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {assignment.assetType} · {assignment.status === "ready" ? "ready to claim" : formatTimeLeft(assignment.completesAt)}
+                    </p>
+                  </div>
+                  {assignment.status === "ready" ? (
+                    <Button size="sm" onClick={() => claimAssignment(assignment.id)} className="h-7 bg-emerald-400 px-2 text-[10px] font-bold text-emerald-950 hover:bg-emerald-300">
+                      Claim
+                    </Button>
+                  ) : (
+                    <span className="shrink-0 rounded bg-white/10 px-2 py-1 text-[10px] font-bold text-muted-foreground">
+                      Running
+                    </span>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">Deck Licenses</p>
+          <h2 className="mb-3 text-sm font-black text-foreground">Progressive Battle Tiers</h2>
+          <div className="space-y-2">
+            {licenses.slice(0, 4).map((license) => {
+              const pct = Math.min(100, (license.progress / Math.max(1, license.target)) * 100);
+              return (
+                <div key={license.licenseId} className="rounded-lg border border-white/10 bg-black/20 p-2">
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <p className="text-xs font-bold text-foreground">{license.displayName}</p>
+                    <span className={cn("rounded px-1.5 py-0.5 text-[9px] font-bold", license.unlocked ? "bg-emerald-400 text-emerald-950" : "bg-white/10 text-muted-foreground")}>
+                      {license.unlocked ? "Unlocked" : `${license.progress}/${license.target}`}
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-full rounded-full bg-emerald-300" style={{ width: `${pct}%` }} />
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground">{license.reward}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       </div>
 
       {/* match setup: difficulty + active deck */}
@@ -324,4 +511,39 @@ function NavCard({
       <span className="text-[10px] text-muted-foreground">{desc}</span>
     </button>
   );
+}
+
+function AssignmentAction({
+  label,
+  desc,
+  color,
+  disabled,
+  onClick,
+}: {
+  label: string;
+  desc: string;
+  color: string;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="rounded-lg border border-white/10 bg-black/25 px-3 py-2 text-left transition hover:border-white/25 disabled:cursor-not-allowed disabled:opacity-45"
+      style={{ boxShadow: `inset 0 0 18px ${color}12` }}
+    >
+      <p className="text-xs font-black" style={{ color }}>{label}</p>
+      <p className="mt-0.5 text-[10px] text-muted-foreground">{desc}</p>
+    </button>
+  );
+}
+
+function formatTimeLeft(iso: string) {
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return "ready now";
+  const hours = Math.floor(ms / 3600000);
+  const minutes = Math.ceil((ms % 3600000) / 60000);
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
