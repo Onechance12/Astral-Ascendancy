@@ -45,6 +45,8 @@ type DeckLicense = {
 type BriefingAction = {
   kind:
     | "claim_assignment"
+    | "claim_reward"
+    | "claim_daily_reward"
     | "start_assignment"
     | "open_domain"
     | "open_deckbuilder"
@@ -55,6 +57,7 @@ type BriefingAction = {
     | "open_operations";
   label: string;
   assignmentId?: string;
+  rewardId?: string;
   assignmentType?: "resource" | "study" | "rescue";
   view?: string;
 };
@@ -87,6 +90,9 @@ type DailyBriefing = {
     deckCount: number;
     nearestLicense: { displayName: string; progress: number; target: number; unlocked: boolean } | null;
     claimableQuests: number;
+    readyRewards: number;
+    currentStreak: number;
+    canClaimDaily: boolean;
   };
   recommendedAction: BriefingItem;
   secondaryActions: BriefingItem[];
@@ -189,9 +195,54 @@ export default function GameHub() {
     loadBetaStatus();
   };
 
+  const claimReward = async (rewardId: string) => {
+    const res = await fetch(`/api/rewards/${rewardId}/claim`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(data.error || "Reward is not ready");
+      return;
+    }
+    const granted = data.granted || {};
+    const parts = [
+      granted.shards ? `${granted.shards} shards` : null,
+      granted.seasonXp ? `${granted.seasonXp} XP` : null,
+      Array.isArray(granted.cards) && granted.cards.length ? `${granted.cards.length} card${granted.cards.length === 1 ? "" : "s"}` : null,
+    ].filter(Boolean);
+    toast.success(parts.length ? `Reward claimed: ${parts.join(", ")}` : "Reward claimed");
+    hydrateSession();
+    loadBetaStatus();
+  };
+
+  const claimDailyReward = async () => {
+    const res = await fetch("/api/rewards", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "claim_daily" }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(data.error || "Daily signal is not ready");
+      loadBetaStatus();
+      return;
+    }
+    if (data.reward?.id) {
+      await claimReward(data.reward.id);
+      return;
+    }
+    loadBetaStatus();
+  };
+
   const runBriefingAction = (action: BriefingAction) => {
     if (action.kind === "claim_assignment" && action.assignmentId) {
       void claimAssignment(action.assignmentId);
+      return;
+    }
+    if (action.kind === "claim_reward" && action.rewardId) {
+      void claimReward(action.rewardId);
+      return;
+    }
+    if (action.kind === "claim_daily_reward") {
+      void claimDailyReward();
       return;
     }
     if (action.kind === "start_assignment" && action.assignmentType) {
@@ -570,18 +621,19 @@ function CommandBrief({
     >
       <div className="nebula-radial absolute inset-0 opacity-40" />
       <div className="grid-pattern absolute inset-0 opacity-20" />
+      <div className="command-scanline pointer-events-none absolute inset-x-0 top-0 h-20" />
       <div className="relative grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <div className="mb-3 flex items-center gap-3">
             <div
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-2xl"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-2xl command-link-pulse"
               style={{ background: `${color}22`, color, boxShadow: `0 0 24px ${color}55` }}
             >
               {briefing.commander.glyph}
             </div>
             <div className="min-w-0">
               <p className="text-[10px] font-black uppercase tracking-[0.26em] text-muted-foreground">
-                Daily Command Brief
+                Command Link Established
               </p>
               <h2 className="truncate text-lg font-black sm:text-xl" style={{ color }}>
                 {briefing.headline}
@@ -601,7 +653,7 @@ function CommandBrief({
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{briefing.recommendedAction.body}</p>
             <Button
               onClick={() => onAction(briefing.recommendedAction.action)}
-              className="mt-3 h-9 bg-emerald-400 px-4 text-xs font-black text-emerald-950 hover:bg-emerald-300"
+              className="mt-3 h-9 bg-emerald-400 px-4 text-xs font-black text-emerald-950 shadow-[0_0_24px_rgba(52,211,153,0.3)] hover:bg-emerald-300"
             >
               {briefing.recommendedAction.action.label}
             </Button>
@@ -613,6 +665,10 @@ function CommandBrief({
             <BriefMetric label="Ready" value={briefing.summary.readyAssignments} color="#34d399" />
             <BriefMetric label="Timers" value={briefing.summary.activeAssignments} color="#38bdf8" />
             <BriefMetric label="Harvest" value={briefing.summary.pendingResourceTotal} color="#fbbf24" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <BriefMetric label="Rewards" value={briefing.summary.readyRewards} color="#c084fc" />
+            <BriefMetric label="Streak" value={briefing.summary.currentStreak} color="#fb7185" />
           </div>
 
           <div className="grid gap-2 text-xs">

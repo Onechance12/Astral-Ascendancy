@@ -40,6 +40,8 @@ model User {
   tribeMemberships TribeMember[]
   assignments   Assignment[]
   deckLicenses  DeckLicense[]
+  loginStreak   LoginStreak?
+  rewards       RewardInbox[]
 }
 
 // A player's in-game identity (chosen at signup)
@@ -161,6 +163,38 @@ model DeckLicense {
 
   @@unique([userId, licenseId])
   @@index([userId, deckTier])
+}
+
+// ---------- Daily Retention & Reward Inbox ----------
+model LoginStreak {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak  Int      @default(0)
+  longestStreak  Int      @default(0)
+  lastClaimedAt  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model RewardInbox {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceType  String   // daily_login | assignment | quest | operation | pack | campaign | system
+  sourceId    String?
+  title       String
+  description String?
+  rewardJson  String   @default("{}")
+  revealType  String   @default("standard") // standard | daily | pack | rare | mythic | singularity
+  status      String   @default("ready") // ready | claimed | expired
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+  claimedAt   DateTime?
+
+  @@unique([userId, sourceType, sourceId])
+  @@index([userId, status, createdAt])
+  @@index([userId, sourceType, sourceId])
 }
 
 // ---------- PvP ----------

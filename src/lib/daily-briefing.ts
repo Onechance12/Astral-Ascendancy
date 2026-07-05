@@ -3,9 +3,12 @@ import { db } from "@/lib/db";
 import { listAssignments, listDeckLicenses } from "@/lib/beta-progression";
 import { getPendingResources, STRUCTURE_DEFS, structureCost, type ResourceType, type StructureType } from "@/lib/resources";
 import { ensureDailyQuests } from "@/lib/progression";
+import { getRewardCenter } from "@/lib/rewards";
 
 type BriefingActionKind =
   | "claim_assignment"
+  | "claim_reward"
+  | "claim_daily_reward"
   | "start_assignment"
   | "open_domain"
   | "open_deckbuilder"
@@ -19,6 +22,7 @@ export type DailyBriefingAction = {
   kind: BriefingActionKind;
   label: string;
   assignmentId?: string;
+  rewardId?: string;
   assignmentType?: "resource" | "study" | "rescue";
   view?: string;
 };
@@ -57,6 +61,9 @@ export type DailyBriefing = {
       unlocked: boolean;
     } | null;
     claimableQuests: number;
+    readyRewards: number;
+    currentStreak: number;
+    canClaimDaily: boolean;
   };
   recommendedAction: DailyBriefingItem;
   secondaryActions: DailyBriefingItem[];
@@ -169,7 +176,7 @@ const FACTION_BRIEFING: Record<
 export async function buildDailyBriefing(userId: string): Promise<DailyBriefing | null> {
   await ensureDailyQuests(userId);
 
-  const [user, assignments, licenses, pendingResources, pvpRanks] = await Promise.all([
+  const [user, assignments, licenses, pendingResources, pvpRanks, rewardCenter] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
       include: {
@@ -187,6 +194,7 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
     listDeckLicenses(userId),
     getPendingResources(userId),
     db.pvpRank.findMany({ where: { userId }, orderBy: { updatedAt: "desc" } }),
+    getRewardCenter(userId),
   ]);
 
   if (!user?.commander) return null;
@@ -211,6 +219,7 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
   const nearestLicense = licenses.find((license) => !license.unlocked) ?? null;
   const pendingResourceTotal = Object.values(pendingResources).reduce((sum, value) => sum + (value ?? 0), 0);
   const claimableQuests = user.quests.filter((userQuest) => userQuest.completed).length;
+  const readyRewards = rewardCenter.readyRewards;
   const nextQuest = user.quests
     .filter((userQuest) => !userQuest.completed)
     .sort((a, b) => (b.progress / Math.max(1, b.quest.target)) - (a.progress / Math.max(1, a.quest.target)))[0];
@@ -225,6 +234,31 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
   const nextCampaign = await findNextCampaign(userId, commander.factionId);
 
   const recommendations: DailyBriefingItem[] = [];
+
+  if (rewardCenter.streak.canClaimDaily) {
+    const next = rewardCenter.streak.nextDailyReward;
+    recommendations.push({
+      id: "claim-daily-streak",
+      title: `Day ${rewardCenter.streak.nextDailyDay} command signal ready`,
+      body: `Claim today's login reward: ${formatRewardSummary(next)}. Streaks are the daily heartbeat of long-term progression.`,
+      score: 165,
+      priority: "critical",
+      source: "reward_state",
+      action: { kind: "claim_daily_reward", label: "Claim daily" },
+    });
+  }
+
+  for (const reward of readyRewards) {
+    recommendations.push({
+      id: `reward-${reward.id}`,
+      title: reward.title,
+      body: `${reward.description ?? "Reward waiting in command storage."} Claim ${formatRewardSummary(reward.reward)}.`,
+      score: reward.sourceType === "daily_login" ? 155 : 135,
+      priority: reward.revealType === "singularity" || reward.revealType === "mythic" ? "critical" : "high",
+      source: "reward_state",
+      action: { kind: "claim_reward", label: "Claim reward", rewardId: reward.id },
+    });
+  }
 
   for (const assignment of readyAssignments) {
     recommendations.push({
@@ -432,6 +466,9 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
           }
         : null,
       claimableQuests,
+      readyRewards: readyRewards.length,
+      currentStreak: rewardCenter.streak.current,
+      canClaimDaily: rewardCenter.streak.canClaimDaily,
     },
     recommendedAction,
     secondaryActions,
@@ -445,7 +482,7 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
         ? `${user.planets.length} worlds · ${pendingResourceTotal} pending resources`
         : "No claimed worlds yet",
       progressionState: nearestLicense
-        ? `${nearestLicense.displayName}: ${nearestLicense.progress}/${nearestLicense.target}`
+        ? `${nearestLicense.displayName}: ${nearestLicense.progress}/${nearestLicense.target} · streak ${rewardCenter.streak.current}`
         : "All visible licenses unlocked",
     },
   };
@@ -460,11 +497,29 @@ function findFaction(factionId: string) {
 }
 
 function pickFactionLine(source: string, voice: (typeof FACTION_BRIEFING)[string]) {
+  if (source.includes("reward")) return voice.ready;
   if (source.includes("domain")) return voice.resource;
   if (source.includes("deck") || source.includes("license")) return voice.deck;
   if (source.includes("campaign")) return voice.campaign;
   if (source.includes("assignment")) return voice.assignment;
   return voice.warning;
+}
+
+function formatRewardSummary(reward: {
+  shards?: number;
+  seasonXp?: number;
+  cards?: string[];
+  packRarity?: string;
+  resources?: Partial<Record<ResourceType, number>>;
+}) {
+  const parts: string[] = [];
+  if (reward.shards) parts.push(`${reward.shards} shards`);
+  if (reward.seasonXp) parts.push(`${reward.seasonXp} XP`);
+  if (reward.packRarity) parts.push(`${reward.packRarity}+ signal`);
+  if (reward.cards?.length) parts.push(`${reward.cards.length} card${reward.cards.length === 1 ? "" : "s"}`);
+  const resourceText = reward.resources ? formatResourceBundle(reward.resources) : "";
+  if (resourceText && resourceText !== "Resources are") parts.push(resourceText);
+  return parts.length > 0 ? parts.join(", ") : "stored supplies";
 }
 
 function formatResourceBundle(resources: Partial<Record<ResourceType, number>>) {
