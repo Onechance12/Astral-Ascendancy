@@ -1,0 +1,31 @@
+component,value_points,applies_to,note
+attack,1.00,entity,Each attack point is one value point
+hp,1.00,entity_or_structure,Each HP point is one value point before profile adjustments
+shield_1,1.00,keyword,Prevents one damage and has clear visual value
+guardian,1.00,keyword,Forces tactical targeting
+strike_first,1.00,keyword,Immediate tempo and surprise value
+ranged_2,1.50,keyword,Positioning advantage on 5x5 board
+flying,1.50,keyword,Movement advantage and terrain evasion
+regenerate_1,1.50,keyword,Recurring durability if not removed
+overwhelm,1.00,keyword,Converts board damage into pressure
+blink,1.50,keyword,Movement rule break
+forecast_1,1.00,keyword,Card quality and planning
+spawn_1_1,2.00,effect,Creates board presence
+draw_card,2.00,effect,Card advantage
+scan_sector,0.75,effect,Information and planning
+move_enemy_or_ally,1.50,effect,Positioning swing
+area_damage_1,2.00,effect,Board-wide pressure
+area_damage_2,4.00,effect,Major swing
+purify_sector,1.00,effect,Counterplay against corruption
+terraform_basic,2.00,world,Creates terrain and future economy
+terraform_advanced,3.00,world,Creates stronger terrain and objective pressure
+structure_trigger_small,2.00,structure,Recurring small start or end turn value
+structure_trigger_medium,3.50,structure,Recurring meaningful engine value
+structure_trigger_large,5.00,structure,Recurring high-value engine
+requires_matching_world,-1.00,setup_penalty,Needs board setup
+requires_connected_worlds,-2.00,setup_penalty,Needs multiple-sector setup
+requires_center_control,-2.00,setup_penalty,High risk objective setup
+structure_must_survive,-2.00,setup_penalty,Delayed value and raid risk
+self_damage,-1.00,risk_penalty,Player pays HP or board risk
+delayed_one_turn,-1.00,delay_penalty,Value is not immediate
+one_copy_limit,1.00,rarity_modifier,Higher ceiling acceptable with deck limit

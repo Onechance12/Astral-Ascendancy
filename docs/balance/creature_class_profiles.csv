@@ -1,0 +1,10 @@
+creature_class,default_move,can_fly,can_build,base_armor,area_damage_modifier,terrain_note
+Infantry,1,false,false,0,1.00,Default class with no special terrain rules
+Beast,1,false,false,0,1.00,Often gains bonuses on Organic and Verdant worlds
+Swarm,1,false,false,0,1.15,Takes extra area damage but benefits from numbers
+Drone,1,true,false,0,1.00,Often stronger on Machine worlds and vulnerable to corruption
+Construct,1,false,false,1,0.95,Slow durable body that likes Machine and Mineral worlds
+Titan,0,false,false,2,0.90,Huge body with limited movement and high board impact
+Flyer,2,true,false,0,1.00,Ignores most movement penalties but is vulnerable to ranged counters
+Caster,1,false,false,0,1.00,Low durability with stronger anomaly and world interactions
+Commander,0,false,false,1,0.85,Commanders use special rules and should not be normal board units in alpha

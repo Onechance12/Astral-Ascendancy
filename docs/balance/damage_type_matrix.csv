@@ -1,0 +1,71 @@
+damage_school,defense_profile,multiplier,note
+Radiant,Lightform,0.85,Light resists light-like damage
+Radiant,Flesh,1.00,Neutral biological target
+Radiant,Chitin,1.15,Radiant burns swarm carapace
+Radiant,Machine,1.00,Neutral machine target
+Radiant,LivingArmor,1.00,Neutral living armor target
+Radiant,BloodMetal,0.95,Blood-metal disperses heat slightly
+Radiant,Phase,1.00,Neutral phase target
+Radiant,Crystal,0.85,Crystal refracts Radiant damage
+Radiant,Unarmored,1.10,Unprotected targets suffer
+Radiant,Structure,1.00,Neutral structure target
+Void,Lightform,1.25,Void consumes lightforms
+Void,Flesh,1.15,Void hunger is strong into flesh
+Void,Chitin,1.00,Neutral swarm carapace target
+Void,Machine,0.85,Machine has little to consume
+Void,LivingArmor,1.00,Neutral living armor target
+Void,BloodMetal,1.00,Neutral blood-metal target
+Void,Phase,1.15,Void distorts phase anchors
+Void,Crystal,1.00,Neutral crystal target
+Void,Unarmored,1.10,Unprotected targets suffer
+Void,Structure,0.85,Structures resist consumption
+Tech,Lightform,1.00,Neutral lightform target
+Tech,Flesh,1.00,Neutral flesh target
+Tech,Chitin,0.90,Organic carapace disrupts targeting
+Tech,Machine,1.15,Tech can exploit machine systems
+Tech,LivingArmor,1.00,Neutral living armor target
+Tech,BloodMetal,1.00,Neutral blood-metal target
+Tech,Phase,0.90,Phase is hard to lock
+Tech,Crystal,1.15,Tech harmonics crack crystal
+Tech,Unarmored,1.00,Neutral unarmored target
+Tech,Structure,1.15,Tech is strong into structures
+Bio,Lightform,0.90,Bio struggles against pure energy
+Bio,Flesh,1.15,Bio adapts into flesh
+Bio,Chitin,1.00,Neutral chitin target
+Bio,Machine,0.75,Machine has no biology to infect
+Bio,LivingArmor,1.15,Bio competes with living armor
+Bio,BloodMetal,0.85,Blood-metal resists parasites
+Bio,Phase,1.00,Neutral phase target
+Bio,Crystal,0.90,Bio struggles against mineral bodies
+Bio,Unarmored,1.15,Unprotected targets are vulnerable
+Bio,Structure,0.85,Structures resist biological damage
+Ember,Lightform,1.00,Neutral lightform target
+Ember,Flesh,1.10,Heat burns flesh
+Ember,Chitin,1.15,Heat cracks chitin
+Ember,Machine,1.00,Neutral machine target
+Ember,LivingArmor,1.25,Fire burns living armor
+Ember,BloodMetal,0.85,Blood-metal is forged in heat
+Ember,Phase,0.85,Phase partially ignores heat
+Ember,Crystal,0.90,Crystal disperses heat
+Ember,Unarmored,1.10,Unprotected targets suffer
+Ember,Structure,1.15,Ember damages structures and fortifications
+Astral,Lightform,1.00,Neutral lightform target
+Astral,Flesh,1.00,Neutral flesh target
+Astral,Chitin,0.90,Chitin grounds astral distortions
+Astral,Machine,1.00,Neutral machine target
+Astral,LivingArmor,1.00,Neutral living armor target
+Astral,BloodMetal,0.90,Blood-metal anchors reality
+Astral,Phase,1.25,Astral collapses phase defenses
+Astral,Crystal,1.15,Astral resonates through crystal
+Astral,Unarmored,1.00,Neutral unarmored target
+Astral,Structure,1.00,Neutral structure target
+Kinetic,Lightform,0.75,Physical force passes through lightform
+Kinetic,Flesh,1.00,Neutral flesh target
+Kinetic,Chitin,1.00,Neutral chitin target
+Kinetic,Machine,1.15,Impact damages machinery
+Kinetic,LivingArmor,0.90,Living armor absorbs impact
+Kinetic,BloodMetal,1.00,Neutral blood-metal target
+Kinetic,Phase,0.85,Phase avoids impact
+Kinetic,Crystal,1.00,Neutral crystal target
+Kinetic,Unarmored,1.15,Unprotected targets are vulnerable
+Kinetic,Structure,1.25,Siege impact is strong against structures

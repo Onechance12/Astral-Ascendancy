@@ -1,0 +1,11 @@
+turn,max_resonance,total_resonance_available,expected_hand_seen,expected_play_pattern,resource_pressure_note
+1,1,1,5,one_cost_card_or_setup,First action should be simple
+2,2,3,6,two_cost_or_two_one_costs,Early world can enter here
+3,3,6,7,core_structure_or_rare_setup,First major board identity turn
+4,4,10,8,build_around_or_two_card_turn,Deck strategy becomes visible
+5,5,15,9,holo_or_large_swing,Strong stabilization or pressure
+6,6,21,10,mythic_payoff_or_combo_turn,Major faction fantasy turn
+7,7,28,11,late_combo_or_singularity_setup,Only rare games should hinge here
+8,8,36,12,high_ceiling_turn,Campaign bosses can push here
+9,9,45,13,near_cap_turn,Long match pressure
+10,10,55,14,capstone_turn,Maximum normal resource state

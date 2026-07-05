@@ -1,0 +1,63 @@
+card_id,rarity,card_type,resonance_cost,affinity_requirement,material_cost_type,material_cost_amount,board_requirement,value_score,target_turn,power_band,costing_note
+solari_acolyte,Common,Entity,1,0,None,0,None,4.0,1,fair,Efficient if protected because evolution is delayed
+lightblade_sentinel,Uncommon,Entity,2,1,None,0,None,6.0,2,fair,Strike First plus shield upside needs Solari identity
+dawn_knight,Rare,Entity,3,1,None,0,None,8.5,3,strong,Guardian aura is formation value
+stellar_guardian_aeon,Holo,Entity,5,2,None,0,None,13.0,5,strong,Large defense payoff with Affinity gate
+solar_forge_moon,Rare,World,2,0,None,0,empty_neutral_or_controlled_sector,6.0,2,strong,World cost buys terrain and shield economy
+dawn_spire,Holo,Structure,3,2,Plasma,0,controlled_star_world,9.0,3,strong,Must survive to generate value
+radiant_aegis,Uncommon,Attachment,1,1,None,0,friendly_entity,3.5,1,fair,Cheap protection with Star upside
+dawnbreak,Mythic,Anomaly,5,2,Plasma,1,None,12.5,5,strong,Area damage plus purify has material gate
+void_broodling,Common,Entity,1,0,None,0,None,3.5,1,fair,Death resource makes low stats matter
+acid_spitter,Uncommon,Entity,2,1,None,0,None,6.0,2,fair,Ranged anti-shield utility
+infestor_node,Rare,Entity,3,1,None,0,None,8.0,3,strong,Guardian plus corruption but low attack
+brood_tyrant,Holo,Entity,4,2,Biomass,0,None,11.0,4,strong,Scaling requires Broodling board
+void_nest,Rare,World,2,0,None,0,empty_neutral_or_controlled_sector,6.5,2,strong,Death-spawn terrain requires bodies
+hive_nest,Holo,Structure,3,2,Biomass,0,controlled_corrupted_or_organic_world,9.0,3,strong,Survival creates recurring bodies
+parasite_carapace,Uncommon,Attachment,1,1,None,0,friendly_organism,4.0,1,strong,Stats plus death spawn balanced by type restriction
+world_hunger,Mythic,Anomaly,5,2,Biomass,1,biomass_markers_or_corrupted_sector,13.0,5,strong,Finisher requires prior deaths/corruption
+survey_drone,Common,Entity,1,0,None,0,None,3.5,1,fair,Flying body with scan and low stats
+relay_operator,Uncommon,Entity,2,1,None,0,None,6.0,2,fair,Needs Machine adjacency for full value
+overclocked_striker,Rare,Entity,3,1,None,0,None,8.0,3,strong,High attack offset by self-damage
+prime_walker,Holo,Entity,5,2,Data,0,None,13.0,5,strong,Attachment engine needs deck support
+relay_grid,Rare,World,2,0,None,0,empty_neutral_or_controlled_sector,6.5,2,strong,Deployment network changes board geometry
+drone_foundry,Holo,Structure,3,2,Data,0,controlled_machine_world,9.0,3,strong,Recurring drone value with raid risk
+adaptive_plating,Uncommon,Attachment,2,1,None,0,friendly_entity,5.5,2,fair,Death prevention is powerful but no attack
+system_override,Mythic,Anomaly,4,2,Data,1,drone_or_attached_entity,11.0,4,strong,Move plus ready requires target and material
+seedling_scout,Common,Entity,1,0,None,0,None,4.0,1,fair,Regeneration depends on terrain
+spore_archer,Uncommon,Entity,2,1,None,0,None,6.0,2,fair,Ranged status role
+living_bulwark,Rare,Entity,3,1,None,0,None,8.5,3,strong,Guardian regeneration with low attack
+worldroot_colossus,Holo,Entity,6,2,Verdance,0,None,15.0,6,strong,Cost reduction requires connected Verdant worlds
+verdant_seedbed,Rare,World,2,0,None,0,empty_neutral_or_controlled_sector,6.0,2,strong,Healing terrain creates sustain economy
+worldroot_nursery,Holo,Structure,3,2,Verdance,0,controlled_verdant_or_organic_world,9.5,3,strong,Healing or spread requires survival
+living_armor,Uncommon,Attachment,2,1,None,0,friendly_entity,6.0,2,strong,Stats plus regen but no immediate damage
+spore_bloom,Mythic,Anomaly,4,2,Verdance,1,organic_or_verdant_world_present,11.0,4,strong,Wide status plus draw needs terrain/material
+ember_initiate,Common,Entity,1,0,None,0,None,3.5,1,fair,High attack fragile body with damage upside
+blood_metal_raider,Uncommon,Entity,2,1,None,0,None,6.0,2,fair,Efficient pressure with terrain upside
+forge_breaker,Rare,Entity,3,1,None,0,None,8.5,3,strong,Structure hate and shield pierce
+crucible_titan,Holo,Entity,6,2,Ember,0,None,15.0,6,strong,Expensive board threat with damage reaction
+crimson_crucible,Rare,World,2,0,None,0,empty_neutral_or_controlled_sector,6.5,2,strong,Self-damage terrain converts risk into power
+ember_cannon,Holo,Structure,3,2,Ember,0,controlled_crucible_world,9.0,3,strong,End-turn line damage is positioning dependent
+blood_metal_plate,Uncommon,Attachment,2,1,None,0,friendly_entity,5.5,2,fair,Defensive stats enable Frenzy
+crucible_verdict,Mythic,Anomaly,5,2,Ember,1,None,13.0,5,strong,Area damage and Frenzy grant with self-risk
+gate_wisp,Common,Entity,1,0,None,0,None,4.0,1,fair,Blink utility on small body
+starblade_adept,Uncommon,Entity,2,1,None,0,None,6.0,2,fair,Movement payoff
+timebound_sentinel,Rare,Entity,3,1,None,0,None,8.5,3,strong,Guardian plus Forecast
+constellation_dragon,Mythic,Entity,6,3,Aether,1,astral_gate_or_astral_world,15.5,6,strong,Flying freeze payoff requires Astral setup
+astral_gate,Rare,World,2,0,None,0,empty_neutral_or_controlled_sector,6.5,2,strong,Movement network world
+time_observatory,Holo,Structure,3,2,Aether,0,controlled_astral_world,9.0,3,strong,Forecast engine with raid risk
+phase_mantle,Uncommon,Attachment,2,1,None,0,friendly_entity,5.5,2,fair,Blink after attack creates tactical reach
+starlight_reversal,Mythic,Anomaly,4,2,Aether,1,friendly_entity,11.0,4,strong,Recall and redeploy combo with material gate
+barren_moon,Common,World,1,0,None,0,empty_neutral_or_controlled_sector,3.0,1,fair,Cheap neutral world and anti-brick draw
+frontier_harvester,Uncommon,Structure,2,0,None,0,controlled_barren_or_any_world,5.5,2,fair,Center Influence economy with low HP
+nomad_engineer,Common,Entity,2,0,None,0,None,5.0,2,fair,Low stats plus repair utility
+crystalline_warden,Rare,Entity,3,0,None,0,None,8.0,3,fair,Neutral defensive body lacks faction scaling
+salvage_runner,Uncommon,Entity,2,0,None,0,None,5.5,2,fair,Structure payoff depends on board events
+gravity_mine,Rare,Structure,2,0,None,0,controlled_world,6.0,2,strong,Trap value depends on enemy pathing
+aether_battery,Uncommon,Attachment,1,0,None,0,friendly_structure,3.5,1,fair,Stores Resonance but needs structure
+emergency_evacuation,Common,Anomaly,2,0,None,0,friendly_entity,4.5,2,fair,Defensive reposition and small heal
+ruin_survey,Common,Anomaly,1,0,None,0,None,3.0,1,fair,Information with conditional draw
+orbital_drop,Rare,Anomaly,3,0,None,0,controlled_sector,8.0,3,fair,Creates body where control exists
+star_chart,Common,Attachment,1,0,None,0,friendly_entity,3.0,1,fair,Scout mobility boost
+ancient_seal,Rare,Attachment,2,0,Aether,0,friendly_world,5.5,2,fair,World protection against corruption
+convergence_engine,Singularity,Anomaly,7,3,Aether,2,controlled_world_and_revealed_world,18.0,7,chase,Rule bend needs world network and high cost
+worldheart_genesis,Singularity,World,5,3,Aether,2,center_row_neutral_or_controlled_sector,16.0,5,chase,Alternate objective requires four world types and center control

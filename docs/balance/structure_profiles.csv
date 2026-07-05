@@ -1,0 +1,11 @@
+structure_class,default_hp_bonus,can_retaliate,flat_armor,weak_to,resists,trigger_timing,note
+Reactor,3,false,0,Kinetic;Ember,Radiant;Tech,start_of_turn,Resource engine that needs protection
+Spire,4,false,0,Kinetic;Void,Radiant;Astral,start_of_turn,Influence and shield engine
+Nest,3,false,0,Radiant;Ember,Bio;Void,start_of_turn,Organic spawn engine
+Foundry,3,false,1,Tech;Kinetic,Bio;Kinetic,start_of_turn,Drone or weapon production engine
+Nursery,4,false,0,Ember;Void,Bio;Kinetic,start_of_turn,Healing and terrain-spread engine
+Cannon,2,true,0,Astral;Kinetic,Ember,end_of_turn,Offensive structure with lower durability
+Gate,3,false,0,Tech;Kinetic,Astral,start_or_active,Movement and influence utility
+Observatory,2,false,0,Kinetic;Void,Astral,start_of_turn,Forecast and deck control structure
+Bastion,5,false,1,Ember;Tech,Kinetic;Radiant,passive,Fortification structure
+Refinery,3,false,0,Kinetic;Ember,Bio;Void,end_of_turn,Domain resource structure

@@ -1,0 +1,63 @@
+card_id,name,faction,rarity,card_type,cost,attack,hp,damage_school,defense_profile,creature_class,world_affinity,structure_class,keywords,combine_family,board_role
+solari_acolyte,Solari Acolyte,Solari,Common,Entity,1,1,2,Radiant,Lightform,Infantry,Star,None,Evolve;Shield,solari_dawn_line,Early evolution body
+lightblade_sentinel,Lightblade Sentinel,Solari,Uncommon,Entity,2,3,2,Radiant,Lightform,Infantry,Star,None,StrikeFirst;Shield,solari_blade_line,Early pressure and shield tempo
+dawn_knight,Dawn Knight,Solari,Rare,Entity,3,3,4,Radiant,Lightform,Infantry,Star,None,Guardian;Bastion,solari_dawn_line,Formation anchor
+stellar_guardian_aeon,Stellar Guardian Aeon,Solari,Holo,Entity,5,3,7,Radiant,Lightform,Titan,Star,None,Guardian;Shield;Immovable,solari_aeon_line,Defensive wall and control stabilizer
+solar_forge_moon,Solar Forge Moon,Solari,Rare,World,2,0,0,Radiant,Structure,Caster,Star,None,Terraform;ShieldBoost,solari_worlds,Star terrain identity
+dawn_spire,Dawn Spire,Solari,Holo,Structure,3,0,5,Radiant,Structure,Construct,Star,Spire,ShieldAura;Influence,solari_structures,Defensive engine
+radiant_aegis,Radiant Aegis,Solari,Uncommon,Attachment,1,0,0,Radiant,Lightform,Infantry,Star,None,Armor;Shield,solari_relics,Survivability attachment
+dawnbreak,Dawnbreak,Solari,Mythic,Anomaly,5,0,0,Radiant,Unarmored,Caster,Star,None,AreaDamage;Purify,solari_mythics,Comeback and corruption cleanse
+void_broodling,Void Broodling,Voidborn,Common,Entity,1,1,1,Void,Chitin,Swarm,Corrupted,None,DeathBiomass,void_brood_line,Swarm seed
+acid_spitter,Acid Spitter,Voidborn,Uncommon,Entity,2,2,2,Bio,Chitin,Beast,Organic,None,Ranged;AntiShield,void_spitter_line,Anti-defense ranged pressure
+infestor_node,Infestor Node,Voidborn,Rare,Entity,3,1,5,Void,Chitin,Swarm,Corrupted,None,Guardian;Corrupt,void_infestor_line,Board conversion
+brood_tyrant,Brood Tyrant,Voidborn,Holo,Entity,4,4,4,Void,Chitin,Beast,Corrupted,None,Overwhelm;BroodScaling,void_brood_line,Swarm payoff
+void_nest,Void Nest,Voidborn,Rare,World,2,0,0,Void,Structure,Caster,Corrupted,None,Terraform;Spawn,void_worlds,Corrupted terrain identity
+hive_nest,Hive Nest,Voidborn,Holo,Structure,3,0,4,Void,Structure,Construct,Corrupted,Nest,Spawn,void_structures,Pressure engine
+parasite_carapace,Parasite Carapace,Voidborn,Uncommon,Attachment,1,0,0,Bio,Chitin,Swarm,Organic,None,Armor;DeathSpawn,void_relics,Sticky board attachment
+world_hunger,World Hunger,Voidborn,Mythic,Anomaly,5,0,0,Void,Unarmored,Caster,Corrupted,None,Consume;SplitDamage,void_mythics,Finisher
+survey_drone,Survey Drone,Synthari,Common,Entity,1,1,1,Tech,Machine,Drone,Machine,None,Flying;Scan,synthari_drone_line,Cheap utility and scouting
+relay_operator,Relay Operator,Synthari,Uncommon,Entity,2,2,3,Tech,Machine,Infantry,Machine,None,DeploySynergy;DroneCreate,synthari_operator_line,Setup body
+overclocked_striker,Overclocked Striker,Synthari,Rare,Entity,3,5,2,Tech,Machine,Drone,Machine,None,StrikeFirst;Overclock,synthari_overclock_line,Burst damage
+prime_walker,Prime Walker,Synthari,Holo,Entity,5,4,6,Tech,Machine,Construct,Machine,None,AttachmentDiscount;DroneAssist,synthari_prime_line,Late attachment engine
+relay_grid,Relay Grid,Synthari,Rare,World,2,0,0,Tech,Structure,Caster,Machine,None,Terraform;DeployBeacon;synthari_network,synthari_worlds,Network terrain identity
+drone_foundry,Drone Foundry,Synthari,Holo,Structure,3,0,4,Tech,Structure,Construct,Machine,Foundry,DroneCreate,synthari_structures,Token engine
+adaptive_plating,Adaptive Plating,Synthari,Uncommon,Attachment,2,0,0,Tech,Machine,Construct,Machine,None,Armor;DeathPrevent,synthari_relics,Protection attachment
+system_override,System Override,Synthari,Mythic,Anomaly,4,0,0,Tech,Machine,Caster,Machine,None,Move;Ready,synthari_mythics,Tactical swing
+seedling_scout,Seedling Scout,Verdant,Common,Entity,1,1,2,Bio,LivingArmor,Beast,Verdant,None,Regenerate,verdant_seed_line,Survivable scout
+spore_archer,Spore Archer,Verdant,Uncommon,Entity,2,2,2,Bio,LivingArmor,Caster,Verdant,None,Ranged;SporeMark,verdant_spore_line,Status spread
+living_bulwark,Living Bulwark,Verdant,Rare,Entity,3,2,5,Bio,LivingArmor,Construct,Verdant,None,Guardian;Regenerate,verdant_bulwark_line,Durable wall
+worldroot_colossus,Worldroot Colossus,Verdant,Holo,Entity,6,5,7,Bio,LivingArmor,Titan,Verdant,None,CostReduction;ConnectedWorlds,verdant_worldroot_line,Terrain payoff
+verdant_seedbed,Verdant Seedbed,Verdant,Rare,World,2,0,0,Bio,Structure,Caster,Verdant,None,Terraform;Heal,verdant_worlds,Sustain terrain identity
+worldroot_nursery,Worldroot Nursery,Verdant,Holo,Structure,3,0,5,Bio,Structure,Construct,Verdant,Nursery,Heal;SpreadTerrain,verdant_structures,Board growth engine
+living_armor,Living Armor,Verdant,Uncommon,Attachment,2,0,0,Bio,LivingArmor,Beast,Verdant,None,Armor;Regenerate,verdant_relics,Sustain attachment
+spore_bloom,Spore Bloom,Verdant,Mythic,Anomaly,4,0,0,Bio,Unarmored,Caster,Verdant,None,AreaStatus;Draw,verdant_mythics,Area pressure
+ember_initiate,Ember Initiate,Crimson,Common,Entity,1,2,1,Ember,BloodMetal,Infantry,Crucible,None,Frenzy,crimson_initiate_line,Aggression tutorial
+blood_metal_raider,Blood-Metal Raider,Crimson,Uncommon,Entity,2,3,2,Ember,BloodMetal,Infantry,Crucible,None,Frenzy,crimson_raider_line,Pressure
+forge_breaker,Forge Breaker,Crimson,Rare,Entity,3,4,3,Kinetic,BloodMetal,Infantry,Crucible,None,PierceShield;StructureDamage,crimson_breaker_line,Anti-defense
+crucible_titan,Crucible Titan,Crimson,Holo,Entity,6,6,6,Ember,BloodMetal,Titan,Crucible,None,RetaliatoryPulse,crimson_titan_line,Boss-like threat
+crimson_crucible,Crimson Crucible,Crimson,Rare,World,2,0,0,Ember,Structure,Caster,Crucible,None,Terraform;SelfDamageBuff,crimson_worlds,Risk reward terrain identity
+ember_cannon,Ember Cannon,Crimson,Holo,Structure,3,0,4,Ember,Structure,Construct,Crucible,Cannon,LineDamage,crimson_structures,Placement weapon
+blood_metal_plate,Blood-Metal Plate,Crimson,Uncommon,Attachment,2,0,0,Kinetic,BloodMetal,Infantry,Crucible,None,Armor;FrenzySupport,crimson_relics,Rage armor
+crucible_verdict,Crucible Verdict,Crimson,Mythic,Anomaly,5,0,0,Ember,Unarmored,Caster,Crucible,None,AreaDamage;FrenzyGrant,crimson_mythics,Dramatic swing
+gate_wisp,Gate Wisp,Astral,Common,Entity,1,1,2,Astral,Phase,Caster,Astral,None,Blink,astral_gate_line,Movement tutorial
+starblade_adept,Starblade Adept,Astral,Uncommon,Entity,2,2,3,Astral,Phase,Infantry,Astral,None,MoveScaling,astral_blade_line,Movement payoff
+timebound_sentinel,Timebound Sentinel,Astral,Rare,Entity,3,2,5,Astral,Phase,Construct,Astral,None,Guardian;Forecast,astral_sentinel_line,Control body
+constellation_dragon,Constellation Dragon,Astral,Mythic,Entity,6,5,6,Astral,Phase,Flyer,Astral,None,Flying;Freeze,astral_dragon_line,Mythic portal payoff
+astral_gate,Astral Gate,Astral,Rare,World,2,0,0,Astral,Structure,Caster,Astral,None,Terraform;BlinkNetwork,astral_worlds,Portal terrain identity
+time_observatory,Time Observatory,Astral,Holo,Structure,3,0,4,Astral,Structure,Construct,Astral,Observatory,Forecast,astral_structures,Deck control engine
+phase_mantle,Phase Mantle,Astral,Uncommon,Attachment,2,0,0,Astral,Phase,Caster,Astral,None,Relic;Blink,astral_relics,Movement skill
+starlight_reversal,Starlight Reversal,Astral,Mythic,Anomaly,4,0,0,Astral,Phase,Caster,Astral,None,Recall;Redeploy,astral_mythics,Combo redeploy
+barren_moon,Barren Moon,Neutral,Common,World,1,0,0,Kinetic,Structure,Caster,Barren,None,Terraform;DrawIfBehind,neutral_worlds,Neutral world base
+frontier_harvester,Frontier Harvester,Neutral,Uncommon,Structure,2,0,3,Kinetic,Structure,Construct,Barren,Refinery,Influence,neutral_structures,Center economy
+nomad_engineer,Nomad Engineer,Neutral,Common,Entity,2,1,3,Kinetic,Unarmored,Infantry,Barren,None,Repair,neutral_workers,Structure support
+crystalline_warden,Crystalline Warden,Neutral,Rare,Entity,3,2,5,Kinetic,Crystal,Construct,Mineral,None,Guardian;Shield,neutral_crystalline,Neutral defensive body
+salvage_runner,Salvage Runner,Neutral,Uncommon,Entity,2,2,2,Kinetic,Unarmored,Infantry,Gas,None,Salvage,neutral_reavers,Structure payoff
+gravity_mine,Gravity Mine,Neutral,Rare,Structure,2,0,2,Kinetic,Structure,Construct,Barren,Bastion,Trap;Slow,neutral_structures,Area denial
+aether_battery,Aether Battery,Neutral,Uncommon,Attachment,1,0,0,Astral,Structure,Construct,Astral,None,Relic;StoreResonance,neutral_relics,Resource smoothing
+emergency_evacuation,Emergency Evacuation,Neutral,Common,Anomaly,2,0,0,Kinetic,Unarmored,Caster,Barren,None,Move;Heal,neutral_tactics,Defensive reposition
+ruin_survey,Ruin Survey,Neutral,Common,Anomaly,1,0,0,Astral,Unarmored,Caster,Barren,None,Scan;Draw,neutral_tactics,World scouting
+orbital_drop,Orbital Drop,Neutral,Rare,Anomaly,3,0,0,Kinetic,Unarmored,Caster,Barren,None,TokenDeploy,neutral_tactics,Controlled sector reinforcement
+star_chart,Star Chart,Neutral,Common,Attachment,1,0,0,Astral,Unarmored,Infantry,Astral,None,Skill;Scout,neutral_relics,Movement attachment
+ancient_seal,Ancient Seal,Neutral,Rare,Attachment,2,0,0,Astral,Crystal,Caster,Mineral,None,Relic;AntiCorrupt,neutral_crystalline,World protection
+convergence_engine,The Convergence Engine,Neutral,Singularity,Anomaly,7,0,0,Astral,Phase,Caster,Astral,None,RuleBend;WorldCopy;Influence,neutral_singularity,Rule-bending world combo chase
+worldheart_genesis,Worldheart Genesis,Neutral,Singularity,World,5,0,0,Astral,Structure,Caster,Astral,None,Terraform;GenesisObjective;Influence,neutral_singularity,Alternate objective world payoff

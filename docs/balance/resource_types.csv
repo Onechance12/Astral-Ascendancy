@@ -1,0 +1,17 @@
+resource_id,display_name,scope,generated_by,spent_on,carryover,default_cap,alpha_visibility,note
+resonance,Resonance,match,turn_start_curve,all_card_play_and_commander_abilities,no,10,always,Universal match energy
+solari_affinity,Solari Affinity,match_requirement,Solari commander Star worlds Solari structures,advanced Solari cards and effects,not_spent,none,contextual,Requirement layer not a normal spend
+void_affinity,Voidborn Affinity,match_requirement,Voidborn commander Corrupted worlds Void structures,advanced Voidborn cards and effects,not_spent,none,contextual,Requirement layer not a normal spend
+synthari_affinity,Synthari Affinity,match_requirement,Synthari commander Machine worlds Synthari structures,advanced Synthari cards and effects,not_spent,none,contextual,Requirement layer not a normal spend
+verdant_affinity,Verdant Affinity,match_requirement,Verdant commander Verdant worlds Verdant structures,advanced Verdant cards and effects,not_spent,none,contextual,Requirement layer not a normal spend
+crimson_affinity,Crimson Affinity,match_requirement,Crimson commander Crucible worlds Crimson structures,advanced Crimson cards and effects,not_spent,none,contextual,Requirement layer not a normal spend
+astral_affinity,Astral Affinity,match_requirement,Astral commander Astral worlds Astral structures,advanced Astral cards and effects,not_spent,none,contextual,Requirement layer not a normal spend
+plasma,Plasma,match_and_domain,Star worlds Solar structures,shields purification Solari upgrades,limited,3,when_nonzero,Material for radiant tech
+biomass,Biomass,match_and_domain,Organic and Corrupted worlds Hive structures,spawn consume growth fusion,limited,3,when_nonzero,Material for organisms
+data,Data,match_and_domain,Machine worlds Synthari structures,scan drones automation,limited,3,when_nonzero,Material for machines
+verdance,Verdance,match_and_domain,Verdant worlds Worldroot structures,regeneration spores living armor,limited,3,when_nonzero,Material for nature growth
+ember,Ember,match_and_domain,Crucible worlds Crimson structures,weapons self-damage burn forge,limited,3,when_nonzero,Material for aggression
+aether,Aether,match_and_domain,Astral worlds gates observatories,blink forecast stasis singularity,limited,3,when_nonzero,Material for portals and time
+influence,Influence,match_victory,sector_control structures world_objectives,ascendancy victory rare objectives,usually_not_spent,30,always,Strategic victory pressure
+aether_shards,Aether Shards,account,duplicate_conversion quests rewards,crafting cosmetics combine,no_match_cap,none,collection_only,Account crafting currency
+memory,Card Memory,account,duplicates campaign bond rewards,combine tiers and fusion,no_match_cap,per_card,collection_only,Per-card progression material

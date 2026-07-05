@@ -1,0 +1,14 @@
+world_id,rarity,world_type,resonance_cost,affinity_requirement,material_cost_type,material_cost_amount,placement_requirement,resource_output_per_turn,value_score,counterplay_cost_note
+solar_forge_moon,Rare,Star,2,0,None,0,empty_neutral_or_controlled_sector,Plasma:1,6.0,Opponent can contest adjacent shield formation
+void_nest,Rare,Corrupted,2,0,None,0,empty_neutral_or_controlled_sector,Biomass:1,6.5,Purify and empty-sector denial reduce value
+relay_grid,Rare,Machine,2,0,None,0,empty_neutral_or_controlled_sector,Data:1,6.5,Destroy structures or sever connected Machine sectors
+verdant_seedbed,Rare,Verdant,2,0,None,0,empty_neutral_or_controlled_sector,Verdance:1,6.0,Ember or corruption checks sustain
+crimson_crucible,Rare,Crucible,2,0,None,0,empty_neutral_or_controlled_sector,Ember:1,6.5,Self-damage risk gives natural counterplay
+astral_gate,Rare,Astral,2,0,None,0,empty_neutral_or_controlled_sector,Aether:1,6.5,Occupy gate exits or destroy linked gate support
+barren_moon,Common,Barren,1,0,None,0,empty_neutral_or_controlled_sector,None,3.0,Low value but smooths early world play
+crystal_reef,Uncommon,Mineral,2,0,None,0,empty_neutral_or_controlled_sector,Crystal:1,5.5,Tech Ember and Void pressure can break defense
+gas_storm_bank,Uncommon,Gas,2,0,None,0,empty_neutral_or_controlled_sector,Tritium:1,5.5,Ranged counters and storm instability
+blackstar_prison,Holo,Astral,3,2,Aether,1,controlled_astral_or_center_sector,Aether:1,9.0,High setup cost and center contest
+living_ocean,Holo,Organic,3,1,Biomass,1,controlled_organic_or_verdant_sector,Biomass:1,8.5,Ember area damage counters regeneration
+supernova_wreath,Mythic,Star,4,2,Plasma,2,controlled_star_world_or_center_sector,Plasma:2,12.0,Expensive and adjacency-dependent
+worldheart_genesis,Singularity,Astral,5,3,Aether,2,center_row_neutral_or_controlled_sector,Aether:1,16.0,Requires four world types and center control

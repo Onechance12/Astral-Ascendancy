@@ -1,0 +1,50 @@
+world_type,faction,creature_class,attack_multiplier,defense_multiplier,movement_modifier,resource_bonus,note
+Star,Solari,Infantry,1.10,1.05,normal,Plasma,Solar units align with radiant terrain
+Star,Solari,Caster,1.10,1.10,normal,Plasma,Solari casters channel star energy
+Star,Voidborn,Swarm,0.95,0.90,normal,None,Radiance suppresses swarm growth
+Star,Crimson,Infantry,1.05,1.00,normal,Ember,Heat supports aggression
+Star,Any,Structure,1.00,1.05,normal,Plasma,Star worlds support shield structures
+Organic,Voidborn,Swarm,1.10,1.05,normal,Biomass,Swarm feeds from organic ground
+Organic,Verdant,Beast,1.10,1.10,normal,Verdance,Verdant life thrives here
+Organic,Synthari,Drone,0.95,1.00,normal,None,Biology interferes with drone maintenance
+Organic,Crimson,Infantry,1.00,0.95,normal,None,Soft ground weakens armor footing
+Organic,Any,Structure,0.95,1.00,normal,Biomass,Organic structures can grow value over time
+Machine,Synthari,Drone,1.15,1.05,normal,Data,Drones sync with the grid
+Machine,Synthari,Construct,1.10,1.10,normal,Alloy,Constructs receive grid diagnostics
+Machine,Voidborn,Swarm,0.90,0.95,normal,None,Machine worlds deny biomass
+Machine,Astral,Caster,1.00,1.00,normal,Data,Astral can read machine patterns but gains no combat edge
+Machine,Any,Structure,1.00,1.10,normal,Alloy,Machine worlds reinforce structures
+Verdant,Verdant,Beast,1.10,1.15,normal,Verdance,Living terrain heals and protects
+Verdant,Verdant,Caster,1.05,1.10,normal,Verdance,Spores empower Verdant casters
+Verdant,Crimson,Infantry,1.05,0.95,normal,None,Crimson burns through growth but takes exposure risk
+Verdant,Synthari,Drone,0.95,0.95,normal,None,Spores disrupt drone systems
+Verdant,Any,Structure,0.95,1.05,normal,Verdance,Living structures survive well
+Crucible,Crimson,Infantry,1.15,0.95,normal,Ember,Crimson trades safety for power
+Crucible,Crimson,Titan,1.15,1.00,slow,Ember,Titans use heat as a forge
+Crucible,Verdant,Beast,0.95,0.90,normal,None,Fire suppresses living armor
+Crucible,Voidborn,Swarm,1.00,0.90,normal,None,Swarm suffers from open heat vents
+Crucible,Any,Structure,1.05,0.95,normal,Ember,Crucible structures hit hard but are volatile
+Astral,Astral,Caster,1.10,1.10,blink,Aether,Astral casters bend routes and timing
+Astral,Astral,Flyer,1.05,1.05,blink,Aether,Flying units use portal currents
+Astral,Crimson,Infantry,0.95,1.00,normal,None,Heavy aggression loses certainty here
+Astral,Voidborn,Swarm,1.00,0.95,normal,None,Portals disrupt swarm cohesion
+Astral,Any,Structure,1.00,1.00,normal,Aether,Astral structures enable utility more than raw combat
+Mineral,Any,Construct,1.00,1.15,slow,Crystal,Mineral worlds favor durable bodies
+Mineral,Solari,Infantry,1.00,1.05,normal,Crystal,Refraction supports shields
+Mineral,Crimson,Infantry,1.05,1.00,normal,Alloy,Minerals feed weapon forging
+Mineral,Verdant,Beast,0.95,1.00,normal,None,Roots struggle to spread
+Mineral,Any,Structure,1.00,1.15,normal,Crystal,Structures are easier to fortify
+Gas,Any,Flyer,1.10,1.05,fast,Tritium,Flyers ride gas currents
+Gas,Crimson,Infantry,0.95,0.95,normal,Tritium,Unstable footing punishes heavy troops
+Gas,Synthari,Drone,1.05,0.95,fast,Data,Drones gain speed but lose stability
+Gas,Astral,Caster,1.00,1.05,normal,Aether,Gas clouds hide portal patterns
+Gas,Any,Structure,0.95,0.90,normal,Tritium,Structures are exposed in storms
+Barren,Any,Infantry,1.00,1.00,normal,None,Neutral baseline terrain
+Barren,Any,Beast,1.00,1.00,normal,None,Neutral baseline terrain
+Barren,Any,Drone,1.00,1.00,normal,None,Neutral baseline terrain
+Barren,Any,Structure,1.00,1.00,normal,None,Cheap development base
+Corrupted,Voidborn,Swarm,1.15,1.10,normal,Biomass,Corruption feeds the swarm
+Corrupted,Astral,Caster,1.05,0.95,normal,Aether,Astral can exploit instability but risks collapse
+Corrupted,Solari,Infantry,1.05,0.90,normal,None,Solari can burn corruption but suffers exposure
+Corrupted,Verdant,Beast,0.90,0.90,normal,None,Corruption poisons natural growth
+Corrupted,Any,Structure,0.95,0.90,normal,None,Corruption weakens normal structures

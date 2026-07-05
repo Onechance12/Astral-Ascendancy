@@ -34,15 +34,26 @@ Render
 
 The browser is where the game runs. The player-facing experience should feel like launching a game client, not navigating a dashboard.
 
-First major milestone:
+Design-first direction:
+
+- Lock the design bible in `docs/00_NORTH_STAR.md` through `docs/08_RARITY_PACKS_AND_COMBINE.md`
+- Move combat from the existing 3-lane prototype toward a 5x5 living tactical board
+- Make world cards visibly terraform sectors
+- Make structures produce risk/reward on controlled worlds
+- Treat cards as animated battlefield entities with hover, drag, snap, attack, damage, death, evolution, and attachment feedback
+- Define combat math through spreadsheet-style balance tables for damage types, resistances, terrain/world modifiers, and stat budgets
+- Define rarity, pack reveal, crafting, duplicate protection, and card combine rules before monetization work
+- Define Resonance, Affinity, materials, Influence, world costs, and per-card value scores before implementation
+
+First implementation milestone after design approval:
 
 - Add `src/game/`
 - Add PixiJS
 - Add `/play`
 - Create a scene manager
 - Build `BootScene`, `PreloadScene`, `MainMenuScene`, `BattleScene`, `PackOpeningScene`, `GalaxyMapScene`, `VictoryScene`, and `DefeatScene`
-- Connect `BattleScene` to the existing match engine
-- Render cards, board lanes, attacks, damage numbers, rarity glows, and destroy effects as animated game objects
+- Use existing match data as seed material while implementing the 5x5 prototype rules
+- Render cards, sectors, worlds, structures, attacks, damage numbers, rarity glows, and destroy effects as animated game objects
 
 ## Local Development
 

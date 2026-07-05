@@ -1,0 +1,10 @@
+cost,baseline_total_stats,premium_text_budget,world_card_budget,structure_hp_budget,note
+0,0,minor,none,0,Use only for generated tokens or special effects
+1,3,small,low,2,Simple body or small utility
+2,5,small_to_medium,medium,3,Core early card
+3,7,medium,medium_high,4,Main setup or structure turn
+4,9,strong,high,5,Strong synergy or board swing
+5,11,strong_to_major,very_high,6,Major faction card or control effect
+6,13,major,mythic_world,7,Faction payoff or boss-like entity
+7,15,mythic,mythic_world,8,Use sparingly in alpha
+8,17,singularity,singularity_world,9,Reserved for late campaign or special modes

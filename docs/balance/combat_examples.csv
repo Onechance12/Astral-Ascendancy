@@ -1,0 +1,9 @@
+scenario,attacker,defender,base_attack,damage_school,defense_profile,world_type,type_multiplier,terrain_multiplier,armor,shield,final_damage,note
+Solari burns Broodling,Solari Acolyte,Void Broodling,2,Radiant,Chitin,Star,1.15,1.10,0,0,3,Radiant on Star world is strong into chitin
+Void consumes Acolyte,Void Broodling,Solari Acolyte,1,Void,Lightform,Corrupted,1.25,1.15,0,1,1,Shield absorbs part of the boosted damage
+Drone shoots structure,Survey Drone,Frontier Harvester,1,Tech,Structure,Machine,1.15,1.00,0,0,1,Minimum damage keeps weak drone relevant
+Crimson hits Living Armor,Blood-Metal Raider,Living Bulwark,3,Ember,LivingArmor,Crucible,1.25,1.15,0,0,4,Strong matchup plus strong terrain
+Verdant attacks Machine,Spore Archer,Prime Walker,2,Bio,Machine,Verdant,0.75,1.10,1,0,1,Bio is weak into machine and armor matters
+Astral strikes Phase,Starblade Adept,Phase Warden,3,Astral,Phase,Astral,1.25,1.10,0,0,4,Astral is best into Phase on Astral worlds
+Kinetic siege cannon,Orbital Trooper,Dawn Spire,3,Kinetic,Structure,Barren,1.25,1.00,0,0,4,Kinetic is strong against structures
+Titan into shield,Crucible Titan,Stellar Guardian Aeon,6,Ember,Lightform,Crucible,1.00,1.15,0,2,5,Shield applies late after type and terrain
