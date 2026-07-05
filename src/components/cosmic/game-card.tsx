@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { SampleCard } from "@/lib/game-data";
-import { FACTIONS } from "@/lib/game-data";
+import { FACTIONS, LANDING_FACTIONS } from "@/lib/game-data";
 import { cn } from "@/lib/utils";
 
 const RARITY_STYLE: Record<
@@ -30,7 +30,9 @@ export default function GameCard({
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, mx: 50, my: 50 });
   const [hover, setHover] = useState(false);
 
-  const faction = FACTIONS.find((f) => f.id === card.faction)!;
+  const faction =
+    LANDING_FACTIONS.find((f) => f.id === card.faction) ??
+    FACTIONS.find((f) => f.id === card.faction)!;
   const rar = RARITY_STYLE[card.rarity];
 
   const handleMove = (e: React.MouseEvent) => {

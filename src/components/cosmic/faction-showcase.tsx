@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { FACTIONS } from "@/lib/game-data";
+import { LANDING_FACTIONS } from "@/lib/game-data";
 import { cn } from "@/lib/utils";
 
 export default function FactionShowcase() {
   const [active, setActive] = useState(0);
-  const f = FACTIONS[active];
+  const f = LANDING_FACTIONS[active];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10">
       {/* LEFT: selector list */}
       <div className="flex flex-col gap-2">
-        {FACTIONS.map((fac, i) => {
+        {LANDING_FACTIONS.map((fac, i) => {
           const isActive = i === active;
           return (
             <button

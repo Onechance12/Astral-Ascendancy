@@ -322,6 +322,157 @@ export const FACTIONS: Faction[] = [
   },
 ];
 
+// ---------- Landing direction data ----------
+export type LandingFaction = Pick<
+  Faction,
+  | "id"
+  | "name"
+  | "short"
+  | "tagline"
+  | "glyph"
+  | "resonance"
+  | "accent"
+  | "accentSoft"
+  | "glow"
+  | "trait"
+  | "description"
+  | "abilities"
+  | "playstyle"
+  | "difficulty"
+  | "art"
+>;
+
+export const LANDING_FACTIONS: LandingFaction[] = [
+  {
+    id: "solari",
+    name: "The Solari Concord",
+    short: "Solari",
+    tagline: "Radiant star-law and plasma shields",
+    glyph: "☼",
+    resonance: "Plasma / Solari Affinity",
+    accent: "#fbbf24",
+    accentSoft: "rgba(251,191,36,0.14)",
+    glow: "rgba(251,191,36,0.55)",
+    trait: "Shields · Purify · Influence",
+    description:
+      "Living light commanders who turn Star worlds into bastions. Solari decks protect formations, purify corrupted sectors, and win through ordered board control.",
+    abilities: [
+      { name: "Radiant Bastion", desc: "Shield adjacent allies and make defensive formations matter." },
+      { name: "Solar Forge", desc: "Star worlds strengthen shields and feed Plasma engines." },
+      { name: "Dawnbreak", desc: "A dramatic purge that punishes corruption and wide enemy boards." },
+    ],
+    playstyle: "Control / Shields / Influence",
+    difficulty: 3,
+    art: "/cards/faction-solari.png",
+  },
+  {
+    id: "voidborn",
+    name: "The Voidborn Swarm",
+    short: "Voidborn",
+    tagline: "Corruption, biomass, and endless bodies",
+    glyph: "☣",
+    resonance: "Biomass / Voidborn Affinity",
+    accent: "#e879f9",
+    accentSoft: "rgba(232,121,249,0.14)",
+    glow: "rgba(232,121,249,0.55)",
+    trait: "Spawn · Consume · Corrupt",
+    description:
+      "A hungry hive mind that turns death into board presence. Voidborn decks corrupt worlds, spawn Broodlings, and convert casualties into pressure.",
+    abilities: [
+      { name: "Endless Brood", desc: "Friendly deaths leave Biomass or spawn new bodies." },
+      { name: "Corrupt Terrain", desc: "Worlds become dangerous sectors that feed the swarm." },
+      { name: "World Hunger", desc: "Stored Biomass becomes a late-game finishing burst." },
+    ],
+    playstyle: "Swarm / Sacrifice / Corruption",
+    difficulty: 2,
+    art: "/cards/faction-voidborn.png",
+  },
+  {
+    id: "synthari",
+    name: "The Synthari Collective",
+    short: "Synthari",
+    tagline: "Hard-light grids, drones, and automation",
+    glyph: "⬡",
+    resonance: "Data / Synthari Affinity",
+    accent: "#22d3ee",
+    accentSoft: "rgba(34,211,238,0.14)",
+    glow: "rgba(34,211,238,0.55)",
+    trait: "Drones · Attachments · Relay",
+    description:
+      "Machine minds that build connected sectors into a tactical network. Synthari decks use Relay Grids, Drone Foundries, attachments, and precise repositioning.",
+    abilities: [
+      { name: "Relay Grid", desc: "Connected Machine worlds extend deployment and tactical reach." },
+      { name: "Fabricate Drone", desc: "Small bodies become weapons when the network is online." },
+      { name: "System Override", desc: "Move and ready key units for clean tactical swings." },
+    ],
+    playstyle: "Setup / Drones / Attachments",
+    difficulty: 4,
+  },
+  {
+    id: "verdant",
+    name: "The Verdant Mycelium",
+    short: "Verdant",
+    tagline: "Spores, regeneration, and living armor",
+    glyph: "✿",
+    resonance: "Verdance / Verdant Affinity",
+    accent: "#34d399",
+    accentSoft: "rgba(52,211,153,0.14)",
+    glow: "rgba(52,211,153,0.55)",
+    trait: "Regenerate · Spore · Grow",
+    description:
+      "A beautiful, unsettling living network that spreads across the board. Verdant decks heal, mark enemies with spores, and grow connected world chains.",
+    abilities: [
+      { name: "Worldroot", desc: "Connected Verdant worlds turn board control into Influence." },
+      { name: "Spore Mark", desc: "Marked enemies take pressure and enable faction payoffs." },
+      { name: "Living Armor", desc: "Creatures heal and harden when the terrain supports them." },
+    ],
+    playstyle: "Growth / Regeneration / Terrain",
+    difficulty: 3,
+  },
+  {
+    id: "crimson",
+    name: "The Crimson Dominion",
+    short: "Crimson",
+    tagline: "Blood-metal war engines and volcanic rage",
+    glyph: "◆",
+    resonance: "Ember / Crimson Affinity",
+    accent: "#fb7185",
+    accentSoft: "rgba(251,113,133,0.14)",
+    glow: "rgba(251,113,133,0.55)",
+    trait: "Frenzy · Forge · Break",
+    description:
+      "A brutal forge-civilization that weaponizes damage. Crimson decks turn self-risk into pressure, crack structures, and make every sector feel dangerous.",
+    abilities: [
+      { name: "Crimson Crucible", desc: "Entities take damage for attack, turning terrain into a weapon." },
+      { name: "Blood-Metal Oath", desc: "Damaged allies become more threatening instead of weaker." },
+      { name: "Ember Cannon", desc: "Structures punish enemies that line up carelessly." },
+    ],
+    playstyle: "Aggro / Self-damage / Siege",
+    difficulty: 2,
+  },
+  {
+    id: "astral",
+    name: "The Astral Continuum",
+    short: "Astral",
+    tagline: "Portals, constellations, and time control",
+    glyph: "✦",
+    resonance: "Aether / Astral Affinity",
+    accent: "#93c5fd",
+    accentSoft: "rgba(147,197,253,0.14)",
+    glow: "rgba(147,197,253,0.55)",
+    trait: "Blink · Forecast · Stasis",
+    description:
+      "Ancient gate-keepers who bend movement and timing. Astral decks use portals, Forecast, Stasis, and alternate objectives to win through precision.",
+    abilities: [
+      { name: "Astral Gate", desc: "Connected portals rewrite movement across the 5x5 board." },
+      { name: "Forecast", desc: "See and shape future draws before committing resources." },
+      { name: "Worldheart Genesis", desc: "A Singularity objective for players who can control diverse worlds." },
+    ],
+    playstyle: "Control / Movement / Objectives",
+    difficulty: 5,
+  },
+];
+
 // ---------- Signature Mechanics ----------
 export type Mechanic = {
   id: string;
@@ -335,57 +486,57 @@ export type Mechanic = {
 export const MECHANICS: Mechanic[] = [
   {
     id: "sector-grid",
-    name: "Sector Grid",
+    name: "Living 5x5 Board",
     icon: "▦",
-    oneLiner: "Positional combat on a 3×3 galactic board",
+    oneLiner: "A tactical world, not a card tray",
     description:
-      "Entities deploy onto a 3×3 Sector Grid. Where you place them matters: adjacency buffs, flanking bonuses, orbital strikes, and sector-locking anomalies turn every deployment into a spatial puzzle.",
-    designPillar: "Board position is a primary skill, not decoration.",
+      "Entities, worlds, structures, hazards, and portals all occupy a 5x5 battlefield. Sectors can be claimed, corrupted, fortified, terraformed, or connected into faction engines.",
+    designPillar: "The board is alive, and geography is a weapon.",
   },
   {
     id: "evolution",
-    name: "Stellar Evolution",
+    name: "Living Cards",
     icon: "↟",
-    oneLiner: "Spawn → Stellar → Ascendant forms",
+    oneLiner: "Cards evolve, attach, react, and remember",
     description:
-      "Every Entity can evolve through three cosmic life-stages. Fulfill a condition such as resonance threshold, kills, or time survived, then awaken a more powerful Ascendant form with new art and abilities.",
+      "Cards begin as collectibles, then become battlefield entities with hover, drag, snap, attack, damage, death, evolution, and attachment states.",
     designPillar: "Cards should feel alive across a match.",
   },
   {
-    id: "quantum",
-    name: "Quantum Cards",
+    id: "worlds",
+    name: "World Cards",
     icon: "◈",
-    oneLiner: "Cards that exist in superposition",
+    oneLiner: "Terrain you develop and fight over",
     description:
-      "Quantum cards are played face-down in a superposition state. On your turn, you Observe one, collapsing it into one of two possible effects. Bluff an answer or threaten a board wipe.",
-    designPillar: "Hidden information should create drama, not confusion.",
+      "World cards terraform sectors into Star, Corrupted, Machine, Verdant, Crucible, Astral, Mineral, Gas, or Barren terrain with real resource and combat effects.",
+    designPillar: "Never show a plain table when a world object can explain it.",
   },
   {
-    id: "ascent",
-    name: "Commander Ascent",
+    id: "structures",
+    name: "Protected Structures",
     icon: "✦",
-    oneLiner: "Comeback transformation at low HP",
+    oneLiner: "Risky engines worth defending",
     description:
-      "When your Commander drops below 10 HP, they Ascend into an empowered transformed state with a new ability and statline. The losing player gets a real shot at a dramatic comeback.",
-    designPillar: "A close defeat should still feel playable until the final hit.",
+      "Structures sit on controlled worlds, usually do little immediately, and become powerful only if protected across turns.",
+    designPillar: "Economy should be visible on the board.",
   },
   {
-    id: "convergence",
-    name: "Convergence Events",
+    id: "resources",
+    name: "Resonance Economy",
     icon: "✺",
-    oneLiner: "Mid-game cosmic events flip the board",
+    oneLiner: "Resonance, Affinity, materials, Influence",
     description:
-      "Every match triggers a random Convergence Event at turn 5 — Supernova, Gravity Well, Time Dilation. These asymmetric board-wide effects force on-the-fly strategy shifts and create unforgettable stories.",
-    designPillar: "Each match should produce a story worth remembering.",
+      "Every card costs Resonance. Stronger cards can require Affinity, materials, world control, or structure setup, giving every card a strict value identity.",
+    designPillar: "Wild fantasy, disciplined math.",
   },
   {
-    id: "weaving",
-    name: "Resonance Weaving",
+    id: "rarity",
+    name: "Rarity and Memory",
     icon: "⊕",
-    oneLiner: "Combine two resonance types for hybrids",
+    oneLiner: "Rare cards, fair crafting, cosmetic combine",
     description:
-      "Tap two different Domain types to cast powerful Hybrid Anomalies only multi-faction decks can access. Rewards bold deck-builders who splash a second galaxy without slowing the core tempo.",
-    designPillar: "Deck identity should reward experimentation without punishing new players.",
+      "Packs, shards, Memory, combine tiers, and Singularity chase cards create collection excitement without paid-only gameplay power.",
+    designPillar: "Free-to-play trust comes before monetization.",
   },
 ];
 
@@ -409,30 +560,30 @@ export const WIN_CONDITIONS: WinCondition[] = [
   },
   {
     id: "ascension",
-    name: "Ascension",
+    name: "Ascendancy",
     icon: "✦",
-    summary: "Reach 30 Cosmic Influence",
+    summary: "Reach 30 Influence",
     detail:
-      "Hold Domains and evolve Entities to accrue Cosmic Influence. Reach 30 and you ascend the galaxy without firing a final shot — a victory for control & growth decks.",
+      "Control sectors, protect structures, and complete world objectives. Reach 30 Influence and win through civilization-scale board control.",
   },
   {
     id: "singularity",
-    name: "Singularity",
+    name: "Genesis",
     icon: "◉",
-    summary: "Assemble the 3-part Genesis Sigil",
+    summary: "Complete a world-specific objective",
     detail:
-      "A combo alt-win: collect the Sigil of Origin, Sigil of Void, and Sigil of Mind across the match. Rare, theatrical, devastating — the dream of Quantum Architects everywhere.",
+      "Cards like Worldheart Genesis create theatrical alternate goals: control the right worlds, hold the center, and trigger a cosmic objective.",
   },
 ];
 
 // ---------- Card Types ----------
 export const CARD_TYPES = [
-  { name: "Commander", icon: "♛", color: "#fbbf24", desc: "Your leader. 30 HP, an active ability, and a signature card. Ascends below 10 HP." },
-  { name: "Entity", icon: "♞", color: "#34d399", desc: "Creatures deployed on the 3×3 Sector Grid. They attack, defend, and can evolve." },
-  { name: "Domain", icon: "⬢", color: "#22d3ee", desc: "Planets & sectors that generate Resonance each turn — your resource engine." },
-  { name: "Tech", icon: "⚙", color: "#a78bfa", desc: "Persistent artifacts & equipment that modify Entities or the board." },
-  { name: "Anomaly", icon: "✺", color: "#e879f9", desc: "One-time cosmic events — blasts, summons, board resets. Instants of the galaxy." },
-  { name: "Evolution", icon: "↟", color: "#fb923c", desc: "Flip an Entity into its next stellar stage. New art, new power, new abilities." },
+  { name: "Commander", icon: "♛", color: "#fbbf24", desc: "Your leader. 30 HP, passive identity, active ability, and campaign progression." },
+  { name: "Entity", icon: "♞", color: "#34d399", desc: "Living battlefield cards that move, attack, defend, evolve, and carry attachments." },
+  { name: "World", icon: "⬢", color: "#22d3ee", desc: "Playable terrain that changes sectors, resources, movement, and victory pressure." },
+  { name: "Structure", icon: "▣", color: "#a78bfa", desc: "Protected engines built on controlled worlds for resources, summons, shields, or portals." },
+  { name: "Attachment", icon: "⚙", color: "#fb923c", desc: "Armor, weapons, relics, drones, spores, or skills that socket onto living cards." },
+  { name: "Anomaly", icon: "✺", color: "#e879f9", desc: "One-time cosmic events: blasts, recalls, blooms, overrides, purges, and board swings." },
 ];
 
 // ---------- Sample cards ----------
@@ -452,75 +603,71 @@ export type SampleCard = {
 export const SAMPLE_CARDS: SampleCard[] = [
   {
     id: "c1",
-    name: "Vael'Sun, Herald of Dawn",
+    name: "Vael'Sun, Dawn Herald",
     faction: "solari",
     type: "Commander",
-    rarity: "Singularity",
+    rarity: "Mythic",
     cost: "—",
     power: "30 HP",
-    text: "Active: Restore 2 HP to all allied Entities in your front row. Signature: Dawnbreak — deal 5 radiant damage split among enemies.",
+    text: "Passive: first ally deployed each turn gains Shield 1. Active: Radiant Verdict deals extra damage on corrupted worlds.",
     flavor: "\"Light is not a weapon. It is a verdict.\"",
     art: "/cards/faction-solari.png",
   },
   {
     id: "c2",
-    name: "The Unmaking",
+    name: "Void Nest",
     faction: "voidborn",
-    type: "Anomaly",
-    rarity: "Mythic",
-    cost: "6 ☣",
+    type: "World",
+    rarity: "Rare",
+    cost: "2R",
     power: "—",
-    text: "Destroy all Entities with power 4 or less. For each destroyed, spawn a 2/2 Broodling under your control.",
-    flavor: "Where the swarm passes, only the swarm remains.",
+    text: "Terraform a sector into Corrupted World. When a friendly organism dies here, spawn a Broodling adjacent if possible.",
+    flavor: "The ground breathes. The swarm calls it home.",
     art: "/cards/faction-voidborn.png",
   },
   {
     id: "c3",
-    name: "Chronos Lattice",
-    faction: "crystalline",
-    type: "Tech",
-    rarity: "Holo",
-    cost: "4 ◆",
+    name: "Relay Grid",
+    faction: "synthari",
+    type: "World",
+    rarity: "Rare",
+    cost: "2R",
     power: "—",
-    text: "Once per turn, you may rewind one of your own Anomalies from the void and replay it at half cost.",
-    flavor: "The Crystalline do not fear the future — they have already seen it.",
-    art: "/cards/faction-crystalline.png",
+    text: "Terraform a sector into Machine World. Connected Machine worlds extend Deploy Beacon for Synthari entities.",
+    flavor: "A battlefield becomes a circuit when the Collective touches it.",
   },
   {
     id: "c4",
-    name: "Kael Vex, Void-Runner",
-    faction: "reavers",
-    type: "Entity",
-    rarity: "Rare",
-    cost: "3 ⚔",
-    power: "4 / 2",
-    text: "Strike First. Raid: When Vex enters a new sector, deal 2 damage to the enemy Commander. Salvage any Tech Vex destroys.",
-    flavor: "\"I don't steal. I redistribute.\"",
-    art: "/cards/faction-reavers.png",
+    name: "Worldroot Nursery",
+    faction: "verdant",
+    type: "Structure",
+    rarity: "Holo",
+    cost: "3R",
+    power: "0 / 5",
+    text: "Start of turn: heal adjacent allies 1. If no healing happens, spread Verdant to an adjacent empty neutral sector.",
+    flavor: "The first root is medicine. The fifth is conquest.",
   },
   {
     id: "c5",
-    name: "Singularity Engine Prime",
-    faction: "quantum",
-    type: "Entity",
-    rarity: "Singularity",
-    cost: "7 ⬡",
-    power: "6 / 6",
-    text: "Quantum — exists in superposition until Observed. On Observe: choose 8 damage to any target OR draw 4 cards. Recompile: if destroyed, return to hand.",
-    flavor: "It calculated its own victory 0.3 seconds before you played it.",
-    art: "/cards/faction-quantum.png",
+    name: "Crimson Crucible",
+    faction: "crimson",
+    type: "World",
+    rarity: "Rare",
+    cost: "2R",
+    power: "—",
+    text: "Entities played here take 1 damage and gain +1 attack. Damaged allies can turn control into Influence.",
+    flavor: "Civilization is proven in the forge.",
   },
   {
     id: "c6",
-    name: "Void Leviathan",
-    faction: "voidborn",
-    type: "Entity",
-    rarity: "Mythic",
-    cost: "8 ☣",
-    power: "9 / 7",
-    text: "Ascendant form of Brood Tyrant. Trample. When it attacks, spawn a 2/2 Broodling in each empty adjacent sector.",
-    flavor: "It does not swim through space. Space moves aside for it.",
-    art: "/cards/card-leviathan.png",
+    name: "Astral Gate",
+    faction: "astral",
+    type: "World",
+    rarity: "Rare",
+    cost: "2R",
+    power: "—",
+    text: "Friendly entities can Blink between connected gates. Hold two gates to pressure the Influence race.",
+    flavor: "Distance is a superstition the old stars never believed.",
   },
   {
     id: "c7",
@@ -528,23 +675,22 @@ export const SAMPLE_CARDS: SampleCard[] = [
     faction: "solari",
     type: "Entity",
     rarity: "Holo",
-    cost: "5 ☼",
-    power: "5 / 7",
-    text: "Guardian — enemies must attack Aeon before your Commander. Radiant Bastion: adjacent allies absorb the next hit.",
+    cost: "5R",
+    power: "3 / 7",
+    text: "Guardian. Shield 2. Cannot be moved by enemy effects. A defensive wall for Star-world formations.",
     flavor: "It stood on a dead moon for ten thousand years. Then it was needed.",
     art: "/cards/card-guardian.png",
   },
   {
     id: "c8",
-    name: "Fractal Swarm Matrix",
-    faction: "crystalline",
-    type: "Entity",
-    rarity: "Rare",
-    cost: "4 ◆",
-    power: "2 / 4",
-    text: "Echo of Tomorrow: reveal your top card each turn. Refract: redirect attacks aimed at Matrix to an adjacent ally once per turn.",
-    flavor: "A thousand minds, one lattice, no beginning.",
-    art: "/cards/card-swarm.png",
+    name: "Worldheart Genesis",
+    faction: "astral",
+    type: "World",
+    rarity: "Singularity",
+    cost: "5R",
+    power: "—",
+    text: "Terraform center into Worldheart. Control it with four different world types to trigger Genesis and gain 10 Influence.",
+    flavor: "A planet remembers what the galaxy forgot.",
   },
 ];
 
@@ -566,8 +712,8 @@ export const VISION_PILLARS: VisionPillar[] = [
 
 // ---------- Stats for hero ----------
 export const HERO_STATS = [
-  { value: "5", label: "Cosmic Factions" },
-  { value: "320+", label: "Launch Cards" },
+  { value: "6", label: "Core Factions" },
+  { value: "5×5", label: "Living Board" },
   { value: "3", label: "Win Paths" },
-  { value: "6", label: "Signature Mechanics" },
+  { value: "14", label: "Alpha Worlds" },
 ];

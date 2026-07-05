@@ -140,8 +140,9 @@ function Landing() {
 
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/80 sm:mt-5 sm:text-lg">
                   An alien-themed trading card game across a galaxy of warring
-                  civilizations. Deploy entities onto a 3-lane Sector Grid and
-                  crush the enemy Commander.
+                  civilizations. Command living cards across a 5x5 world-board,
+                  terraform sectors, build structures, and outplay the enemy
+                  Commander.
                 </p>
 
                 <p className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-emerald-300/80 sm:mt-3 sm:text-sm">
@@ -207,12 +208,12 @@ function Landing() {
             <SectionHeading
               kicker="The Universe"
               title="The Convergence shattered the galaxy"
-              subtitle="Five ancient civilizations. One collapsing barrier between galaxies. A war for the Aetherion Cluster."
+              subtitle="Six civilizations. One collapsing barrier between galaxies. A war fought through worlds, cards, and living battlefields."
             />
             <div className="mt-12 grid gap-5 lg:grid-cols-3">
-              <LoreCard index="01" title="The Aetherion Cluster" accent="#34d399" body="A web of a hundred thousand stars where five civilizations reached ascendancy in isolation — each believing itself alone in the universe. For ten thousand years, the Barrier Veil kept them apart." />
-              <LoreCard index="02" title="The Convergence" accent="#e879f9" body="An apocalyptic cosmic event cracked the Veil. Galaxies collided. Worlds folded into one another. The five civilizations met — and the war for the Cluster began. You are a Commander. You choose who wins." />
-              <LoreCard index="03" title="The Ascendancy War" accent="#fbbf24" body="There is no peace between stars. Conquer by force, ascend through influence, or trigger the Genesis Singularity. Every match is a battle in the eternal war — and every card is a being, a world, a law of physics." />
+              <LoreCard index="01" title="The Aetherion Cluster" accent="#34d399" body="A web of stars where Solari, Voidborn, Synthari, Verdant, Crimson, and Astral powers collide over worlds that can be claimed, changed, and weaponized." />
+              <LoreCard index="02" title="The Convergence" accent="#e879f9" body="The Barrier Veil cracked. Planets folded into hostile skies. Ancient factions now fight on unstable 5x5 battle-worlds where terrain itself can decide a war." />
+              <LoreCard index="03" title="The Ascendancy War" accent="#fbbf24" body="Conquer by force, ascend through Influence, or trigger a Genesis objective. Every card is a creature, structure, relic, world, or law of physics made playable." />
             </div>
           </div>
         </section>
@@ -221,9 +222,9 @@ function Landing() {
         <section id="factions" className="scroll-mt-20 border-t border-white/10 bg-black/20 py-20 sm:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <SectionHeading
-              kicker="The Five Civilizations"
-              title="Five galaxies. Five ways to ascend."
-              subtitle="Each faction is a full playstyle — pick one, or weave them together with Resonance Weaving. Hover a faction to inspect it."
+              kicker="The Six Factions"
+              title="Six civilizations. Six ways to reshape the board."
+              subtitle="Each faction has its own resource identity, terrain language, combat feel, commander fantasy, and route to victory."
             />
             <div className="mt-12">
               <FactionShowcase />
@@ -244,8 +245,8 @@ function Landing() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <SectionHeading
               kicker="Signature Mechanic"
-              title="The Sector Grid — geography is a weapon"
-              subtitle="Where you place your entities matters. Try the live demo below, then take the system into a live match."
+              title="The 5x5 world-board — geography is a weapon"
+              subtitle="Move living cards through sectors, claim terrain, protect structures, and turn the board itself into your strategy."
             />
             <div className="mt-12 rounded-3xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur sm:p-10">
               <SectorGrid />
@@ -267,7 +268,7 @@ function Landing() {
             <SectionHeading
               kicker="Signature Mechanics"
               title="Six systems that make the galaxy playable"
-              subtitle="Each mechanic turns lore into action: position, evolution, hidden information, comeback drama, cosmic events, and hybrid deck identity."
+              subtitle="Each system turns lore into action: living sectors, evolving cards, world terrain, protected structures, strict resources, and fair collection progression."
             />
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {MECHANICS.map((m, i) => (
@@ -374,8 +375,8 @@ function Landing() {
               ))}
             </div>
             <p className="mt-8 text-center text-xs text-muted-foreground">
-              320+ cards at launch · 6 rarity tiers including animated{" "}
-              <span className="font-bold text-fuchsia-300">Singularity</span> foils
+              Alpha catalog: 63 scripted cards · 14 worlds · 6 rarity tiers including craftable{" "}
+              <span className="font-bold text-fuchsia-300">Singularity</span> chase cards
             </p>
           </div>
         </section>
@@ -416,9 +417,9 @@ function Landing() {
                   The Cluster is calling your name
                 </h2>
                 <p className="mx-auto mt-3 max-w-xl text-foreground/75">
-                  Register your Commander and play a live match right now. Deploy
-                  entities, spend Resonance, and crush the enemy Commander on the
-                  Sector Grid.
+                  Register your Commander and enter the prototype now. The next
+                  evolution is a fullscreen game client built around the 5x5
+                  living board.
                 </p>
                 <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
                   <button
