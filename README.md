@@ -60,19 +60,31 @@ First implementation milestone after design approval:
 
 ## Local Development
 
-This project was generated with Bun-oriented scripts, but it can be inspected with npm in a standard Node environment.
+Use npm and Node for local development and production startup.
 
 ```bash
 npm install
+npm run db:deploy
 npm run lint
 npm run build
 npx tsc --noEmit
 ```
 
-These checks pass on the initial public baseline.
+The app now expects Postgres through `DATABASE_URL`.
+
+Local Postgres options:
+
+```bash
+# Homebrew Postgres, already compatible with this repo's .env.example
+brew services start postgresql@16
+
+# Or Docker Desktop / Compose
+docker compose up -d postgres
+```
 
 ## Production Notes
 
-- The current Prisma datasource is SQLite for prototype development. Production should move to Postgres.
+- Prisma is configured for Postgres. Render should use a managed Render Postgres database.
+- Production deploys should run `npm run db:deploy` before `npm run build`; `render.yaml` defines that path.
 - Do not commit `.env`, local SQLite databases, generated upload files, or local process files.
 - Monetization is intentionally out of scope for the current milestone. The alpha should prove the game feel first.

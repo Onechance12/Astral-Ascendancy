@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: astral-ascendancy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: astral
+      POSTGRES_PASSWORD: astral
+      POSTGRES_DB: astral_ascendancy
+    ports:
+      - "5432:5432"
+    volumes:
+      - astral_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U astral -d astral_ascendancy"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  astral_postgres_data:
