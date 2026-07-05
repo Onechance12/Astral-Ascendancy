@@ -50,6 +50,7 @@ Design docs:
 - `docs/15_RPG_GAME_SYSTEMS_AUDIT.md`
 - `docs/16_SET_004_RPG_FOUNDATIONS.md`
 - `docs/17_PVP_RANKED_COMMUNITY_SYSTEMS.md`
+- `docs/18_BETA_PUSH_LIVE_GAME_PLAN.md`
 
 Balance sheets:
 
@@ -81,6 +82,9 @@ Balance sheets:
 - `docs/balance/pvp_deck_tiers.csv`
 - `docs/balance/pvp_rank_ladder.csv`
 - `docs/balance/pvp_matchmaking_rules.csv`
+- `docs/balance/deck_license_progression.csv`
+- `docs/balance/async_assignment_loops.csv`
+- `docs/balance/beta_push_milestones.csv`
 
 Updated index docs:
 
@@ -99,6 +103,7 @@ Updated index docs:
 - RPG progression now has an explicit audit across battle, worlds, commander levels, card mastery, relics, skills, evolutions, and PvP fairness.
 - Set 004 seeds the catalog with non-battle-ready RPG foundation cards.
 - PvP now has a ranked/unranked/friendly/event plan where deck tiers organize progression power and ranks measure skill inside each bracket.
+- The beta push plan now defines the live-game loop: timed assignments, busy cards/decks/crew, deck licenses, world study, resource gathering, rescue operations, and long-term return reasons.
 - The design protects free-to-play trust by making chase cards craftable/earnable and avoiding paid-only power.
 
 ## Important Gaps Before Implementation
@@ -138,6 +143,10 @@ These should be resolved before large code work:
 10. PvP needs live service work.
    - Deck power, ranks, queues, friends, and tribes now have scaffolding.
    - Real-time opponent pairing, battle sync, server-authoritative result validation, and anti-abuse checks are still future work.
+
+11. Beta live-game loop needs implementation.
+   - The design now calls for assignment timers and deck licenses.
+   - Next code phase should add `Assignment`, asset availability, `DeckLicense`, unlock requirements, claim rewards, and visible timers.
 
 ## Recommended Next Commits
 

@@ -59,6 +59,9 @@ Initial balance tables live in:
 - `docs/balance/pvp_deck_tiers.csv`
 - `docs/balance/pvp_rank_ladder.csv`
 - `docs/balance/pvp_matchmaking_rules.csv`
+- `docs/balance/deck_license_progression.csv`
+- `docs/balance/async_assignment_loops.csv`
+- `docs/balance/beta_push_milestones.csv`
 
 These are design tables first. Later, implementation can import the same data or translate it into versioned game data.
 

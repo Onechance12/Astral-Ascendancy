@@ -1,0 +1,9 @@
+assignment_type,display_name,required_assets,busy_assets,min_duration_minutes,max_duration_minutes,primary_rewards,risk_level,cancel_rule,beta_priority
+resource,Resource Gathering,Crew card or resource-specialist card plus world,Crew/card,15,480,Domain resources;world XP;minor shards,Low,Cancel anytime no bonus,1
+study,World Study,Science card or researcher plus world,Science/card,30,720,Science XP;world trait;field-test unlock,LowMedium,Cancel returns card no discovery,1
+project,Engineering Project,Project card plus resources plus world/structure,Project/card;resource lock,60,1440,Structure upgrade;relic socket;world upgrade,Low,Cancel refunds partial resources,2
+rescue,Rescue Operation,Battle deck or crew team,Deck/cards in deck,20,360,Crew card;rescued card;shards;relic fragments,MediumHigh,Cancel recalls deck after cooldown,1
+expedition,Expedition,Deck or scout crew plus Tritium,Deck or crew,60,720,New world;resource node;artifact;enemy event,Medium,Cancel loses travel cost,3
+training,Training Simulation,Card deck or commander,Card/deck optional,10,120,Card mastery;commander XP;license progress,None,Cancel no reward,2
+defense,Defense Deployment,Battle deck plus owned world,Deck/cards in deck,120,1440,Protected resources;tribe contribution;defense report,Medium,Cancel leaves world exposed,3
+tribe,Tribe Mission,Deck crew or resource pledge,Depends on mission,60,1440,Tribe XP;cosmetics;packs;influence,Medium,Cancel removes contribution,4

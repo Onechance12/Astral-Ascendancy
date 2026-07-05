@@ -73,6 +73,7 @@ Before implementation, keep the creative target in these docs:
 - `docs/15_RPG_GAME_SYSTEMS_AUDIT.md`
 - `docs/16_SET_004_RPG_FOUNDATIONS.md`
 - `docs/17_PVP_RANKED_COMMUNITY_SYSTEMS.md`
+- `docs/18_BETA_PUSH_LIVE_GAME_PLAN.md`
 
 ## Asset Pipeline
 

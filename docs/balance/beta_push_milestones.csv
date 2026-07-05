@@ -1,0 +1,7 @@
+milestone_id,display_name,primary_goal,core_systems,exit_criteria,not_in_scope
+beta0,Stabilize Foundation,Make current app and schema deploy-ready,Build;Prisma;Render;docs;balance tables,Build passes and DB schema can push,New monetization
+beta1,Assignment Clock,Make cards crew and decks commit to timed jobs,Assignment model;availability service;claim rewards;active timer UI,Asset can become busy finish timer and claim reward,Many assignment types
+beta2,Deck License Ladder,Teach and gate deck power progression,DeckLicense model;requirements;unlock rewards;celebration,Starter to Skirmish unlock works end to end,All license tiers fully playable
+beta3,World Study Expansion,Make worlds evolve through study and resources,World XP;study assignments;traits;resource specialization,Study returns world trait and improves progression,Deep procedural world simulation
+beta4,Rescue Operations,Make deck commitment missions meaningful,Deck busy state;rescue outcomes;crew rewards;risk,Deck is unavailable while deployed and returns with result,Full auto-battle simulation
+beta5,PvP Community Beta,Connect deck tiers licenses and social systems,PvP queue;friends;tribes;contribution;legal deck checks,Only legal decks queue and tribe/friend shell is usable,Full tribe wars
