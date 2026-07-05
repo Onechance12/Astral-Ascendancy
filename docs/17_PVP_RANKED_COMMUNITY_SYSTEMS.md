@@ -123,6 +123,19 @@ Examples:
 - Ascendant Synthari Network
 - Open War Crimson Monster Deck
 
+Deck capacity is a core progression system, not just a UI limit.
+
+Players should unlock enough saved deck slots to keep several decks across tiers and activities:
+
+- ranked deck
+- casual/testing deck
+- campaign deck
+- rescue deck
+- defense deck
+- event deck
+
+A deck assigned to a timed mission remains unavailable until it returns, so the player needs backup decks by design.
+
 The deck builder should eventually show:
 
 ```txt
@@ -131,6 +144,8 @@ Tier: Veteran II
 Illegal for: Starter, Skirmish I
 Reason: 3 evolved cards, 2 rare relics, commander skill path active
 ```
+
+See `docs/19_DECK_CAPACITY_AND_ECONOMY_FOUNDATION.md` and `docs/balance/deck_slot_capacity.csv`.
 
 ## Ranked Structure
 
@@ -304,4 +319,3 @@ No tribe-exclusive combat power in the first version.
 - Real-time battle sync is still separate work.
 - Rank updates should not become fully authoritative until server-side battle resolution exists.
 - Do not turn all PvP into normalized starter mode; that would erase the RPG promise.
-

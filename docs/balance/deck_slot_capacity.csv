@@ -1,0 +1,13 @@
+stage_id,display_name,trigger,earned_saved_deck_slots,total_earned_slots_after_stage,rank_bonus_slots_available,recommended_paid_slot_cap,default_slot_intent,notes
+account_start,Account Start,Create account and choose faction,3,3,0,0,Starter ranked;campaign training;flex,Player can send one deck away and still play
+starter_bronze,Starter Bronze Reward,Reach Bronze Orbit Starter placement,1,4,1,1,Starter ranked variant,First ranked reward should teach deck variants
+skirmish_license,Skirmish License,Unlock Skirmish License,2,6,2,2,Skirmish ranked;rescue deck,First moment where multiple tier decks matter
+skirmish_silver,Skirmish Silver Reward,Reach Silver Orbit in Skirmish,1,7,3,2,Skirmish sideboard,Reward active PvP without adding raw power
+veteran_license,Veteran License,Unlock Veteran License,3,10,3,3,Veteran ranked;relic test;defense deck,Relics and evolutions demand more deck identities
+veteran_gold,Veteran Gold Reward,Reach Gold Orbit in Veteran,1,11,4,3,Veteran counter deck,Skill reward inside tier
+ascendant_license,Ascendant License,Unlock Ascendant License,3,14,4,4,Ascendant ranked;world synergy;expedition deck,High-power decks become specialized
+ascendant_platinum,Ascendant Platinum Reward,Reach Platinum Constellation in Ascendant,1,15,5,4,Ascendant tech deck,Reward serious ladder progression
+mythic_license,Mythic License,Unlock Mythic License,2,17,5,5,Mythic ranked;mythic campaign,Prestige capacity not required for casual play
+open_war_license,Open War License,Unlock Open War License,1,18,5,6,Open War sandbox,Explicit opt-in high-power capacity
+subscription_command_pass,Command Pass Subscription,Active subscription entitlement,0,18,0,4,Temporary extra saved decks,Expires without deleting decks
+season_event_slot,Season Event Slot,Season reward or event purchase,0,18,0,2,Event format deck,Expires or converts to frozen deck state

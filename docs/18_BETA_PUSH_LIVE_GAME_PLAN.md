@@ -182,6 +182,12 @@ This creates long-term aspiration without hiding exciting cards.
 
 See `docs/balance/deck_license_progression.csv`.
 
+Deck licenses should also unlock deck capacity.
+
+The player needs multiple usable decks per tier because timed assignments can make decks unavailable. Starter should begin with enough capacity to learn, Skirmish should add the first serious extra slots, and Veteran should make specialized ranked, campaign, rescue, and defense decks normal.
+
+See `docs/19_DECK_CAPACITY_AND_ECONOMY_FOUNDATION.md` and `docs/balance/deck_slot_capacity.csv`.
+
 ## Assignment Types
 
 ### Resource Gathering
@@ -360,6 +366,12 @@ Examples:
 
 Active assignments should produce higher rewards and progression but create opportunity cost.
 
+Assignment capacity is separate from saved deck capacity.
+
+A player may have many saved decks but only one rescue bay, study lab, or engineering bay until progression unlocks more. This keeps the galaxy readable and gives science, worlds, and future subscriptions a clean place to add convenience without bypassing PvP legality.
+
+See `docs/balance/action_capacity_progression.csv`.
+
 ## Availability Model
 
 Every owned card/deck/crew needs an availability state.
@@ -421,12 +433,16 @@ The beta should not implement every dream system. It should prove the living loo
 
 ### Not For First Beta
 
-- Monetization.
+- Live monetization.
 - Fully open player trading.
 - Full tribe wars.
 - Full real-time PvP battle sync if not stable.
 - Deep AI economy simulation.
 - Dozens of parallel assignment types.
+
+Beta should still plan the economy foundation: deck slot capacity, assignment capacity, future entitlements, transparent pack rules, and disabled store-ready product categories. Do not enable checkout until the loop is fun and fair.
+
+See `docs/balance/economy_monetization_surfaces.csv`.
 
 ## Beta Progression Arc
 
@@ -518,6 +534,7 @@ Goal:
 - Gate deck tier use by license.
 - Add unlock requirements.
 - Add Starter -> Skirmish unlock celebration.
+- Add earned saved deck slot rewards.
 
 Exit criteria:
 
@@ -525,6 +542,7 @@ Exit criteria:
 - Skirmish is locked with clear requirements.
 - Completing requirements unlocks Skirmish.
 - Reward pack is granted.
+- Extra deck slot is granted and explained.
 
 ### Beta 3: World Study And Resource Expansion
 
@@ -623,4 +641,3 @@ Without assignments, resources are passive numbers.
 Without deck licenses, progression power has no teaching structure.
 
 Together they create a game players can live in for years.
-

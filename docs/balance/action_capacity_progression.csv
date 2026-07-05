@@ -1,0 +1,9 @@
+capacity_id,display_name,activity_type,starting_capacity,earned_capacity_path,recommended_beta_cap,recommended_live_cap,paid_or_subscription_cap,fairness_rule
+resource_crews,Resource Crew Slots,resource,1,World Advancement levels and crew recruitment,2,6,2,Paid capacity increases gathering options but not match power directly
+study_labs,Study Lab Slots,study,1,Science tracks and researcher cards,2,5,2,Study speed and quantity cannot bypass license gates
+engineering_bays,Engineering Bays,project,0,Project Engineering level 1 unlock then world structures,1,4,2,Projects still require resources and time
+rescue_bays,Rescue Bays,rescue,1,Skirmish License then Veteran operations,1,3,1,Decks assigned to rescue remain unavailable
+expedition_bays,Expedition Bays,expedition,0,Veteran License and world survey milestones,0,3,1,Expedition rewards can raise collection but obey deck tier validation
+defense_fleets,Defense Fleet Slots,defense,0,Veteran License then tribe/domain milestones,0,4,1,Defense slots do not grant ranked rating
+training_sims,Training Simulation Slots,training,1,Tutorial and commander training milestones,2,5,2,Training grants capped mastery and cannot instantly max PvP power
+tribe_missions,Tribe Mission Slots,tribe,0,Join tribe and contribute weekly,0,3,1,Tribe boosts are contribution based and seasonal

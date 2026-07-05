@@ -1,0 +1,14 @@
+surface_id,display_name,product_type,free_path,paid_path,fairness_guardrail,beta_status
+card_packs,Card Packs,collection,Campaign quests PvP rewards events crafting,Direct pack purchase or battle pass,Visible odds pity duplicate protection and craftable chase cards,planned_only
+starter_bundles,Starter Bundles,onboarding,Tutorial rewards and starter missions,One-time faction starter bundle,No exclusive competitive staples and only early catch-up value,planned_only
+permanent_deck_slots,Permanent Deck Slots,capacity,License rank campaign and event unlocks,Account deck slot purchase,Does not bypass deck tier license or power validation,foundation_needed
+temporary_deck_slots,Temporary Deck Slots,capacity,Season event rewards,24h 7d or season rental,Expired decks freeze instead of deleting; no rank bypass,foundation_needed
+subscription_command_pass,Command Pass,subscription,Normal earned capacity and rewards,Monthly convenience slots cosmetics and capped speed,Subscription adds options not hidden combat normalization,planned_only
+assignment_capacity,Assignment Capacity,capacity,Science projects world upgrades and licenses,Extra lab bay rescue bay or project bay,Capacity does not bypass resource costs or deck busy rules,foundation_needed
+chrono_cells,Chrono Cells,speed,Daily login events and campaign rewards,Small speed bundles or subscription stipend,Daily caps no ranked progress skip no license skip,planned_only
+cosmetics,Cosmetics,vanity,Season quests events mastery,Direct skins frames boards animations,No gameplay advantage,planned_only
+world_skins,World Skins,vanity,Campaign achievements,Direct cosmetic purchase,World skin does not change resource output,planned_only
+premium_world_cards,World Card Packs,collection,Crafting campaign exploration and events,Pack bundle later,World cards increase deck power and obey format restrictions,planned_only
+weapon_blueprints,Weapon Blueprints,progression,Crafting boss drops engineering projects,Blueprint pack later,Weapons raise deck power and require legal tier,planned_only
+armor_blueprints,Armor Blueprints,progression,Crafting rescue drops engineering projects,Blueprint pack later,Armor raises deck power and low tiers can restrict it,planned_only
+battle_pass,Season Battle Pass,seasonal,Free reward track,Paid reward track,Cosmetics capacity convenience and capped resources only,planned_only
