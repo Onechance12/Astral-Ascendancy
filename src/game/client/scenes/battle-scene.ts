@@ -33,6 +33,21 @@ const STARTING_HAND = [
   "hardlight_exoshell",
 ];
 
+const PLAYER_DRAW_DECK = [
+  "acolyte",
+  "dawnknight",
+  "solar-priest",
+  "radiance",
+  "survey_claim",
+  "emergency_bulkhead",
+  "solar_mantle",
+  "verdict_of_helios",
+  "artifact_recovery_team",
+];
+
+const ENEMY_STARTING_HAND = ["broodling", "spitter", "infestor"];
+const ENEMY_DRAW_DECK = ["larval_tide", "tyrant", "harvester", "maw_apostle", "spawning_pit", "black_bloom"];
+
 const WORLD_COLOR: Record<string, number> = {
   barren: 0x64748b,
   astral: 0x93c5fd,
@@ -78,6 +93,9 @@ function createInitialBattleState(): FiveByFiveMatchState {
 export class BattleScene extends BaseScene {
   private match = createInitialBattleState();
   private hand = [...STARTING_HAND];
+  private playerDeck = [...PLAYER_DRAW_DECK];
+  private enemyHand = [...ENEMY_STARTING_HAND];
+  private enemyDeck = [...ENEMY_DRAW_DECK];
   private selectedCardId: string | null = null;
   private selectedActor: number | null = null;
   private bgLayer = new Container();
@@ -88,6 +106,7 @@ export class BattleScene extends BaseScene {
   private lastWidth = 0;
   private lastHeight = 0;
   private time = 0;
+  private enemyTurnQueued = false;
 
   enter(): void {
     this.container.addChild(this.bgLayer, this.boardLayer, this.hudLayer, this.handLayer, this.fxLayer);
@@ -155,15 +174,21 @@ export class BattleScene extends BaseScene {
     const reset = makeButton("RESET", 94, COLORS.gold, () => {
       this.match = createInitialBattleState();
       this.hand = [...STARTING_HAND];
+      this.playerDeck = [...PLAYER_DRAW_DECK];
+      this.enemyHand = [...ENEMY_STARTING_HAND];
+      this.enemyDeck = [...ENEMY_DRAW_DECK];
       this.selectedActor = null;
       this.selectedCardId = null;
+      this.enemyTurnQueued = false;
       this.redraw();
     });
     reset.position.set(width - 226, 78);
     const menu = makeButton("MENU", 94, COLORS.cyan, () => this.switchScene("mainMenu"));
     menu.position.set(width - 118, 78);
-    const pulse = makeButton("PULSE TURN", Math.min(170, width * 0.28), COLORS.emerald, () => this.pulseTurn());
-    pulse.position.set(width - pulse.width - 18, height - 152);
+    const end = makeButton("END TURN", Math.min(170, width * 0.28), COLORS.emerald, () => this.endPlayerTurn());
+    end.position.set(width - end.width - 18, height - 152);
+    end.eventMode = this.match.active === "player" ? "static" : "none";
+    end.alpha = this.match.active === "player" ? 1 : 0.34;
     const selectedCanStrikeCommander = this.selectedActor !== null && canAttackCommander(this.match.board, this.selectedActor);
     const direct = makeButton("STRIKE COMMANDER", Math.min(210, width * 0.38), COLORS.rose, () => this.attackCommander());
     direct.position.set(width - direct.width - 18, height - 208);
@@ -174,7 +199,11 @@ export class BattleScene extends BaseScene {
     logPanel.position.set(width - logPanel.width - 18, 138);
     const logTitle = label("BATTLE LOG", 9, COLORS.cyan, "900");
     logTitle.position.set(logPanel.x + 12, logPanel.y + 10);
-    this.hudLayer.addChild(top, player, reset, menu, pulse, direct, logPanel, logTitle);
+    const phase = this.turnBanner(width);
+    phase.position.set(Math.max(18, width / 2 - phase.width / 2), 22);
+    const hint = this.actionHint();
+    hint.position.set(22, Math.max(136, height - 208));
+    this.hudLayer.addChild(top, player, reset, menu, end, direct, logPanel, logTitle, phase, hint);
     this.match.log.slice(-4).forEach((entry, index) => {
       const row = label(entry, 10, COLORS.slate, "bold");
       row.position.set(logPanel.x + 12, logPanel.y + 28 + index * 15);
@@ -212,7 +241,7 @@ export class BattleScene extends BaseScene {
     this.hand.forEach((defId, index) => {
       const def = getCard(defId);
       const selected = this.selectedCardId === defId;
-      const disabled = def.cost > this.match.player.resonance || def.type === "Anomaly";
+      const disabled = this.match.active !== "player" || def.cost > this.match.player.resonance || def.type === "Anomaly";
       const card = this.handCard(def, cardW, cardH, selected, disabled);
       card.position.set(startX + index * (cardW + 8), y + (selected ? -10 : 0));
       card.eventMode = disabled ? "none" : "static";
@@ -388,8 +417,51 @@ export class BattleScene extends BaseScene {
     return hud;
   }
 
+  private turnBanner(screenWidth: number) {
+    const title = this.match.active === "player" ? `TURN ${this.match.turn} · YOUR ACTION` : `TURN ${this.match.turn} · ENEMY ACTION`;
+    const accent = this.match.active === "player" ? COLORS.emerald : COLORS.fuchsia;
+    const banner = new Container();
+    const width = Math.min(360, screenWidth - 36);
+    banner.addChild(roundedPanel(width, 38, 0x030712, 0.78, accent));
+    const copy = label(title, 13, accent, "900");
+    copy.anchor.set(0.5);
+    copy.position.set(width / 2, 19);
+    banner.addChild(copy);
+    return banner;
+  }
+
+  private actionHint() {
+    const width = Math.min(360, this.app.screen.width - 44);
+    const hint = new Container();
+    hint.addChild(roundedPanel(width, 54, 0x030712, 0.68, COLORS.gold));
+    const copy = label(this.hintText(), 10, COLORS.slate, "bold");
+    copy.position.set(12, 10);
+    hint.addChild(copy);
+    return hint;
+  }
+
+  private hintText() {
+    if (this.match.active !== "player") return "Enemy commander is resolving actions.";
+    if (this.selectedCardId) {
+      const card = getCard(this.selectedCardId);
+      if (card.cost > this.match.player.resonance) return `Need ${card.cost} Resonance to play ${card.name}.`;
+      if (this.targetIndexes().length === 0) return "No legal sectors for this card right now.";
+      return "Tap a glowing sector to play the selected card.";
+    }
+    if (this.selectedActor !== null) {
+      const actor = this.match.board[this.selectedActor]?.entity;
+      if (!actor) return "Select a card or a friendly unit.";
+      if (canAttackCommander(this.match.board, this.selectedActor)) return "Enemy board is clear. Strike the commander or move.";
+      if (actor.exhausted || !actor.canAttack) return "This unit is spent until your next turn.";
+      if (legalAttackIndexes(this.match.board, this.selectedActor).length > 0) return "Tap a glowing enemy to attack. Each unit attacks once per turn.";
+      return "No legal attack. Move toward the fight or end turn.";
+    }
+    return "Tap a hand card to deploy, or tap a friendly unit to move or attack.";
+  }
+
   private targetIndexes() {
     const selectedCard = this.selectedCardId ? getCard(this.selectedCardId) : null;
+    if (this.match.active !== "player") return [];
     if (selectedCard) {
       if (selectedCard.cost > this.match.player.resonance) return [];
       if (selectedCard.type === "Entity") return legalDeployIndexes(this.match.board, "player");
@@ -410,6 +482,7 @@ export class BattleScene extends BaseScene {
   }
 
   private onSectorTap(index: number) {
+    if (this.match.active !== "player") return;
     const sector = this.match.board[index];
     const selectedCard = this.selectedCardId ? getCard(this.selectedCardId) : null;
     const targets = this.targetIndexes();
@@ -427,7 +500,7 @@ export class BattleScene extends BaseScene {
       const next = this.playSelectedCard(selectedCard, index);
       if (next !== before) {
         this.match = next;
-        this.hand = this.hand.filter((id) => id !== selectedCard.defId);
+        this.removeCardFromHand(selectedCard.defId);
         this.selectedCardId = null;
         this.bus.emit("battlelog", { message: `${selectedCard.name} played.` });
       }
@@ -447,7 +520,7 @@ export class BattleScene extends BaseScene {
   }
 
   private attackCommander() {
-    if (this.selectedActor === null || !canAttackCommander(this.match.board, this.selectedActor)) return;
+    if (this.match.active !== "player" || this.selectedActor === null || !canAttackCommander(this.match.board, this.selectedActor)) return;
     this.match = attackCommanderInMatch(this.match, this.selectedActor);
     this.selectedActor = null;
     this.selectedCardId = null;
@@ -463,13 +536,156 @@ export class BattleScene extends BaseScene {
     return this.match;
   }
 
-  private pulseTurn() {
-    const ended = endStep(this.match);
-    this.match = ended.phase === "over" ? ended : startTurn(ended, "player");
+  private endPlayerTurn() {
+    if (this.match.active !== "player") return;
     this.selectedActor = null;
     this.selectedCardId = null;
-    if (this.match.winner) this.switchScene(this.match.winner === "player" ? "victory" : "defeat");
+    const playerEnded = endStep({
+      ...this.match,
+      log: [...this.match.log, "Player ends turn."],
+      lastEvents: [],
+    });
+    this.match = playerEnded;
+    if (this.resolveWinner()) return;
+    this.match = startTurn(this.match, "enemy");
+    this.drawEnemyCard();
     this.redraw();
+    this.enemyTurnQueued = true;
+    window.setTimeout(() => {
+      if (!this.enemyTurnQueued || this.match.active !== "enemy") return;
+      this.enemyTurnQueued = false;
+      this.runEnemyTurn();
+    }, 550);
+  }
+
+  private runEnemyTurn() {
+    let next = this.playEnemyCard(this.match);
+    next = this.resolveEnemyAttacks(next);
+    const enemyEvents = next.lastEvents;
+    if (next.phase !== "over") {
+      next = endStep({
+        ...next,
+        log: [...next.log, "Enemy ends turn."],
+      });
+    }
+    if (next.phase !== "over") {
+      next = startTurn(next, "player");
+      next = {
+        ...next,
+        lastEvents: enemyEvents.length > 0 ? enemyEvents : next.lastEvents,
+      };
+      this.drawPlayerCard();
+    }
+    this.match = next;
+    this.enemyTurnQueued = false;
+    if (this.resolveWinner()) return;
+    this.redraw();
+  }
+
+  private playEnemyCard(state: FiveByFiveMatchState) {
+    const affordable = this.enemyHand
+      .map((id) => getCard(id))
+      .filter((card) => card.type === "Entity" && card.cost <= state.enemy.resonance)
+      .sort((a, b) => b.cost - a.cost);
+    const card = affordable[0];
+    if (!card) {
+      return { ...state, log: [...state.log, "Enemy holds position."] };
+    }
+    const target = this.chooseEnemyDeployIndex(state);
+    if (target === null) return state;
+    const next = deployEntityCard(state, card, "enemy", target);
+    if (next !== state) this.removeEnemyCardFromHand(card.defId);
+    return next;
+  }
+
+  private chooseEnemyDeployIndex(state: FiveByFiveMatchState) {
+    const targets = legalDeployIndexes(state.board, "enemy");
+    if (targets.length === 0) return null;
+    const playerIndexes = state.board.filter((sector) => sector.entity?.owner === "player").map((sector) => sector.index);
+    if (playerIndexes.length === 0) {
+      return targets.sort((a, b) => Math.abs((a % 5) - 2) - Math.abs((b % 5) - 2))[0];
+    }
+    return targets.sort((a, b) => this.closestDistance(a, playerIndexes) - this.closestDistance(b, playerIndexes))[0];
+  }
+
+  private resolveEnemyAttacks(state: FiveByFiveMatchState) {
+    let next = state;
+    for (let pass = 0; pass < 6; pass++) {
+      const attackerIndex = this.bestEnemyAttacker(next);
+      if (attackerIndex === null) break;
+      const targetIndex = this.bestEnemyTarget(next, attackerIndex);
+      if (targetIndex !== null) {
+        next = attackInMatch(next, attackerIndex, targetIndex);
+      } else if (canAttackCommander(next.board, attackerIndex)) {
+        next = attackCommanderInMatch(next, attackerIndex);
+      } else {
+        const moveTarget = this.bestEnemyMove(next, attackerIndex);
+        if (moveTarget === null) break;
+        next = moveEntityInMatch(next, attackerIndex, moveTarget);
+      }
+      if (next.phase === "over") break;
+    }
+    return next;
+  }
+
+  private bestEnemyAttacker(state: FiveByFiveMatchState) {
+    const candidates = state.board
+      .filter((sector) => sector.entity?.owner === "enemy" && sector.entity.canAttack && !sector.entity.exhausted)
+      .map((sector) => sector.index);
+    if (candidates.length === 0) return null;
+    return candidates.sort((a, b) => (state.board[b].entity?.attack ?? 0) - (state.board[a].entity?.attack ?? 0))[0];
+  }
+
+  private bestEnemyTarget(state: FiveByFiveMatchState, attackerIndex: number) {
+    const attacker = state.board[attackerIndex].entity;
+    const targets = legalAttackIndexes(state.board, attackerIndex);
+    if (!attacker || targets.length === 0) return null;
+    return targets.sort((a, b) => {
+      const aTarget = state.board[a].entity ?? state.board[a].structure;
+      const bTarget = state.board[b].entity ?? state.board[b].structure;
+      const aLethal = aTarget && aTarget.hp <= attacker.attack ? 0 : 1;
+      const bLethal = bTarget && bTarget.hp <= attacker.attack ? 0 : 1;
+      if (aLethal !== bLethal) return aLethal - bLethal;
+      return (aTarget?.hp ?? 99) - (bTarget?.hp ?? 99);
+    })[0];
+  }
+
+  private bestEnemyMove(state: FiveByFiveMatchState, fromIndex: number) {
+    const moves = legalMoveIndexes(state.board, fromIndex);
+    const playerIndexes = state.board.filter((sector) => sector.entity?.owner === "player").map((sector) => sector.index);
+    if (moves.length === 0 || playerIndexes.length === 0) return null;
+    return moves.sort((a, b) => this.closestDistance(a, playerIndexes) - this.closestDistance(b, playerIndexes))[0];
+  }
+
+  private closestDistance(index: number, targets: number[]) {
+    return Math.min(...targets.map((target) => Math.abs(Math.floor(index / 5) - Math.floor(target / 5)) + Math.abs((index % 5) - (target % 5))));
+  }
+
+  private drawPlayerCard() {
+    const next = this.playerDeck.shift();
+    if (!next || this.hand.length >= 7) return;
+    this.hand.push(next);
+  }
+
+  private drawEnemyCard() {
+    const next = this.enemyDeck.shift();
+    if (!next || this.enemyHand.length >= 6) return;
+    this.enemyHand.push(next);
+  }
+
+  private removeCardFromHand(defId: string) {
+    const index = this.hand.indexOf(defId);
+    if (index >= 0) this.hand.splice(index, 1);
+  }
+
+  private removeEnemyCardFromHand(defId: string) {
+    const index = this.enemyHand.indexOf(defId);
+    if (index >= 0) this.enemyHand.splice(index, 1);
+  }
+
+  private resolveWinner() {
+    if (this.match.winner) this.switchScene(this.match.winner === "player" ? "victory" : "defeat");
+    return Boolean(this.match.winner);
   }
 
   private clearLayer(layer: Container) {
