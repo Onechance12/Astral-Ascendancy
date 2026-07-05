@@ -1,0 +1,37 @@
+card_id,resonance_cost,affinity_requirement,material_requirement,material_amount,expected_turn,baseline_value,actual_value,rarity_pressure,setup_requirement,counterplay_note,pricing_note
+dawnline_cartographer,2,Solari,Plasma,0,2,4.0,4.4,0.2,Star-line positioning,Disrupt line or remove shielded allies,Low stats offset line shield utility
+treaty_spire,3,Solari,Plasma,1,3,6.0,6.8,0.4,Controlled Star world,Destroy or contest adjacent sectors,Influence denial costs setup
+solar_mantle,2,Solari,Plasma,0,2,4.0,4.1,0.1,Valid ally target,Attachment removal or non-corrupt damage,Fair protection attachment
+verdict_of_helios,5,Solari,Plasma,1,5,10.0,11.2,0.8,Corrupted or contested enemies,Avoid corrupted sectors or spread out,Holo board clear needs board condition
+celestial_embassy,3,Solari,Plasma,1,3,6.0,6.7,0.4,Adjacent controlled sectors,Contest nearby control,World plus Influence requires setup
+larval_tide,1,Voidborn,Biomass,0,1,2.0,2.4,0.0,Corrupted world for spawn,Keep corruption contained,Common body only spikes with terrain
+parasite_crown,2,Voidborn,Biomass,1,2,4.0,5.2,0.5,Enemy entity target,Destroy host outside key sector,Rare infection payoff
+spawning_pit,3,Voidborn,Biomass,1,3,6.0,7.0,0.4,Organic or Corrupted world,Destroy pit or occupy adjacent sectors,Spawn engine must survive
+black_bloom,4,Voidborn,Biomass,1,4,8.0,9.4,0.8,Adjacent uncontrolled Organic worlds,Purify or control adjacent terrain,Holo corruption spread is slow but scary
+consume_the_map,6,Voidborn,Biomass,2,6,12.0,14.0,1.2,Friendly structure sacrifice,Remove structures before payoff,Mythic terrain bomb priced high
+survey_drone_wing,1,Synthari,Alloy,0,1,2.0,2.3,0.0,Machine world for Scan,Kill fragile flyer,Common scout body
+circuit_bloom,3,Synthari,Alloy,1,3,6.0,7.0,0.5,Machine network positioning,Separate Machine worlds,Connection payoff priced as rare
+nanite_plate,2,Synthari,Alloy,0,2,4.0,4.4,0.2,Entity target,Use Void or armor break,Armor attachment with no attack
+assembly_spine,4,Synthari,Alloy,2,4,8.0,9.8,0.8,Three connected Machine worlds,Contest network or destroy structure,Holo engine requires network
+system_override,3,Synthari,Alloy,1,3,6.0,6.9,0.5,Enemy structure target,Avoid Machine placement or bait timing,Temporary control avoids permanent swing
+glowcap_runner,1,Verdant,Verdance,0,1,2.0,2.3,0.0,Verdant movement,Block movement lanes,Common scout healer
+mycelial_archive,3,Verdant,Verdance,1,3,6.0,6.9,0.4,Healing adjacent allies,Remove structure or deny healing,Forecast engine tied to healing
+living_bulwark,2,Verdant,Verdance,0,2,4.0,4.5,0.2,Verdant world for Guardian,Move target off terrain,Good defensive attachment needs terrain
+overgrowth_surge,4,Verdant,Verdance,1,4,8.0,9.3,0.8,Adjacent neutral sectors,Occupy or corrupt spread points,Holo board spread plus heal
+worldroot_gate,3,Verdant,Verdance,1,3,6.0,7.0,0.5,Connected Verdant worlds,Sever terrain network,Rare movement terrain
+ember_sapper,2,Crimson,Ember,0,2,4.0,4.3,0.2,Enemy structures,Protect structures or remove sapper,Anti-structure attacker
+blood_metal_harness,2,Crimson,Ember,1,2,4.0,4.9,0.5,Damage survival trigger,Kill in one hit or silence,Rare economy attachment
+war_foundry,4,Crimson,Ember,2,4,8.0,9.7,0.8,Damaged ally plus Crucible world,Heal/finish damaged allies,Holo engine requires board state
+scorched_claim,3,Crimson,Ember,1,3,6.0,6.8,0.5,Control changes,Hold rather than trade sector,Dangerous terrain pressures both commanders
+break_the_line,2,Crimson,Ember,0,2,4.0,4.5,0.2,Push lane and collision target,Position away from structures,Cheap displacement trick
+gate_moth,1,Astral,Aether,0,1,2.0,2.4,0.0,Astral adjacency,Block blink destinations,Common portal scout
+timeglass_reliquary,3,Astral,Aether,1,3,6.0,6.8,0.4,Astral world and world cards,Destroy observatory or pressure world deck,Forecast discount engine
+phase_cloak,2,Astral,Aether,0,2,4.0,4.4,0.2,Entity target,Use non-Kinetic damage,Defensive attachment with school counterplay
+foldspace_treaty,4,Astral,Aether,1,4,8.0,9.1,0.8,Two friendly entities,Disrupt board before swap,Holo reposition swing
+starless_door,5,Astral,Aether,2,5,10.0,12.5,1.2,Revealed Astral sectors,Seal or contest portals,Mythic movement world with setup
+survey_claim,1,Neutral,None,0,1,2.0,2.0,0.0,Neutral sector,Opponent can use revealed info too,Clean common utility world
+mobile_barricade,2,Neutral,Alloy,0,2,4.0,4.3,0.1,Controlled world,Destroy after it fixes,Flexible but low-value blocker
+salvage_medic,2,Neutral,None,0,2,4.0,4.2,0.1,Damaged adjacent structure,Kill medic or finish structure,Repair support with small body
+gravity_anchor,2,Neutral,Aether,0,2,4.0,4.8,0.5,Important sector target,Destroy attachment or win without Blink,Rare portal counter
+wreckage_field,3,Neutral,None,0,3,6.0,6.7,0.4,Structures dying there,Avoid building into field,Resource terrain with delayed payoff
+relic_of_first_contact,3,Neutral,Aether,1,3,6.0,7.6,0.8,Off-faction world standing,Contest or alter terrain,Holo influence relic with positional requirement

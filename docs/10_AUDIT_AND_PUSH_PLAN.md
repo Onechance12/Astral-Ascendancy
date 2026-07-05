@@ -45,6 +45,7 @@ Design docs:
 - `docs/08_RARITY_PACKS_AND_COMBINE.md`
 - `docs/09_RESOURCE_COSTING_AND_CARD_VALUE.md`
 - `docs/11_SET_001_CARD_EXPANSION.md`
+- `docs/13_SET_002_WORLDS_AWAKEN.md`
 
 Balance sheets:
 
@@ -64,6 +65,8 @@ Balance sheets:
 - `docs/balance/world_resource_costs.csv`
 - `docs/balance/set001_card_expansion.csv`
 - `docs/balance/set001_resource_costs.csv`
+- `docs/balance/set002_card_expansion.csv`
+- `docs/balance/set002_resource_costs.csv`
 
 Updated index docs:
 

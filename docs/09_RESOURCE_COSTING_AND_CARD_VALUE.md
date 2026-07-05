@@ -412,5 +412,6 @@ Resource/costing tables:
 - `docs/balance/card_resource_costs.csv`
 - `docs/balance/world_resource_costs.csv`
 - `docs/balance/set001_resource_costs.csv`
+- `docs/balance/set002_resource_costs.csv`
 
 These tables should be considered the design source of truth for resource tuning.

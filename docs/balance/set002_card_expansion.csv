@@ -1,0 +1,37 @@
+card_id,name,faction,rarity,card_type,cost,attack,hp,damage_school,defense_profile,creature_class,world_affinity,structure_class,keywords,combine_family,board_role
+dawnline_cartographer,Dawnline Cartographer,Solari,Uncommon,Entity,2,1,4,Radiant,Lightform,Caster,Star,None,Shield;LineMark,solari_cartographers,Line-based shield setup
+treaty_spire,Treaty Spire,Solari,Rare,Structure,3,0,5,Radiant,Structure,Construct,Star,Spire,InfluenceDeny;ProjectControl,solari_structures,Anti-influence control structure
+solar_mantle,Solar Mantle,Solari,Uncommon,Attachment,2,0,0,Radiant,Lightform,Caster,Star,None,Shield;CannotCorrupt,solari_attachments,Anti-corruption protection
+verdict_of_helios,Verdict of Helios,Solari,Holo,Anomaly,5,0,0,Radiant,Unarmored,Caster,Star,None,AreaDamage;Purify,solari_purify_line,Corrupted board punish
+celestial_embassy,Celestial Embassy,Solari,Rare,World,3,0,0,Radiant,Structure,Caster,Star,None,Terraform;Influence,solari_worlds,Influence terrain setup
+larval_tide,Larval Tide,Voidborn,Common,Entity,1,1,1,Bio,Chitin,Swarm,Corrupted,None,Swarm;Spawn,void_larva_line,Cheap corrupted-world swarm
+parasite_crown,Parasite Crown,Voidborn,Rare,Attachment,2,0,0,Void,Chitin,Caster,Corrupted,None,Debuff;SpawnOnDeath,void_parasites,Enemy infection attachment
+spawning_pit,Spawning Pit,Voidborn,Rare,Structure,3,0,4,Bio,Structure,Construct,Organic,Nest,Spawn;Broodling,void_structures,Protected spawn engine
+black_bloom,Black Bloom,Voidborn,Holo,World,4,0,0,Void,Structure,Caster,Corrupted,None,Terraform;SpreadCorruption,void_worlds,Corruption spread terrain
+consume_the_map,Consume the Map,Voidborn,Mythic,Anomaly,6,0,0,Void,Unarmored,Caster,Corrupted,None,SacrificeStructure;AreaCorrupt,void_mythics,High-commit terrain bomb
+survey_drone_wing,Survey Drone Wing,Synthari,Common,Entity,1,1,1,Tech,Machine,Drone,Machine,None,Flying;Scan,synthari_drones,Cheap flying information unit
+circuit_bloom,Circuit Bloom,Synthari,Rare,World,3,0,0,Tech,Structure,Caster,Machine,None,Terraform;ConnectedWorlds;synthari_network,synthari_worlds,Machine connection enabler
+nanite_plate,Nanite Plate,Synthari,Uncommon,Attachment,2,0,0,Tech,Machine,Construct,Machine,None,Armor;FlatArmor,synthari_attachments,Efficient armor attachment
+assembly_spine,Assembly Spine,Synthari,Holo,Structure,4,0,6,Tech,Structure,Construct,Machine,Foundry,ConstructSpawn;synthari_network,synthari_structures,Connected machine payoff
+system_override,System Override,Synthari,Rare,Anomaly,3,0,0,Tech,Machine,Caster,Machine,None,ExhaustStructure;TemporaryControl,synthari_control,Structure control trick
+glowcap_runner,Glowcap Runner,Verdant,Common,Entity,1,1,2,Bio,LivingArmor,Beast,Verdant,None,Scout;SelfHeal,verdant_beasts,Cheap movement healer
+mycelial_archive,Mycelial Archive,Verdant,Rare,Structure,3,0,5,Bio,Structure,Construct,Verdant,Observatory,Forecast;HealTrigger,verdant_structures,Healing-to-forecast engine
+living_bulwark,Living Bulwark,Verdant,Uncommon,Attachment,2,0,0,Bio,LivingArmor,Beast,Verdant,None,HPBuff;Guardian,verdant_attachments,Living armor protection
+overgrowth_surge,Overgrowth Surge,Verdant,Holo,Anomaly,4,0,0,Bio,Unarmored,Caster,Verdant,None,SpreadTerrain;Heal,verdant_worlds,Board spread and healing swing
+worldroot_gate,Worldroot Gate,Verdant,Rare,World,3,0,0,Bio,Structure,Caster,Verdant,None,Terraform;ConnectedMovement,verdant_worlds,Verdant movement network
+ember_sapper,Ember Sapper,Crimson,Uncommon,Entity,2,2,2,Kinetic,BloodMetal,Infantry,Crucible,None,StructureDamage,crimson_sappers,Anti-structure attacker
+blood_metal_harness,Blood-Metal Harness,Crimson,Rare,Attachment,2,0,0,Kinetic,BloodMetal,Infantry,Crucible,None,AttackBuff;EmberGain,crimson_attachments,Damage-survival economy
+war_foundry,War Foundry,Crimson,Holo,Structure,4,0,6,Kinetic,Structure,Construct,Crucible,Foundry,AttackBuff;DamagedAlly,crimson_structures,Damaged ally attack engine
+scorched_claim,Scorched Claim,Crimson,Rare,World,3,0,0,Ember,Structure,Caster,Crucible,None,Terraform;CommanderDamage,crimson_worlds,Dangerous control terrain
+break_the_line,Break the Line,Crimson,Uncommon,Anomaly,2,0,0,Kinetic,Unarmored,Infantry,Crucible,None,Push;CollisionDamage,crimson_tactics,Position disruption
+gate_moth,Gate Moth,Astral,Common,Entity,1,1,1,Astral,Phase,Flyer,Astral,None,Flying;Blink,astral_moths,Cheap portal scout
+timeglass_reliquary,Timeglass Reliquary,Astral,Rare,Structure,3,0,4,Astral,Structure,Construct,Astral,Observatory,Forecast;CostReduce,astral_structures,World forecast engine
+phase_cloak,Phase Cloak,Astral,Uncommon,Attachment,2,0,0,Astral,Phase,Caster,Astral,None,Phase;KineticReduction,astral_attachments,Anti-kinetic defense
+foldspace_treaty,Foldspace Treaty,Astral,Holo,Anomaly,4,0,0,Astral,Phase,Caster,Astral,None,Swap;Shield,astral_tactics,Portal reposition trick
+starless_door,Starless Door,Astral,Mythic,World,5,0,0,Astral,Structure,Caster,Astral,None,Terraform;PortalNetwork,astral_worlds,High-value movement terrain
+survey_claim,Survey Claim,Neutral,Common,World,1,0,0,Kinetic,Structure,Caster,Barren,None,Terraform;Reveal,neutral_worlds,Cheap information terrain
+mobile_barricade,Mobile Barricade,Neutral,Uncommon,Structure,2,0,4,Kinetic,Structure,Construct,Barren,Bastion,MoveOnce;Block,neutral_structures,Flexible protection structure
+salvage_medic,Salvage Medic,Neutral,Uncommon,Entity,2,1,3,Kinetic,Unarmored,Infantry,Barren,None,StructureHeal,neutral_workers,Structure repair support
+gravity_anchor,Gravity Anchor,Neutral,Rare,Attachment,2,0,0,Astral,Crystal,Caster,Barren,None,AntiBlink;SectorLock,neutral_control,Portal counter attachment
+wreckage_field,Wreckage Field,Neutral,Rare,World,3,0,0,Kinetic,Structure,Caster,Barren,None,Terraform;MaterialCache,neutral_worlds,Structure death resource terrain
+relic_of_first_contact,Relic of First Contact,Neutral,Holo,Attachment,3,0,0,Astral,Crystal,Caster,Barren,None,StatBuff;Influence,neutral_relics,Off-faction world payoff

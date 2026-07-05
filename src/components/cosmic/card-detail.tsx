@@ -36,6 +36,7 @@ const ATTACK_TYPE_COLOR: Record<string, string> = {
   Void: "#e879f9",
   Tech: "#22d3ee",
   Bio: "#34d399",
+  Ember: "#fb7185",
   Kinetic: "#fb923c",
   Astral: "#93c5fd",
 };
@@ -50,6 +51,7 @@ const ATTACK_TYPE_ICON: Record<string, string> = {
   Void: "☣",
   Tech: "▦",
   Bio: "✦",
+  Ember: "✺",
   Kinetic: "⚔",
   Astral: "◌",
 };
