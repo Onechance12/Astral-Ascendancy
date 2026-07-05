@@ -50,11 +50,12 @@ This project was generated with Bun-oriented scripts, but it can be inspected wi
 
 ```bash
 npm install
+npm run lint
 npm run build
 npx tsc --noEmit
 ```
 
-`npm run lint` currently exposes React lint cleanup work that should be resolved before production hardening.
+These checks pass on the initial public baseline.
 
 ## Production Notes
 
