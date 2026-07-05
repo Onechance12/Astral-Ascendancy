@@ -42,6 +42,63 @@ type DeckLicense = {
   reward: string;
 };
 
+type BriefingAction = {
+  kind:
+    | "claim_assignment"
+    | "start_assignment"
+    | "open_domain"
+    | "open_deckbuilder"
+    | "open_pack"
+    | "play_match"
+    | "open_campaign"
+    | "open_multiplayer"
+    | "open_operations";
+  label: string;
+  assignmentId?: string;
+  assignmentType?: "resource" | "study" | "rescue";
+  view?: string;
+};
+
+type BriefingItem = {
+  id: string;
+  title: string;
+  body: string;
+  priority: "critical" | "high" | "medium" | "low";
+  source: string;
+  action: BriefingAction;
+};
+
+type DailyBriefing = {
+  generatedAt: string;
+  headline: string;
+  factionVoiceLine: string;
+  commander: {
+    name: string;
+    factionId: string;
+    factionName: string;
+    glyph: string;
+    color: string;
+  };
+  summary: {
+    readyAssignments: number;
+    activeAssignments: number;
+    pendingResourceTotal: number;
+    availableDecks: number;
+    deckCount: number;
+    nearestLicense: { displayName: string; progress: number; target: number; unlocked: boolean } | null;
+    claimableQuests: number;
+  };
+  recommendedAction: BriefingItem;
+  secondaryActions: BriefingItem[];
+  completedItems: BriefingItem[];
+  warnings: BriefingItem[];
+  context: {
+    deckState: string;
+    worldState: string;
+    progressionState: string;
+  };
+};
+
 export default function GameHub() {
   const commander = useGame((s) => s.commander);
   const stats = useGame((s) => s.stats);
@@ -58,6 +115,7 @@ export default function GameHub() {
   const hydrateSession = useGame((s) => s.hydrateSession);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [licenses, setLicenses] = useState<DeckLicense[]>([]);
+  const [briefing, setBriefing] = useState<DailyBriefing | null>(null);
   const [assignmentBusy, setAssignmentBusy] = useState<string | null>(null);
   const activeDeck = decks.find((d) => d.id === activeDeckId) ?? decks[0];
 
@@ -65,9 +123,11 @@ export default function GameHub() {
     void Promise.all([
       fetch("/api/assignments").then((r) => (r.ok ? r.json() : { assignments: [] })),
       fetch("/api/deck-licenses").then((r) => (r.ok ? r.json() : { licenses: [] })),
-    ]).then(([assignmentData, licenseData]) => {
+      fetch("/api/daily-briefing").then((r) => (r.ok ? r.json() : { briefing: null })),
+    ]).then(([assignmentData, licenseData, briefingData]) => {
       setAssignments(assignmentData.assignments || []);
       setLicenses(licenseData.licenses || []);
+      setBriefing(briefingData.briefing || null);
     });
   }, []);
 
@@ -127,6 +187,27 @@ export default function GameHub() {
     toast.success("Assignment rewards claimed");
     hydrateSession();
     loadBetaStatus();
+  };
+
+  const runBriefingAction = (action: BriefingAction) => {
+    if (action.kind === "claim_assignment" && action.assignmentId) {
+      void claimAssignment(action.assignmentId);
+      return;
+    }
+    if (action.kind === "start_assignment" && action.assignmentType) {
+      void startAssignment(action.assignmentType);
+      return;
+    }
+    if (action.kind === "open_pack") {
+      setPackOpen(true);
+      return;
+    }
+    if (action.kind === "play_match") {
+      if (canPlayActiveDeck) playMatch();
+      return;
+    }
+    const targetView = action.view ?? actionKindToView(action.kind);
+    if (targetView) setView(targetView as Parameters<typeof setView>[0]);
   };
 
   return (
@@ -235,6 +316,10 @@ export default function GameHub() {
           <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Shards</span>
         </div>
       </div>
+
+      {briefing && (
+        <CommandBrief briefing={briefing} color={color} onAction={runBriefingAction} />
+      )}
 
       {/* beta live loop */}
       <div className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
@@ -462,6 +547,151 @@ export default function GameHub() {
       </div>
     </div>
   );
+}
+
+function CommandBrief({
+  briefing,
+  color,
+  onAction,
+}: {
+  briefing: DailyBriefing;
+  color: string;
+  onAction: (action: BriefingAction) => void;
+}) {
+  const license = briefing.summary.nearestLicense;
+
+  return (
+    <section
+      className="relative mt-4 overflow-hidden rounded-2xl border bg-black/35 p-4 sm:p-5"
+      style={{
+        borderColor: `${color}44`,
+        boxShadow: `inset 0 0 40px ${color}12, 0 0 30px ${color}12`,
+      }}
+    >
+      <div className="nebula-radial absolute inset-0 opacity-40" />
+      <div className="grid-pattern absolute inset-0 opacity-20" />
+      <div className="relative grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+        <div>
+          <div className="mb-3 flex items-center gap-3">
+            <div
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-2xl"
+              style={{ background: `${color}22`, color, boxShadow: `0 0 24px ${color}55` }}
+            >
+              {briefing.commander.glyph}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.26em] text-muted-foreground">
+                Daily Command Brief
+              </p>
+              <h2 className="truncate text-lg font-black sm:text-xl" style={{ color }}>
+                {briefing.headline}
+              </h2>
+            </div>
+          </div>
+
+          <p className="mb-3 text-xs leading-relaxed text-foreground/75 sm:text-sm">
+            {briefing.factionVoiceLine}
+          </p>
+
+          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
+              Strategic Priority
+            </p>
+            <h3 className="mt-1 text-sm font-black text-foreground">{briefing.recommendedAction.title}</h3>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{briefing.recommendedAction.body}</p>
+            <Button
+              onClick={() => onAction(briefing.recommendedAction.action)}
+              className="mt-3 h-9 bg-emerald-400 px-4 text-xs font-black text-emerald-950 hover:bg-emerald-300"
+            >
+              {briefing.recommendedAction.action.label}
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid gap-3">
+          <div className="grid grid-cols-3 gap-2">
+            <BriefMetric label="Ready" value={briefing.summary.readyAssignments} color="#34d399" />
+            <BriefMetric label="Timers" value={briefing.summary.activeAssignments} color="#38bdf8" />
+            <BriefMetric label="Harvest" value={briefing.summary.pendingResourceTotal} color="#fbbf24" />
+          </div>
+
+          <div className="grid gap-2 text-xs">
+            <BriefContext label="Deck" value={briefing.context.deckState} />
+            <BriefContext label="Worlds" value={briefing.context.worldState} />
+            <BriefContext
+              label="License"
+              value={license ? `${license.displayName} ${license.progress}/${license.target}` : briefing.context.progressionState}
+            />
+          </div>
+
+          {briefing.warnings.length > 0 && (
+            <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-200/80">Warnings</p>
+              <div className="mt-2 space-y-1.5">
+                {briefing.warnings.map((item) => (
+                  <p key={item.id} className="text-xs text-amber-100/80">{item.title}</p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {briefing.secondaryActions.length > 0 && (
+            <div className="grid gap-2">
+              {briefing.secondaryActions.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => onAction(item.action)}
+                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-left transition hover:border-white/20 hover:bg-white/[0.06]"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="truncate text-xs font-bold text-foreground">{item.title}</p>
+                    <span className={cn("shrink-0 rounded px-1.5 py-0.5 text-[8px] font-black uppercase", priorityClass(item.priority))}>
+                      {item.priority}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 line-clamp-2 text-[10px] text-muted-foreground">{item.body}</p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BriefMetric({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/25 p-2 text-center">
+      <p className="text-lg font-black tabular-nums" style={{ color }}>{value}</p>
+      <p className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function BriefContext({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+      <span className="shrink-0 text-[9px] font-black uppercase tracking-widest text-muted-foreground">{label}</span>
+      <span className="min-w-0 truncate text-right text-[11px] font-bold text-foreground/75">{value}</span>
+    </div>
+  );
+}
+
+function priorityClass(priority: BriefingItem["priority"]) {
+  if (priority === "critical") return "bg-rose-400 text-rose-950";
+  if (priority === "high") return "bg-amber-300 text-amber-950";
+  if (priority === "medium") return "bg-cyan-300 text-cyan-950";
+  return "bg-white/10 text-muted-foreground";
+}
+
+function actionKindToView(kind: BriefingAction["kind"]) {
+  if (kind === "open_domain") return "domain";
+  if (kind === "open_deckbuilder") return "deckbuilder";
+  if (kind === "open_campaign") return "campaign";
+  if (kind === "open_multiplayer") return "multiplayer";
+  if (kind === "open_operations") return "operations";
+  return null;
 }
 
 function StatCard({ label, value, accent }: { label: string; value: string | number; accent: string }) {
