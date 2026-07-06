@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { ensureHeadquarters } from "@/lib/headquarters";
 
 // GET /api/profile — the logged-in commander's profile + stats
 export async function GET() {
@@ -9,10 +10,12 @@ export async function GET() {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+  await ensureHeadquarters(session.user.id);
   const user = await db.user.findUnique({
     where: { id: session.user.id },
     include: {
       commander: true,
+      headquarters: true,
       decks: { orderBy: { updatedAt: "desc" } },
     },
   });
@@ -41,6 +44,16 @@ export async function GET() {
           tritium: user.commander.tritium,
           quantumCores: user.commander.quantumCores,
           activeDeckId: user.commander.activeDeckId,
+          headquarters: user.headquarters
+            ? {
+                id: user.headquarters.id,
+                name: user.headquarters.name,
+                homeworldName: user.headquarters.homeworldName,
+                homeworldType: user.headquarters.homeworldType,
+                doctrine: user.headquarters.doctrine,
+                capitalLevel: user.headquarters.capitalLevel,
+              }
+            : null,
         }
       : null,
     decks: user.decks.map((d) => ({

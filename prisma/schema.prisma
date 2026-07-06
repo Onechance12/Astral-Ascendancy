@@ -20,6 +20,7 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   commander     Commander?
+  headquarters  Headquarters?
   matches       MatchRecord[]
   decks         Deck[]
   cards         UserCard[]
@@ -79,6 +80,39 @@ model Commander {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ---------- Headquarters / Homeworld ----------
+// The player's capital base. Commander is the identity; Headquarters is the place.
+model Headquarters {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  homeworldName String
+  homeworldType String // star | organic | mineral | gas | anomaly | barren
+  doctrine    String   @default("balanced") // balanced | expansion | research | war | recovery
+
+  capitalLevel Int     @default(1)
+  commandLevel Int     @default(1)
+  infirmaryLevel Int   @default(0)
+  trainingLevel Int    @default(0)
+  researchLevel Int    @default(0)
+  engineeringLevel Int @default(0)
+  hangarLevel Int      @default(0)
+  securityLevel Int    @default(1)
+
+  morale      Int      @default(50)
+  stability   Int      @default(50)
+  alertLevel  String   @default("calm") // calm | strained | threatened | crisis
+  activeProjectKey String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, homeworldType])
+  @@index([userId, doctrine])
 }
 
 model MatchRecord {

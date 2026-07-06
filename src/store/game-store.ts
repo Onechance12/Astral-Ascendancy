@@ -14,7 +14,7 @@ import {
 } from "@/lib/match-engine";
 import type { DeckData } from "@/lib/match-engine";
 
-export type View = "landing" | "hub" | "game" | "deckbuilder" | "profile" | "multiplayer" | "collection" | "campaign" | "operations" | "domain" | "codex";
+export type View = "landing" | "hub" | "game" | "deckbuilder" | "profile" | "multiplayer" | "collection" | "campaign" | "operations" | "domain" | "headquarters" | "codex";
 
 type Commander = {
   id: string;

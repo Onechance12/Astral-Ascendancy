@@ -54,6 +54,7 @@ type BriefingAction = {
     | "play_match"
     | "open_campaign"
     | "open_multiplayer"
+    | "open_headquarters"
     | "open_operations";
   label: string;
   assignmentId?: string;
@@ -554,6 +555,12 @@ export default function GameHub() {
           onClick={() => setView("domain")}
         />
         <NavCard
+          icon="◆"
+          label="Headquarters"
+          desc="Homeworld base"
+          onClick={() => setView("headquarters")}
+        />
+        <NavCard
           icon="✦"
           label="Operations"
           desc="Live events"
@@ -746,6 +753,7 @@ function actionKindToView(kind: BriefingAction["kind"]) {
   if (kind === "open_deckbuilder") return "deckbuilder";
   if (kind === "open_campaign") return "campaign";
   if (kind === "open_multiplayer") return "multiplayer";
+  if (kind === "open_headquarters") return "headquarters";
   if (kind === "open_operations") return "operations";
   return null;
 }

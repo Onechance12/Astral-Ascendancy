@@ -5,6 +5,7 @@ import { getPendingResources, STRUCTURE_DEFS, structureCost, type ResourceType, 
 import { ensureDailyQuests } from "@/lib/progression";
 import { getRewardCenter } from "@/lib/rewards";
 import { getCardInstanceOverview } from "@/lib/card-instances";
+import { getHeadquartersState } from "@/lib/headquarters";
 
 type BriefingActionKind =
   | "claim_assignment"
@@ -17,6 +18,7 @@ type BriefingActionKind =
   | "play_match"
   | "open_campaign"
   | "open_multiplayer"
+  | "open_headquarters"
   | "open_operations";
 
 export type DailyBriefingAction = {
@@ -192,7 +194,7 @@ const FACTION_BRIEFING: Record<
 export async function buildDailyBriefing(userId: string): Promise<DailyBriefing | null> {
   await ensureDailyQuests(userId);
 
-  const [user, assignments, licenses, pendingResources, pvpRanks, rewardCenter, latestMatch, cardInstanceOverview] = await Promise.all([
+  const [user, assignments, licenses, pendingResources, pvpRanks, rewardCenter, latestMatch, cardInstanceOverview, headquartersState] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
       include: {
@@ -213,6 +215,7 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
     getRewardCenter(userId),
     db.matchRecord.findFirst({ where: { userId }, orderBy: { playedAt: "desc" } }),
     getCardInstanceOverview(userId),
+    getHeadquartersState(userId),
   ]);
 
   if (!user?.commander) return null;
@@ -433,6 +436,29 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
     });
   }
 
+  const headquartersUpgrade = headquartersState?.facilities.find((facility) => facility.canAfford && facility.nextCost);
+  if (headquartersUpgrade) {
+    recommendations.push({
+      id: `hq-${headquartersUpgrade.key}`,
+      title: `Upgrade ${headquartersUpgrade.name}`,
+      body: `Your homeworld can upgrade ${headquartersUpgrade.name} to level ${headquartersUpgrade.nextLevel}. This strengthens future base systems.`,
+      score: headquartersUpgrade.key === "capital" || headquartersUpgrade.level === 0 ? 92 : 66,
+      priority: headquartersUpgrade.key === "capital" || headquartersUpgrade.level === 0 ? "high" : "medium",
+      source: "headquarters_state",
+      action: { kind: "open_headquarters", label: "Open HQ", view: "headquarters" },
+    });
+  } else if (headquartersState && headquartersState.headquarters.capitalLevel <= 1) {
+    recommendations.push({
+      id: "hq-foundation",
+      title: "Review your homeworld",
+      body: "Headquarters controls recovery, training, research, engineering, security, and future petitions. Set the direction before the domain gets larger.",
+      score: 64,
+      priority: "medium",
+      source: "headquarters_state",
+      action: { kind: "open_headquarters", label: "Open HQ", view: "headquarters" },
+    });
+  }
+
   if (nextCampaign && !activeDeckBusy) {
     recommendations.push({
       id: `campaign-${nextCampaign.id}`,
@@ -536,7 +562,9 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
         : "No claimed worlds yet",
       progressionState: nearestLicense
         ? `${nearestLicense.displayName}: ${nearestLicense.progress}/${nearestLicense.target} · streak ${rewardCenter.streak.current}`
-        : "All visible licenses unlocked",
+        : headquartersState
+          ? `${headquartersState.headquarters.name} Lv.${headquartersState.headquarters.capitalLevel} · ${headquartersState.headquarters.doctrine}`
+          : "All visible licenses unlocked",
     },
   };
 }
@@ -553,6 +581,7 @@ function pickFactionLine(source: string, voice: (typeof FACTION_BRIEFING)[string
   if (source.includes("reward")) return voice.ready;
   if (source.includes("match")) return voice.warning;
   if (source.includes("domain")) return voice.resource;
+  if (source.includes("headquarters")) return voice.assignment;
   if (source.includes("deck") || source.includes("license")) return voice.deck;
   if (source.includes("campaign")) return voice.campaign;
   if (source.includes("assignment")) return voice.assignment;

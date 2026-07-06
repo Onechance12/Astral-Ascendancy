@@ -16,6 +16,7 @@ import CollectionView from "@/components/cosmic/collection-view";
 import CampaignView from "@/components/cosmic/campaign-view";
 import OperationsView from "@/components/cosmic/operations-view";
 import DomainView from "@/components/cosmic/domain-view";
+import HeadquartersView from "@/components/cosmic/headquarters-view";
 import FactionCodex from "@/components/cosmic/faction-codex";
 import PackOpener from "@/components/cosmic/pack-opener";
 import InstallPrompt from "@/components/cosmic/install-prompt";
@@ -78,6 +79,8 @@ export default function Home() {
         <OperationsView />
       ) : view === "domain" ? (
         <DomainView />
+      ) : view === "headquarters" ? (
+        <HeadquartersView />
       ) : view === "codex" ? (
         <FactionCodex />
       ) : (
