@@ -34,6 +34,52 @@ type Planet = {
   nextLevelCost: { shards: number; resource: number; resourceType: ResourceType } | null;
 };
 
+type WorldOperationType = "gather" | "survey" | "scout" | "secure";
+
+type WorldOperationDef = {
+  type: WorldOperationType;
+  title: string;
+  verb: string;
+  durationMinutes: number;
+  description: string;
+  eligibleCategories: string[];
+  requiresStructure?: boolean;
+};
+
+type WorldOperation = {
+  id: string;
+  type: WorldOperationType;
+  title: string;
+  status: "active" | "ready" | string;
+  cardDefId: string | null;
+  cardInstanceId: string | null;
+  cardName: string | null;
+  planetId: string | null;
+  planetName: string | null;
+  planetType: string | null;
+  description: string | null;
+  rewards: Record<string, number | { licenseId: string; amount: number } | undefined>;
+  startedAt: string;
+  completesAt: string;
+};
+
+type OperationCard = {
+  id: string;
+  defId: string;
+  name: string;
+  category: string;
+  rarity: string;
+  level: number;
+  condition: string;
+  eligibleOperations: WorldOperationType[];
+};
+
+type WorldOperationsData = {
+  definitions: Record<WorldOperationType, WorldOperationDef>;
+  operations: WorldOperation[];
+  eligibleCards: OperationCard[];
+};
+
 type WorldCard = {
   defId: string;
   name: string;
@@ -102,12 +148,19 @@ export default function DomainView() {
   const [data, setData] = useState<DomainData | null>(null);
   const [loading, setLoading] = useState(true);
   const [harvesting, setHarvesting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"planets" | "cards">("planets");
+  const [activeTab, setActiveTab] = useState<"planets" | "operations" | "cards">("planets");
+  const [worldOps, setWorldOps] = useState<WorldOperationsData | null>(null);
+  const [operationBusy, setOperationBusy] = useState(false);
 
   const load = useCallback(() => {
-    fetch("/api/domain")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setData(d))
+    Promise.all([
+      fetch("/api/domain").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/world-operations").then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([domainData, operationData]) => {
+        setData(domainData);
+        setWorldOps(operationData);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -195,6 +248,47 @@ export default function DomainView() {
     }
   };
 
+  const startWorldOperation = async (planetId: string, type: WorldOperationType, cardInstanceId: string) => {
+    if (!cardInstanceId) {
+      toast.error("Choose a card to send");
+      return;
+    }
+    setOperationBusy(true);
+    const res = await fetch("/api/world-operations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ planetId, type, cardInstanceId }),
+    });
+    if (res.ok) {
+      const d = await res.json();
+      toast.success(`${d.assignment?.title || "World operation"} launched`);
+      load();
+      hydrateSession();
+    } else {
+      const e = await res.json().catch(() => ({}));
+      toast.error(e.error || "Cannot start operation");
+    }
+    setOperationBusy(false);
+  };
+
+  const claimWorldOperation = async (assignmentId: string) => {
+    setOperationBusy(true);
+    const res = await fetch("/api/world-operations", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ assignmentId, action: "claim" }),
+    });
+    if (res.ok) {
+      toast.success("World operation rewards claimed");
+      load();
+      hydrateSession();
+    } else {
+      const e = await res.json().catch(() => ({}));
+      toast.error(e.error || "Operation is not ready");
+    }
+    setOperationBusy(false);
+  };
+
   if (!commander) return null;
 
   const totalPending = data ? Object.values(data.pending).reduce((s, v) => s + (v || 0), 0) : 0;
@@ -245,10 +339,13 @@ export default function DomainView() {
         </div>
       )}
 
-      {/* tab switcher: planets vs world cards */}
-      <div className="mb-3 flex rounded-lg border border-white/10 bg-black/30 p-0.5 text-xs">
+      {/* tab switcher: planets / operations / world cards */}
+      <div className="mb-3 grid grid-cols-3 rounded-lg border border-white/10 bg-black/30 p-0.5 text-xs">
         <button onClick={() => setActiveTab("planets")} className={cn("flex-1 rounded-md py-1.5 font-bold transition", activeTab === "planets" ? "bg-emerald-400 text-emerald-950" : "text-foreground/60")}>
           🪐 Planets ({data?.planets.length || 0})
+        </button>
+        <button onClick={() => setActiveTab("operations")} className={cn("flex-1 rounded-md py-1.5 font-bold transition", activeTab === "operations" ? "bg-emerald-400 text-emerald-950" : "text-foreground/60")}>
+          ⚔ Ops ({worldOps?.operations.length || 0})
         </button>
         <button onClick={() => setActiveTab("cards")} className={cn("flex-1 rounded-md py-1.5 font-bold transition", activeTab === "cards" ? "bg-emerald-400 text-emerald-950" : "text-foreground/60")}>
           🃏 World Cards ({(data?.ownedPlanetCards.length || 0) + (data?.ownedDevelopmentCards.length || 0) + (data?.ownedCrewCards.length || 0)})
@@ -264,6 +361,14 @@ export default function DomainView() {
             <PlanetCard key={p.id} planet={p} onUpgrade={upgrade} onAssignCrew={assignCrew} ownedCrewCards={data?.ownedCrewCards || []} resources={data?.resources || {} as any} maxLevel={data?.maxStructureLevel || 5} />
           ))}
         </div>
+      ) : activeTab === "operations" ? (
+        <WorldOperationsPanel
+          planets={data?.planets || []}
+          worldOps={worldOps}
+          busy={operationBusy}
+          onStart={startWorldOperation}
+          onClaim={claimWorldOperation}
+        />
       ) : (
         /* WORLD CARDS TAB */
         <div className="space-y-4">
@@ -325,10 +430,203 @@ export default function DomainView() {
       {/* info */}
       <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-3 text-[11px] text-muted-foreground">
         <p className="mb-1 font-bold text-foreground/70">⚡ How it works</p>
-        <p>Build structures on planets to passively generate resources. Deploy planet cards to claim new worlds. Activate development cards for permanent tech boosts. Assign crew cards to planets for production bonuses. Resources are needed to craft faction cards.</p>
+        <p>Build structures on planets to passively generate resources. Deploy planet cards to claim new worlds. Send exact card copies on timed world operations. Assigned cards become unavailable until they return. Resources are needed to craft faction cards.</p>
       </div>
     </div>
   );
+}
+
+function WorldOperationsPanel({
+  planets,
+  worldOps,
+  busy,
+  onStart,
+  onClaim,
+}: {
+  planets: Planet[];
+  worldOps: WorldOperationsData | null;
+  busy: boolean;
+  onStart: (planetId: string, type: WorldOperationType, cardInstanceId: string) => void;
+  onClaim: (assignmentId: string) => void;
+}) {
+  const activeByPlanet = new Map((worldOps?.operations || []).map((operation) => [operation.planetId, operation]));
+  const defs = worldOps?.definitions;
+
+  if (!worldOps || !defs) {
+    return <p className="py-8 text-center text-xs text-muted-foreground">Opening command channels...</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-3">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">World Operations</p>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          Pick a world, send a real available card, and let it work while the rest of your collection keeps moving.
+          That card is locked until the operation returns.
+        </p>
+      </div>
+
+      {worldOps.eligibleCards.length === 0 && (
+        <div className="rounded-xl border border-dashed border-white/15 p-6 text-center text-xs text-muted-foreground">
+          No available operation cards. Claim completed assignments or recover busy cards before launching another world task.
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {planets.map((planet) => {
+          const active = activeByPlanet.get(planet.id);
+          return (
+            <WorldOperationPlanet
+              key={planet.id}
+              planet={planet}
+              active={active}
+              definitions={defs}
+              cards={worldOps.eligibleCards}
+              busy={busy}
+              onStart={onStart}
+              onClaim={onClaim}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function WorldOperationPlanet({
+  planet,
+  active,
+  definitions,
+  cards,
+  busy,
+  onStart,
+  onClaim,
+}: {
+  planet: Planet;
+  active?: WorldOperation;
+  definitions: Record<WorldOperationType, WorldOperationDef>;
+  cards: OperationCard[];
+  busy: boolean;
+  onStart: (planetId: string, type: WorldOperationType, cardInstanceId: string) => void;
+  onClaim: (assignmentId: string) => void;
+}) {
+  const [selectedType, setSelectedType] = useState<WorldOperationType>("gather");
+  const filteredCards = cards.filter((card) => card.eligibleOperations.includes(selectedType));
+  const [selectedCardId, setSelectedCardId] = useState("");
+  const effectiveSelectedCardId = filteredCards.some((card) => card.id === selectedCardId)
+    ? selectedCardId
+    : filteredCards[0]?.id || "";
+  const selectedDef = definitions[selectedType];
+
+  const timeLeft = active ? formatTimeLeft(active.completesAt) : "";
+  const rewardText = active ? formatRewardText(active.rewards) : "";
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl" style={{ background: `${planet.planetColor}22`, color: planet.planetColor }}>
+          {planet.planetGlyph}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-bold">{planet.name}</p>
+          <p className="text-[10px] text-muted-foreground">
+            {planet.planetTypeName} · {planet.structureName ? `${planet.structureName} Lv.${planet.structureLevel}` : "no structure"}
+          </p>
+        </div>
+      </div>
+
+      {active ? (
+        <div className={cn("mt-3 rounded-lg border p-3", active.status === "ready" ? "border-emerald-400/30 bg-emerald-400/10" : "border-white/10 bg-black/20")}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-black text-foreground">{active.title}</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">
+                {active.cardName || active.cardDefId} · {active.status === "ready" ? "Ready" : timeLeft}
+              </p>
+            </div>
+            {active.status === "ready" ? (
+              <button
+                onClick={() => onClaim(active.id)}
+                disabled={busy}
+                className="shrink-0 rounded-lg bg-emerald-400 px-2.5 py-1.5 text-[10px] font-black text-emerald-950 hover:bg-emerald-300 disabled:opacity-50"
+              >
+                Claim
+              </button>
+            ) : (
+              <span className="shrink-0 rounded-md border border-white/10 px-2 py-1 text-[10px] font-bold text-muted-foreground">{timeLeft}</span>
+            )}
+          </div>
+          {rewardText && <p className="mt-2 text-[10px] font-bold text-emerald-300">{rewardText}</p>}
+        </div>
+      ) : (
+        <div className="mt-3 space-y-2">
+          <div className="grid grid-cols-2 gap-1.5">
+            {(Object.keys(definitions) as WorldOperationType[]).map((type) => {
+              const def = definitions[type];
+              const disabled = def.requiresStructure && !planet.structureName;
+              return (
+                <button
+                  key={type}
+                  onClick={() => setSelectedType(type)}
+                  disabled={disabled}
+                  className={cn(
+                    "rounded-lg border px-2 py-1.5 text-[10px] font-bold transition",
+                    selectedType === type ? "border-emerald-400/40 bg-emerald-400/20 text-emerald-200" : "border-white/10 bg-white/5 text-foreground/60 hover:bg-white/10",
+                    disabled && "cursor-not-allowed opacity-40"
+                  )}
+                >
+                  {def.verb}
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="min-h-8 text-[10px] leading-relaxed text-muted-foreground">{selectedDef.description}</p>
+
+          <select
+            value={effectiveSelectedCardId}
+            onChange={(event) => setSelectedCardId(event.target.value)}
+            className="w-full rounded-lg border border-white/10 bg-black/50 px-2 py-2 text-xs text-foreground outline-none"
+          >
+            {filteredCards.length === 0 ? (
+              <option value="">No eligible available cards</option>
+            ) : (
+              filteredCards.map((card) => (
+                <option key={card.id} value={card.id}>
+                  {card.name} · Lv.{card.level} · {card.rarity} · {card.category}
+                </option>
+              ))
+            )}
+          </select>
+
+          <button
+            onClick={() => onStart(planet.id, selectedType, effectiveSelectedCardId)}
+            disabled={busy || !effectiveSelectedCardId}
+            className="w-full rounded-lg bg-emerald-400/20 px-3 py-2 text-xs font-black text-emerald-300 transition hover:bg-emerald-400/30 disabled:bg-white/5 disabled:text-muted-foreground"
+          >
+            Launch {selectedDef.verb} · {selectedDef.durationMinutes}m
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatTimeLeft(iso: string) {
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return "ready";
+  const hours = Math.floor(ms / 3600000);
+  const minutes = Math.ceil((ms % 3600000) / 60000);
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+}
+
+function formatRewardText(rewards: WorldOperation["rewards"]) {
+  const parts: string[] = [];
+  for (const [key, value] of Object.entries(rewards)) {
+    if (typeof value !== "number" || value <= 0) continue;
+    parts.push(`${RESOURCE_GLYPH[key] || "◈"} +${value}`);
+  }
+  return parts.join("  ");
 }
 
 function PlanetCard({

@@ -320,6 +320,8 @@ export async function claimAssignment(userId: string, assignmentId: string) {
         location: "collection",
         status: "available",
         currentAssignmentId: null,
+        planetId: null,
+        metadataJson: "{}",
         lastStateChangeAt: new Date(),
       },
     });
