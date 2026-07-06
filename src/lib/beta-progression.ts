@@ -151,7 +151,11 @@ export async function isDeckBusy(userId: string, deckId: string) {
 export async function listAssignments(userId: string) {
   await markReadyAssignments(userId);
   return db.assignment.findMany({
-    where: { userId, status: { in: ["active", "ready"] } },
+    where: {
+      userId,
+      status: { in: ["active", "ready"] },
+      type: { notIn: ["medical_recovery", "training_drill"] },
+    },
     orderBy: [{ status: "asc" }, { completesAt: "asc" }],
   });
 }
@@ -269,6 +273,9 @@ export async function claimAssignment(userId: string, assignmentId: string) {
   await markReadyAssignments(userId);
   const assignment = await db.assignment.findUnique({ where: { id: assignmentId } });
   if (!assignment || assignment.userId !== userId) return { ok: false as const, error: "assignment not found" };
+  if (assignment.type === "medical_recovery" || assignment.type === "training_drill") {
+    return { ok: false as const, error: "claim this assignment from headquarters" };
+  }
   if (assignment.status !== "ready") return { ok: false as const, error: "assignment is not ready" };
 
   const rewards = JSON.parse(assignment.rewardsJson || "{}") as AssignmentReward;

@@ -69,6 +69,44 @@ type HeadquartersData = {
   };
 };
 
+type CareCard = {
+  id: string;
+  defId: string;
+  name: string;
+  rarity: string;
+  level: number;
+  xp: number;
+  condition: string;
+  location: string;
+};
+
+type CareQueue = {
+  id: string;
+  type: "medical_recovery" | "training_drill";
+  title: string;
+  status: "active" | "ready" | string;
+  cardInstanceId: string | null;
+  cardDefId: string | null;
+  cardName: string | null;
+  cardLevel: number | null;
+  cardCondition: string | null;
+  rewards: { cardXp?: number; recoveredCondition?: string; previousCondition?: string };
+  startedAt: string;
+  completesAt: string;
+};
+
+type CareData = {
+  capacities: {
+    recoveryBeds: number;
+    recoveryUsed: number;
+    trainingSlots: number;
+    trainingUsed: number;
+  };
+  queues: CareQueue[];
+  recoveryCandidates: CareCard[];
+  trainingCandidates: CareCard[];
+};
+
 const RESOURCE_GLYPH: Record<ResourceType | "shards", string> = {
   shards: "◈",
   plasma: "☀",
@@ -109,13 +147,19 @@ export default function HeadquartersView() {
   const exitToHub = useGame((s) => s.exitToHub);
   const hydrateSession = useGame((s) => s.hydrateSession);
   const [data, setData] = useState<HeadquartersData | null>(null);
+  const [careData, setCareData] = useState<CareData | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    fetch("/api/headquarters")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((payload) => setData(payload))
+    Promise.all([
+      fetch("/api/headquarters").then((res) => (res.ok ? res.json() : null)),
+      fetch("/api/recovery-training").then((res) => (res.ok ? res.json() : null)),
+    ])
+      .then(([headquartersPayload, carePayload]) => {
+        setData(headquartersPayload);
+        setCareData(carePayload);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -158,6 +202,45 @@ export default function HeadquartersView() {
       return;
     }
     toast.success("Doctrine updated");
+    load();
+    hydrateSession();
+    setBusyKey(null);
+  };
+
+  const startCare = async (action: "recover" | "train", cardInstanceId: string) => {
+    setBusyKey(`${action}-${cardInstanceId}`);
+    const res = await fetch("/api/recovery-training", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, cardInstanceId }),
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(payload.error || "Care action unavailable");
+      setBusyKey(null);
+      return;
+    }
+    toast.success(`${payload.assignment?.title || "Care assignment"} started`);
+    load();
+    hydrateSession();
+    setBusyKey(null);
+  };
+
+  const claimCare = async (assignmentId: string) => {
+    setBusyKey(`claim-${assignmentId}`);
+    const res = await fetch("/api/recovery-training", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "claim", assignmentId }),
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(payload.error || "Care assignment is not ready");
+      setBusyKey(null);
+      return;
+    }
+    const reward = payload.rewards?.cardXp ? ` +${payload.rewards.cardXp} XP` : payload.rewards?.recoveredCondition ? ` ${payload.rewards.recoveredCondition}` : "";
+    toast.success(`Care assignment complete${reward}`);
     load();
     hydrateSession();
     setBusyKey(null);
@@ -259,6 +342,13 @@ export default function HeadquartersView() {
             </div>
           </section>
 
+          <CareSystemsPanel
+            careData={careData}
+            busyKey={busyKey}
+            onStart={startCare}
+            onClaim={claimCare}
+          />
+
           <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Living Asset Readout</p>
             <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
@@ -321,6 +411,159 @@ function FacilityPanel({
       )}
     </div>
   );
+}
+
+function CareSystemsPanel({
+  careData,
+  busyKey,
+  onStart,
+  onClaim,
+}: {
+  careData: CareData | null;
+  busyKey: string | null;
+  onStart: (action: "recover" | "train", cardInstanceId: string) => void;
+  onClaim: (assignmentId: string) => void;
+}) {
+  if (!careData) {
+    return (
+      <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+        <p className="text-xs text-muted-foreground">Opening medical and training queues...</p>
+      </section>
+    );
+  }
+
+  const recoveryLocked = careData.capacities.recoveryBeds <= 0;
+  const trainingLocked = careData.capacities.trainingSlots <= 0;
+  const recoveryFull = careData.capacities.recoveryUsed >= careData.capacities.recoveryBeds;
+  const trainingFull = careData.capacities.trainingUsed >= careData.capacities.trainingSlots;
+
+  return (
+    <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Medical / Training</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">Care queues use exact card copies. Cards are unavailable while healing or training.</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-center">
+          <BaseMetric label="Beds" value={`${careData.capacities.recoveryUsed}/${careData.capacities.recoveryBeds}`} />
+          <BaseMetric label="Training" value={`${careData.capacities.trainingUsed}/${careData.capacities.trainingSlots}`} />
+        </div>
+      </div>
+
+      {careData.queues.length > 0 && (
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {careData.queues.map((queue) => (
+            <div key={queue.id} className={cn("rounded-xl border p-3", queue.status === "ready" ? "border-emerald-400/30 bg-emerald-400/10" : "border-white/10 bg-black/25")}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-black">{queue.title}</p>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">
+                    {queue.type === "medical_recovery" ? "Medical" : "Training"} · {queue.status === "ready" ? "Ready" : formatTimeLeft(queue.completesAt)}
+                  </p>
+                </div>
+                {queue.status === "ready" ? (
+                  <Button
+                    size="sm"
+                    onClick={() => onClaim(queue.id)}
+                    disabled={busyKey !== null}
+                    className="h-7 shrink-0 bg-emerald-400 px-2 text-[10px] font-black text-emerald-950 hover:bg-emerald-300"
+                  >
+                    Claim
+                  </Button>
+                ) : (
+                  <span className="shrink-0 rounded-md border border-white/10 px-2 py-1 text-[10px] font-bold text-muted-foreground">{formatTimeLeft(queue.completesAt)}</span>
+                )}
+              </div>
+              <p className="mt-2 text-[10px] text-muted-foreground">
+                {queue.type === "training_drill" && queue.rewards.cardXp ? `Reward: +${queue.rewards.cardXp} mastery XP` : null}
+                {queue.type === "medical_recovery" ? `Recovery: ${queue.rewards.previousCondition || queue.cardCondition || "wounded"} → ${queue.rewards.recoveredCondition || "healthy"}` : null}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <CareList
+          title="Infirmary"
+          desc={recoveryLocked ? "Upgrade Homeworld Infirmary to unlock medical recovery." : recoveryFull ? "All beds are occupied." : "Send injured, damaged, fallen, or fatigued cards to recover."}
+          empty="No cards currently need medical care."
+          cards={careData.recoveryCandidates}
+          disabled={recoveryLocked || recoveryFull || busyKey !== null}
+          actionLabel="Recover"
+          action="recover"
+          onStart={onStart}
+        />
+        <CareList
+          title="Training Grounds"
+          desc={trainingLocked ? "Upgrade Training Grounds to unlock card drills." : trainingFull ? "All training slots are occupied." : "Send healthy or fatigued cards for mastery XP."}
+          empty="No available cards can train right now."
+          cards={careData.trainingCandidates}
+          disabled={trainingLocked || trainingFull || busyKey !== null}
+          actionLabel="Train"
+          action="train"
+          onStart={onStart}
+        />
+      </div>
+    </section>
+  );
+}
+
+function CareList({
+  title,
+  desc,
+  empty,
+  cards,
+  disabled,
+  actionLabel,
+  action,
+  onStart,
+}: {
+  title: string;
+  desc: string;
+  empty: string;
+  cards: CareCard[];
+  disabled: boolean;
+  actionLabel: string;
+  action: "recover" | "train";
+  onStart: (action: "recover" | "train", cardInstanceId: string) => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
+      <p className="text-xs font-black">{title}</p>
+      <p className="mt-1 min-h-8 text-[10px] leading-relaxed text-muted-foreground">{desc}</p>
+      <div className="mt-3 max-h-72 space-y-1.5 overflow-auto pr-1">
+        {cards.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-white/10 px-2 py-3 text-center text-[10px] text-muted-foreground">{empty}</p>
+        ) : (
+          cards.map((card) => (
+            <div key={card.id} className="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-2 py-2">
+              <div className="min-w-0">
+                <p className="truncate text-[11px] font-black">{card.name}</p>
+                <p className="text-[9px] text-muted-foreground">Lv.{card.level} · {card.rarity} · {card.condition} · {card.xp} XP</p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => onStart(action, card.id)}
+                disabled={disabled}
+                className="h-7 shrink-0 bg-white/10 px-2 text-[10px] font-black text-foreground hover:bg-white/15 disabled:opacity-40"
+              >
+                {actionLabel}
+              </Button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function formatTimeLeft(iso: string) {
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return "ready";
+  const hours = Math.floor(ms / 3600000);
+  const minutes = Math.ceil((ms % 3600000) / 60000);
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
 
 function BaseMetric({ label, value }: { label: string; value: string | number }) {
