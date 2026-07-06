@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { CARD_DEFS } from "@/lib/match-engine";
 import { ALL_WORLD_CARDS, getCardCategory } from "@/lib/world-cards";
+import { getCardInstanceOverview } from "@/lib/card-instances";
 
 // GET /api/collection — all cards owned by the user, with counts + meta
 export async function GET() {
@@ -19,6 +20,26 @@ export async function GET() {
     where: { userId: session.user.id },
     select: { shards: true, collectionLevel: true, plasma: true, biomass: true, crystals: true, tritium: true, quantumCores: true },
   });
+  const instanceOverview = await getCardInstanceOverview(session.user.id);
+  const instancesByDef = new Map<
+    string,
+    { total: number; available: number; busy: number; unavailable: number; injured: number }
+  >();
+  for (const instance of instanceOverview.instances) {
+    const summary = instancesByDef.get(instance.defId) ?? {
+      total: 0,
+      available: 0,
+      busy: 0,
+      unavailable: 0,
+      injured: 0,
+    };
+    summary.total += 1;
+    if (instance.status === "available") summary.available += 1;
+    if (instance.status === "busy") summary.busy += 1;
+    if (instance.status === "unavailable") summary.unavailable += 1;
+    if (["injured", "critical", "fallen"].includes(instance.condition)) summary.injured += 1;
+    instancesByDef.set(instance.defId, summary);
+  }
 
   // join with battle card defs OR world card defs
   const enriched = cards.map((c) => {
@@ -30,6 +51,7 @@ export async function GET() {
       return {
         defId: c.defId,
         count: c.count,
+        instances: instancesByDef.get(c.defId) ?? { total: 0, available: 0, busy: 0, unavailable: 0, injured: 0 },
         source: c.source,
         acquiredAt: c.acquiredAt,
         category,
@@ -49,6 +71,7 @@ export async function GET() {
       return {
         defId: c.defId,
         count: c.count,
+        instances: instancesByDef.get(c.defId) ?? { total: 0, available: 0, busy: 0, unavailable: 0, injured: 0 },
         source: c.source,
         acquiredAt: c.acquiredAt,
         category,
@@ -68,6 +91,7 @@ export async function GET() {
     return {
       defId: c.defId,
       count: c.count,
+      instances: instancesByDef.get(c.defId) ?? { total: 0, available: 0, busy: 0, unavailable: 0, injured: 0 },
       source: c.source,
       acquiredAt: c.acquiredAt,
       category,
@@ -95,6 +119,7 @@ export async function GET() {
     shards: commander?.shards || 0,
     collectionLevel: commander?.collectionLevel || 0,
     catalogTotal,
+    instanceSummary: instanceOverview.summary,
     resources: {
       plasma: commander?.plasma || 0,
       biomass: commander?.biomass || 0,

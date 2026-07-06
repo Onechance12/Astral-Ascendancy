@@ -1,4 +1,9 @@
 import { db } from "@/lib/db";
+import {
+  findAvailableCardInstance,
+  lockCardInstanceForAssignment,
+  releaseAssignmentCardInstances,
+} from "@/lib/card-instances";
 
 export type AssignmentType = "resource" | "study" | "rescue" | "training" | "defense" | "expedition" | "project";
 
@@ -159,11 +164,14 @@ export async function createAssignment(input: {
   userId: string;
   type: "resource" | "study" | "rescue";
   cardDefId?: string;
+  cardInstanceId?: string;
   deckId?: string;
   planetId?: string;
 }) {
   const def = ASSIGNMENT_DEFS[input.type];
   let planetId = input.planetId;
+  let cardDefId = input.cardDefId;
+  let cardInstanceId = input.cardInstanceId;
 
   if (input.type === "rescue") {
     if (!input.deckId) return { ok: false as const, error: "deck required" };
@@ -186,11 +194,22 @@ export async function createAssignment(input: {
     if (!planet || planet.userId !== input.userId) return { ok: false as const, error: "world not found" };
   }
 
-  if ((input.type === "resource" || input.type === "study") && input.cardDefId) {
+  if ((input.type === "resource" || input.type === "study") && (input.cardInstanceId || input.cardDefId)) {
+    const cardResult = await findAvailableCardInstance({
+      userId: input.userId,
+      cardInstanceId: input.cardInstanceId,
+      defId: input.cardDefId,
+    });
+    if (!cardResult.ok) return cardResult;
+    cardDefId = cardResult.instance.defId;
+    cardInstanceId = cardResult.instance.id;
+
+    const busyCardConditions: Array<{ cardInstanceId?: string; cardDefId?: string }> = [{ cardInstanceId }];
+    if (cardDefId) busyCardConditions.push({ cardDefId });
     const busyCard = await db.assignment.findFirst({
       where: {
         userId: input.userId,
-        cardDefId: input.cardDefId,
+        OR: busyCardConditions,
         status: { in: ["active", "ready"] },
       },
     });
@@ -204,7 +223,8 @@ export async function createAssignment(input: {
       type: input.type,
       title: def.title,
       assetType: def.assetType,
-      cardDefId: input.cardDefId,
+      cardDefId,
+      cardInstanceId,
       deckId: input.deckId,
       planetId,
       description: def.description,
@@ -212,6 +232,14 @@ export async function createAssignment(input: {
       completesAt: new Date(now.getTime() + def.durationMinutes * 60 * 1000),
     },
   });
+
+  if (cardInstanceId) {
+    await lockCardInstanceForAssignment({
+      userId: input.userId,
+      cardInstanceId,
+      assignmentId: assignment.id,
+    });
+  }
 
   return { ok: true as const, assignment };
 }
@@ -265,6 +293,8 @@ export async function claimAssignment(userId: string, assignmentId: string) {
       }
     }
   });
+
+  await releaseAssignmentCardInstances(userId, assignment.id);
 
   return { ok: true as const, rewards };
 }

@@ -108,10 +108,29 @@ export async function grantCard(
       where: { id: existing.id },
       data: { count: { increment: 1 } },
     });
+    await db.cardInstance.create({
+      data: {
+        userId,
+        defId,
+        source,
+        xp: existing.xp,
+        level: existing.level,
+      },
+    });
     return { defId, isNew: false };
   }
-  await db.userCard.create({
+  const card = await db.userCard.create({
     data: { userId, defId, count: 1, source },
+  });
+  await db.cardInstance.create({
+    data: {
+      userId,
+      defId,
+      source,
+      xp: card.xp,
+      level: card.level,
+      acquiredAt: card.acquiredAt,
+    },
   });
   // bump collection level for new unique
   await db.commander.update({

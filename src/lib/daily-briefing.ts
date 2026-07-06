@@ -4,6 +4,7 @@ import { listAssignments, listDeckLicenses } from "@/lib/beta-progression";
 import { getPendingResources, STRUCTURE_DEFS, structureCost, type ResourceType, type StructureType } from "@/lib/resources";
 import { ensureDailyQuests } from "@/lib/progression";
 import { getRewardCenter } from "@/lib/rewards";
+import { getCardInstanceOverview } from "@/lib/card-instances";
 
 type BriefingActionKind =
   | "claim_assignment"
@@ -64,6 +65,14 @@ export type DailyBriefing = {
     readyRewards: number;
     currentStreak: number;
     canClaimDaily: boolean;
+    cardInstances: {
+      total: number;
+      available: number;
+      busy: number;
+      injured: number;
+      recovering: number;
+      assigned: number;
+    };
     lastBattle: {
       result: string;
       enemyName: string;
@@ -183,7 +192,7 @@ const FACTION_BRIEFING: Record<
 export async function buildDailyBriefing(userId: string): Promise<DailyBriefing | null> {
   await ensureDailyQuests(userId);
 
-  const [user, assignments, licenses, pendingResources, pvpRanks, rewardCenter, latestMatch] = await Promise.all([
+  const [user, assignments, licenses, pendingResources, pvpRanks, rewardCenter, latestMatch, cardInstanceOverview] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
       include: {
@@ -203,6 +212,7 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
     db.pvpRank.findMany({ where: { userId }, orderBy: { updatedAt: "desc" } }),
     getRewardCenter(userId),
     db.matchRecord.findFirst({ where: { userId }, orderBy: { playedAt: "desc" } }),
+    getCardInstanceOverview(userId),
   ]);
 
   if (!user?.commander) return null;
@@ -495,6 +505,14 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
       readyRewards: readyRewards.length,
       currentStreak: rewardCenter.streak.current,
       canClaimDaily: rewardCenter.streak.canClaimDaily,
+      cardInstances: {
+        total: cardInstanceOverview.summary.total,
+        available: cardInstanceOverview.summary.available,
+        busy: cardInstanceOverview.summary.busy,
+        injured: cardInstanceOverview.summary.injured,
+        recovering: cardInstanceOverview.summary.recovering,
+        assigned: cardInstanceOverview.summary.assigned,
+      },
       lastBattle: latestMatch
         ? {
             result: latestMatch.result,

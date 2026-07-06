@@ -92,6 +92,7 @@ export async function GET() {
       validStructureType: validStructure?.type || null,
       validStructureName: validStructure?.name || null,
       crewCardDefId: p.crewCardDefId,
+      crewCardInstanceId: p.crewCardInstanceId,
       crewName: crewDef?.name || null,
       crewBonus: crewDef?.description || null,
       sourceCardDefId: p.sourceCardDefId,

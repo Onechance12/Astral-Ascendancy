@@ -5,6 +5,7 @@
 import { db } from "./db";
 import { CARD_DEFS } from "./match-engine";
 import { STRUCTURE_DEFS, PLANET_TYPES, productionRate as baseProductionRate } from "./resources";
+import { findAvailableCardInstance } from "./card-instances";
 
 // ---------- Card categories ----------
 export type CardCategory =
@@ -373,6 +374,8 @@ export async function deployPlanetCard(userId: string, planetCardDefId: string, 
     where: { userId_defId: { userId, defId: planetCardDefId } },
   });
   if (!userCard || userCard.count < 1) return { ok: false, error: "you don't own this card" };
+  const instanceResult = await findAvailableCardInstance({ userId, defId: planetCardDefId });
+  if (!instanceResult.ok) return instanceResult;
 
   // count existing planets to assign a slot
   const existingPlanets = await db.planet.findMany({ where: { userId } });
@@ -408,6 +411,15 @@ export async function deployPlanetCard(userId: string, planetCardDefId: string, 
       data: { count: { decrement: 1 } },
     });
   }
+  await db.cardInstance.update({
+    where: { id: instanceResult.instance.id },
+    data: {
+      location: "world",
+      status: "unavailable",
+      planetId: planet.id,
+      lastStateChangeAt: new Date(),
+    },
+  });
 
   return { ok: true, planetId: planet.id };
 }
@@ -425,6 +437,8 @@ export async function activateDevelopmentCard(userId: string, devCardDefId: stri
     where: { userId_defId: { userId, defId: devCardDefId } },
   });
   if (!userCard || userCard.count < 1) return { ok: false, error: "you don't own this card" };
+  const instanceResult = await findAvailableCardInstance({ userId, defId: devCardDefId });
+  if (!instanceResult.ok) return instanceResult;
 
   // check not already activated
   const existing = await db.developmentProgress.findUnique({
@@ -446,6 +460,15 @@ export async function activateDevelopmentCard(userId: string, devCardDefId: stri
       data: { count: { decrement: 1 } },
     });
   }
+  await db.cardInstance.update({
+    where: { id: instanceResult.instance.id },
+    data: {
+      location: "headquarters",
+      status: "unavailable",
+      lastStateChangeAt: new Date(),
+      metadataJson: JSON.stringify({ activatedDevelopment: devCardDefId }),
+    },
+  });
 
   return { ok: true };
 }
@@ -474,13 +497,37 @@ export async function assignCrewToPlanet(userId: string, planetId: string, crewC
     where: { userId_defId: { userId, defId: crewCardDefId } },
   });
   if (!userCard || userCard.count < 1) return { ok: false, error: "you don't own this crew card" };
+  const instanceResult = await findAvailableCardInstance({ userId, defId: crewCardDefId });
+  if (!instanceResult.ok) return instanceResult;
+
+  if (planet.crewCardInstanceId) {
+    await db.cardInstance.updateMany({
+      where: { userId, id: planet.crewCardInstanceId },
+      data: {
+        location: "collection",
+        status: "available",
+        planetId: null,
+        lastStateChangeAt: new Date(),
+      },
+    });
+  }
 
   // assign (replaces any existing crew)
   await db.planet.update({
     where: { id: planetId },
     data: {
       crewCardDefId,
+      crewCardInstanceId: instanceResult.instance.id,
       crewAssignedAt: new Date(),
+    },
+  });
+  await db.cardInstance.update({
+    where: { id: instanceResult.instance.id },
+    data: {
+      location: "world",
+      status: "busy",
+      planetId,
+      lastStateChangeAt: new Date(),
     },
   });
 
@@ -492,8 +539,19 @@ export async function unassignCrew(userId: string, planetId: string): Promise<{ 
   if (!planet || planet.userId !== userId) return { ok: false };
   await db.planet.update({
     where: { id: planetId },
-    data: { crewCardDefId: null, crewAssignedAt: null },
+    data: { crewCardDefId: null, crewCardInstanceId: null, crewAssignedAt: null },
   });
+  if (planet.crewCardInstanceId) {
+    await db.cardInstance.updateMany({
+      where: { userId, id: planet.crewCardInstanceId },
+      data: {
+        location: "collection",
+        status: "available",
+        planetId: null,
+        lastStateChangeAt: new Date(),
+      },
+    });
+  }
   return { ok: true };
 }
 

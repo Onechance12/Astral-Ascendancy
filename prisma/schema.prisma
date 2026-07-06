@@ -23,6 +23,7 @@ model User {
   matches       MatchRecord[]
   decks         Deck[]
   cards         UserCard[]
+  cardInstances CardInstance[]
   quests        UserQuest[]
   campaignProg  CampaignProgress[]
   opProg        OperationProgress[]
@@ -132,6 +133,7 @@ model Assignment {
   status      String   @default("active") // active | ready | claimed | canceled
   assetType   String   // crew | card | deck | world | project
   cardDefId   String?
+  cardInstanceId String?
   deckId      String?
   planetId    String?
   description String?
@@ -144,6 +146,7 @@ model Assignment {
   @@index([userId, status, completesAt])
   @@index([userId, deckId, status])
   @@index([userId, cardDefId, status])
+  @@index([userId, cardInstanceId, status])
   @@index([userId, planetId, status])
 }
 
@@ -374,6 +377,48 @@ model UserCard {
   @@index([userId])
 }
 
+// One row per real owned card copy. This is the living-asset layer:
+// location, condition, assignment, deck/world/ship placement, XP, and history.
+// `UserCard` remains the collection-count summary for pack/crafting UI.
+model CardInstance {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defId       String
+  source      String   @default("drop")
+
+  displayName String?
+  title       String?
+  xp          Int      @default(0)
+  level       Int      @default(1)
+
+  // location: collection | deck | assignment | headquarters | world | structure | ship | recovery | training | medical | repair | captured | missing
+  location    String   @default("collection")
+  // status: available | busy | unavailable
+  status      String   @default("available")
+  // condition: healthy | fatigued | injured | critical | fallen | damaged | restoring
+  condition   String   @default("healthy")
+
+  currentAssignmentId String?
+  deckId      String?
+  planetId    String?
+  structureKey String?
+  shipId      String?
+  equippedToInstanceId String?
+  metadataJson String   @default("{}")
+
+  acquiredAt  DateTime @default(now())
+  lastStateChangeAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, defId])
+  @@index([userId, status, location])
+  @@index([userId, condition])
+  @@index([userId, currentAssignmentId])
+  @@index([userId, deckId])
+  @@index([userId, planetId])
+}
+
 // ---------- Quests ----------
 model Quest {
   id          String   @id @default(cuid())
@@ -494,9 +539,11 @@ model Planet {
 
   // crew assignment (one crew card per planet)
   crewCardDefId String? // defId of the assigned crew card
+  crewCardInstanceId String?
   crewAssignedAt DateTime?
 
   @@index([userId])
+  @@index([userId, crewCardInstanceId])
 }
 
 // ---------- Developments (tech tree, activated from cards) ----------

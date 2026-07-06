@@ -20,6 +20,7 @@ export async function GET() {
       status: assignment.status,
       assetType: assignment.assetType,
       cardDefId: assignment.cardDefId,
+      cardInstanceId: assignment.cardInstanceId,
       deckId: assignment.deckId,
       planetId: assignment.planetId,
       description: assignment.description,
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
     userId: session.user.id,
     type,
     cardDefId: typeof body.cardDefId === "string" ? body.cardDefId : undefined,
+    cardInstanceId: typeof body.cardInstanceId === "string" ? body.cardInstanceId : undefined,
     deckId: typeof body.deckId === "string" ? body.deckId : undefined,
     planetId: typeof body.planetId === "string" ? body.planetId : undefined,
   });
