@@ -403,7 +403,7 @@ function maybeCountResult(
   // count deployed + cast for quest progress (entities on board + anomalies implied by log)
   const survivingPlayerCards = match.sectors.filter((s) => s && s.ownerSide === "player");
   const deployedCount = survivingPlayerCards.length;
-  const cardsPlayed = survivingPlayerCards.map((card) => card!.defId);
+  const cardsPlayed = match.cardsPlayed;
 
   // persist to DB (fire-and-forget) and capture rewards
   const c = get().commander;

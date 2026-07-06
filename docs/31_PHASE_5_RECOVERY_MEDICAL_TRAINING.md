@@ -160,9 +160,19 @@ It shows:
 
 ## Design Constraint
 
-Phase 5 does not yet create injuries from battle results.
+Phase 5 originally did not create injuries from battle results.
 
-That belongs with Phase 7 and later battle-result persistence. This phase builds the system that will receive those injuries when result scenes start producing them.
+Audit pass update:
+
+Phase 7 now feeds this system with early post-battle condition changes.
+
+Current alpha rule:
+
+- played cards on wins become fatigued
+- played cards on losses fatigue normally
+- one played card on a loss becomes injured when an available matching `CardInstance` exists
+
+Only exact available collection copies are touched. Cards already busy in assignments, structures, medical, training, ships, worlds, or other locations are not modified by the result pass.
 
 ## Next Hooks
 
@@ -176,8 +186,7 @@ Phase 6 petitions can now ask for:
 
 Phase 7 result scenes can now output:
 
-- card injured
 - card fatigued
-- card fallen
+- card injured
 - card gained XP
 - card needs recovery

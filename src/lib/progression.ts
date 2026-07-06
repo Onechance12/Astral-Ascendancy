@@ -55,6 +55,15 @@ export type CardMasteryResult = {
   isNew: boolean;
 };
 
+export type CardConditionResult = {
+  cardInstanceId: string;
+  defId: string;
+  previousCondition: string;
+  condition: string;
+  reason: "battle_fatigue" | "battle_injury";
+  needsRecovery: boolean;
+};
+
 export type PackProgress = {
   pityCounter: number;
   nextRarePlusAt: number;
@@ -388,6 +397,7 @@ export async function processMatchRewards(outcome: MatchOutcome): Promise<{
   seasonXp: number;
   dailyBonus: boolean;
   cardMastery: CardMasteryResult[];
+  cardConditions: CardConditionResult[];
   packProgress: PackProgress;
 }> {
   // Check for daily login bonus (first match of the day)
@@ -432,6 +442,9 @@ export async function processMatchRewards(outcome: MatchOutcome): Promise<{
   // 3b. Card mastery: played cards gain persistent XP.
   const cardMastery = await grantCardMasteryXp(outcome.userId, outcome.cardsPlayed ?? [], outcome.won);
 
+  // 3c. Living-card condition: results should feed recovery/training loops.
+  const cardConditions = await applyPostMatchCardConditions(outcome.userId, outcome.cardsPlayed ?? [], outcome.won);
+
   // 4. Quest progress (skip for campaign mode — campaigns have their own rewards)
   if (outcome.mode !== "campaign") {
     await progressQuests(outcome.userId, {
@@ -463,12 +476,80 @@ export async function processMatchRewards(outcome: MatchOutcome): Promise<{
     seasonXp,
     dailyBonus: isFirstOfDay,
     cardMastery,
+    cardConditions,
     packProgress: {
       pityCounter,
       nextRarePlusAt: PITY_THRESHOLD,
       winsUntilRarePlus: Math.max(0, PITY_THRESHOLD - pityCounter),
     },
   };
+}
+
+async function applyPostMatchCardConditions(
+  userId: string,
+  cardsPlayed: string[],
+  won: boolean
+): Promise<CardConditionResult[]> {
+  const playCounts = new Map<string, number>();
+  for (const defId of cardsPlayed.slice(0, 30)) {
+    if (typeof defId !== "string") continue;
+    playCounts.set(defId, (playCounts.get(defId) ?? 0) + 1);
+  }
+
+  const results: CardConditionResult[] = [];
+  let injuryAssigned = won;
+
+  for (const [defId, count] of playCounts) {
+    const candidates = await db.cardInstance.findMany({
+      where: {
+        userId,
+        defId,
+        location: "collection",
+        status: "available",
+        condition: { in: ["healthy", "fatigued"] },
+      },
+      orderBy: [{ condition: "asc" }, { level: "desc" }, { acquiredAt: "asc" }],
+      take: Math.max(1, count),
+    });
+
+    for (const card of candidates) {
+      const nextCondition = !injuryAssigned && !won ? "injured" : "fatigued";
+      const reason: CardConditionResult["reason"] = nextCondition === "injured" ? "battle_injury" : "battle_fatigue";
+      injuryAssigned = injuryAssigned || nextCondition === "injured";
+      if (card.condition === nextCondition) continue;
+
+      const updated = await db.cardInstance.update({
+        where: { id: card.id },
+        data: {
+          condition: nextCondition,
+          lastStateChangeAt: new Date(),
+          metadataJson: JSON.stringify({
+            ...(safeJson(card.metadataJson) as Record<string, unknown>),
+            lastBattleCondition: reason,
+          }),
+        },
+      });
+
+      results.push({
+        cardInstanceId: updated.id,
+        defId: updated.defId,
+        previousCondition: card.condition,
+        condition: updated.condition,
+        reason,
+        needsRecovery: ["injured", "critical", "fallen", "damaged", "restoring"].includes(updated.condition),
+      });
+    }
+  }
+
+  return results;
+}
+
+function safeJson(value: string) {
+  try {
+    return JSON.parse(value || "{}");
+  } catch {
+    return {};
+  }
 }
 
 // ---------- Crafting ----------

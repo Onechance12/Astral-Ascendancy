@@ -18,19 +18,27 @@ It shows:
 - daily bonus callout
 - card drop reveal with rarity color
 - card mastery XP and level-up rows
+- medical review rows for fatigued or injured cards
 - pack pity progress
 - rematch and command hub actions
 
-The client now sends surviving player cards to `/api/matches` as early `cardsPlayed` data so the existing mastery system can start surfacing in the result screen.
+The React match engine now tracks player `cardsPlayed` directly when cards are deployed or anomalies are cast. This means destroyed units and spent anomalies still count for mastery and post-battle condition handling.
+
+The match reward pipeline now returns:
+
+- card mastery XP
+- level-up flags
+- post-battle condition changes
+- recovery flags
+- pack progress
 
 The Pixi game-client path now has a dedicated `ResultScene` for `victory` and `defeat`, replacing generic splash screens.
 
 ## Next Upgrades
 
-- Track every played card in the React battle engine, including destroyed cards and anomalies.
 - Feed exact result payloads into the Pixi result scene through the `GameEventBus`.
 - Add card portraits, drop flip animation, reward count-up, and sound hooks.
-- Connect injuries, recovery petitions, and post-battle medical review directly from result outcomes.
+- Expand injuries into critical, fallen, armor damage, and structure damage once battle severity is modeled.
 - Add a “next best action” button based on daily briefing and petitions.
 
 ## Design Rule

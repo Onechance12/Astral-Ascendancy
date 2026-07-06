@@ -138,6 +138,7 @@ PATCH /api/world-operations
 GET returns:
 
 - operation definitions
+- operation capacity from Headquarters Command Spire
 - active and ready world operations
 - eligible available card instances
 
@@ -178,6 +179,28 @@ CardInstance.location = collection
 CardInstance.status = available
 CardInstance.currentAssignmentId = null
 ```
+
+## Headquarters Capacity Integration
+
+Audit pass update:
+
+World operations now respect Headquarters capacity.
+
+Capacity is derived from:
+
+```txt
+Command Spire level + floor(Capital level / 2)
+```
+
+Active and ready world operations both occupy capacity. A ready operation must be claimed before that slot opens again.
+
+The Domain Operations panel now shows:
+
+```txt
+used slots / max slots
+```
+
+and disables new launches when slots are full.
 
 ## Domain UI
 

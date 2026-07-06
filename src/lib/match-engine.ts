@@ -81,6 +81,7 @@ export type MatchState = {
   convergence: ConvergenceEvent | null;
   winCondition: "conquest" | "ascension" | "singularity" | null;
   difficulty: Difficulty;
+  cardsPlayed: string[];
 };
 
 export type LogEntry = {
@@ -574,6 +575,7 @@ export function createMatch(
     convergence: null,
     winCondition: null,
     difficulty,
+    cardsPlayed: [],
   };
 
   // player's units can't attack turn 1 anyway (just deployed), but allow new turns
@@ -678,11 +680,13 @@ export function playCard(state: MatchState, handIdx: number, col: number): Match
     p.hand.splice(handIdx, 1);
     const placed = { ...card, justDeployed: true, canAttack: card.keyword === "StrikeFirst" };
     next.sectors[target] = placed;
+    next.cardsPlayed.push(card.defId);
     next.log.push({ id: logId(), side: "player", text: `Deployed ${card.name} to lane ${col + 1}.` });
   } else if (card.type === "Anomaly") {
     // anomaly
     p.resonance -= card.cost;
     p.hand.splice(handIdx, 1);
+    next.cardsPlayed.push(card.defId);
     resolveAnomaly(next, card, "player", "enemy");
   } else {
     return next;
@@ -1020,5 +1024,6 @@ function clone(s: MatchState): MatchState {
     player: { ...s.player, hand: s.player.hand.map((c) => ({ ...c })), deck: [...s.player.deck] },
     enemy: { ...s.enemy, hand: s.enemy.hand.map((c) => ({ ...c })), deck: [...s.enemy.deck] },
     log: [...s.log],
+    cardsPlayed: [...s.cardsPlayed],
   };
 }

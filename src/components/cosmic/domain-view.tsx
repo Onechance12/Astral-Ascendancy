@@ -76,6 +76,11 @@ type OperationCard = {
 
 type WorldOperationsData = {
   definitions: Record<WorldOperationType, WorldOperationDef>;
+  capacity: {
+    used: number;
+    max: number;
+    available: number;
+  };
   operations: WorldOperation[];
   eligibleCards: OperationCard[];
 };
@@ -687,6 +692,7 @@ function WorldOperationsPanel({
 }) {
   const activeByPlanet = new Map((worldOps?.operations || []).map((operation) => [operation.planetId, operation]));
   const defs = worldOps?.definitions;
+  const capacityFull = worldOps ? worldOps.capacity.available <= 0 : false;
 
   if (!worldOps || !defs) {
     return <p className="py-8 text-center text-xs text-muted-foreground">Opening command channels...</p>;
@@ -695,7 +701,12 @@ function WorldOperationsPanel({
   return (
     <div className="space-y-3">
       <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">World Operations</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">World Operations</p>
+          <span className="rounded-md border border-white/10 bg-black/25 px-2 py-1 text-[10px] font-black text-foreground/70">
+            {worldOps.capacity.used}/{worldOps.capacity.max} slots
+          </span>
+        </div>
         <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
           Pick a world, send a real available card, and let it work while the rest of your collection keeps moving.
           That card is locked until the operation returns.
@@ -719,6 +730,7 @@ function WorldOperationsPanel({
               definitions={defs}
               cards={worldOps.eligibleCards}
               busy={busy}
+              capacityFull={capacityFull}
               onStart={onStart}
               onClaim={onClaim}
             />
@@ -735,6 +747,7 @@ function WorldOperationPlanet({
   definitions,
   cards,
   busy,
+  capacityFull,
   onStart,
   onClaim,
 }: {
@@ -743,6 +756,7 @@ function WorldOperationPlanet({
   definitions: Record<WorldOperationType, WorldOperationDef>;
   cards: OperationCard[];
   busy: boolean;
+  capacityFull: boolean;
   onStart: (planetId: string, type: WorldOperationType, cardInstanceId: string) => void;
   onClaim: (assignmentId: string) => void;
 }) {
@@ -837,10 +851,10 @@ function WorldOperationPlanet({
 
           <button
             onClick={() => onStart(planet.id, selectedType, effectiveSelectedCardId)}
-            disabled={busy || !effectiveSelectedCardId}
+            disabled={busy || capacityFull || !effectiveSelectedCardId}
             className="w-full rounded-lg bg-emerald-400/20 px-3 py-2 text-xs font-black text-emerald-300 transition hover:bg-emerald-400/30 disabled:bg-white/5 disabled:text-muted-foreground"
           >
-            Launch {selectedDef.verb} · {selectedDef.durationMinutes}m
+            {capacityFull ? "Operation Slots Full" : `Launch ${selectedDef.verb} · ${selectedDef.durationMinutes}m`}
           </button>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { claimAssignment } from "@/lib/beta-progression";
 import { findAvailableCardInstance } from "@/lib/card-instances";
 import { db } from "@/lib/db";
+import { ensureHeadquarters } from "@/lib/headquarters";
 import { CARD_DEFS } from "@/lib/match-engine";
 import { RESOURCE_META, STRUCTURE_DEFS, type ResourceType, type StructureType } from "@/lib/resources";
 import { getCardCategory, getWorldCardDef } from "@/lib/world-cards";
@@ -92,7 +93,7 @@ const PLANET_RESOURCE: Record<string, ResourceType | null> = {
 export async function listWorldOperations(userId: string) {
   await markReadyWorldOperations(userId);
 
-  const [assignments, planets, cards] = await Promise.all([
+  const [assignments, planets, cards, headquarters] = await Promise.all([
     db.assignment.findMany({
       where: {
         userId,
@@ -103,12 +104,19 @@ export async function listWorldOperations(userId: string) {
     }),
     db.planet.findMany({ where: { userId }, orderBy: { slot: "asc" } }),
     listEligibleOperationCards(userId),
+    ensureHeadquarters(userId),
   ]);
 
   const planetMap = new Map(planets.map((planet) => [planet.id, planet]));
+  const operationCapacity = headquarters ? getWorldOperationCapacity(headquarters) : 1;
 
   return {
     definitions: WORLD_OPERATION_DEFS,
+    capacity: {
+      used: assignments.length,
+      max: operationCapacity,
+      available: Math.max(0, operationCapacity - assignments.length),
+    },
     operations: assignments.map((assignment) => {
       const operationType = ASSIGNMENT_TYPE_TO_OPERATION.get(assignment.type) ?? "gather";
       const planet = assignment.planetId ? planetMap.get(assignment.planetId) : null;
@@ -151,6 +159,19 @@ export async function startWorldOperation(input: {
   }
   if (def.requiresStructure && (!planet.structureType || planet.structureLevel <= 0)) {
     return { ok: false as const, error: "build a structure on this world before gathering" };
+  }
+
+  const headquarters = await ensureHeadquarters(input.userId);
+  const operationCapacity = headquarters ? getWorldOperationCapacity(headquarters) : 1;
+  const activeOperations = await db.assignment.count({
+    where: {
+      userId: input.userId,
+      type: { in: WORLD_OPERATION_ASSIGNMENT_TYPES },
+      status: { in: ["active", "ready"] },
+    },
+  });
+  if (activeOperations >= operationCapacity) {
+    return { ok: false as const, error: "world operation capacity is full; upgrade Command Spire" };
   }
 
   const existingPlanetOp = await db.assignment.findFirst({
@@ -345,6 +366,10 @@ async function markReadyWorldOperations(userId: string) {
     },
     data: { status: "ready" },
   });
+}
+
+function getWorldOperationCapacity(headquarters: { commandLevel: number; capitalLevel: number }) {
+  return Math.max(1, headquarters.commandLevel + Math.floor(headquarters.capitalLevel / 2));
 }
 
 export function formatWorldOperationReward(rewards: Record<string, unknown>) {

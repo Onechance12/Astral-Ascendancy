@@ -18,6 +18,14 @@ export type MatchRewardPayload = {
     leveledUp: boolean;
     isNew: boolean;
   }>;
+  cardConditions?: Array<{
+    cardInstanceId: string;
+    defId: string;
+    previousCondition: string;
+    condition: string;
+    reason: "battle_fatigue" | "battle_injury" | string;
+    needsRecovery: boolean;
+  }>;
   packProgress?: {
     pityCounter: number;
     nextRarePlusAt: number;
@@ -199,6 +207,28 @@ export default function MatchResultScene({
                             Lv.{card.level}{card.leveledUp ? " up" : ""}
                           </p>
                         </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {rewards?.cardConditions && rewards.cardConditions.length > 0 && (
+              <div className="rounded-2xl border border-white/10 bg-black/35 p-4 backdrop-blur">
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/45">Medical Review</p>
+                <div className="mt-3 grid gap-2">
+                  {rewards.cardConditions.slice(0, 4).map((card) => {
+                    const meta = getCardMeta(card.defId);
+                    return (
+                      <div key={card.cardInstanceId} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-black text-white">{meta.name}</p>
+                          <p className="text-[10px] text-white/45">{card.previousCondition} → {card.condition}</p>
+                        </div>
+                        <span className={cn("shrink-0 rounded px-2 py-1 text-[10px] font-black uppercase tracking-widest", card.needsRecovery ? "bg-rose-300/15 text-rose-200" : "bg-cyan-300/15 text-cyan-200")}>
+                          {card.needsRecovery ? "Recovery" : "Fatigued"}
+                        </span>
                       </div>
                     );
                   })}
