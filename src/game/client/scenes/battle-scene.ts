@@ -1,4 +1,4 @@
-import { Container, Graphics, Text } from "pixi.js";
+import { Assets, Container, Graphics, Sprite, Text, type Texture } from "pixi.js";
 import { CARD_DEFS, type CardDef } from "@/lib/match-engine";
 import {
   anomalyNeedsTarget,
@@ -133,11 +133,21 @@ export class BattleScene extends BaseScene {
   private deployedCount = 0;
   private castCount = 0;
   private resultSubmitted = false;
+  private active = false;
+  private loadingArt = false;
+  private readonly cardArtTextures = new Map<string, Texture>();
 
   enter(): void {
+    this.active = true;
     if (this.hand.length === 0 && this.playerDeck.length === 0) this.resetBattle();
     this.container.addChild(this.bgLayer, this.boardLayer, this.hudLayer, this.handLayer, this.fxLayer);
+    this.loadCardArt();
     this.redraw();
+  }
+
+  exit(): void {
+    this.active = false;
+    super.exit();
   }
 
   update(deltaMS: number): void {
@@ -426,25 +436,72 @@ export class BattleScene extends BaseScene {
     const bg = new Graphics()
       .roundRect(0, 0, width, height, 8)
       .fill({ color: 0x070a14, alpha: disabled ? 0.55 : 0.94 })
-      .stroke({ color: selected ? COLORS.emerald : factionColor, alpha: selected ? 0.9 : 0.42, width: selected ? 2 : 1 })
-      .roundRect(8, 10, width - 16, height * 0.47, 7)
-      .fill({ color: factionColor, alpha: disabled ? 0.08 : 0.16 });
+      .stroke({ color: selected ? COLORS.emerald : factionColor, alpha: selected ? 0.9 : 0.42, width: selected ? 2 : 1 });
+    node.addChild(bg);
+
+    const artX = 8;
+    const artY = 10;
+    const artW = width - 16;
+    const artH = height * 0.47;
+    const texture = def.art ? this.cardArtTextures.get(def.art) : undefined;
+    if (texture) {
+      const art = new Sprite(texture);
+      const scale = Math.max(artW / texture.width, artH / texture.height);
+      art.scale.set(scale);
+      art.position.set(artX + (artW - texture.width * scale) / 2, artY + (artH - texture.height * scale) / 2);
+      art.alpha = disabled ? 0.56 : 0.96;
+      const mask = new Graphics().roundRect(artX, artY, artW, artH, 7).fill({ color: 0xffffff, alpha: 1 });
+      art.mask = mask;
+      const wash = new Graphics()
+        .roundRect(artX, artY, artW, artH, 7)
+        .stroke({ color: factionColor, alpha: disabled ? 0.18 : 0.44, width: 1 })
+        .rect(artX, artY + artH * 0.55, artW, artH * 0.45)
+        .fill({ color: 0x000000, alpha: 0.22 });
+      node.addChild(art, mask, wash);
+    } else {
+      const artPanel = new Graphics()
+        .roundRect(artX, artY, artW, artH, 7)
+        .fill({ color: factionColor, alpha: disabled ? 0.08 : 0.16 });
+      const glyph = label(def.type === "World" ? "⬢" : def.type === "Structure" ? "▣" : def.type === "Attachment" ? "⚙" : def.type === "Anomaly" ? "!" : "✦", Math.max(20, width * 0.3), factionColor, "900");
+      glyph.anchor.set(0.5);
+      glyph.position.set(width / 2, height * 0.33);
+      node.addChild(artPanel, glyph);
+    }
+
     const cost = new Graphics().circle(17, 18, 12).fill({ color: COLORS.cyan, alpha: 0.9 });
     const costText = label(String(def.cost), 12, 0x041016, "900");
     costText.anchor.set(0.5);
     costText.position.set(17, 18);
-    const glyph = label(def.type === "World" ? "⬢" : def.type === "Structure" ? "▣" : def.type === "Attachment" ? "⚙" : def.type === "Anomaly" ? "!" : "✦", Math.max(20, width * 0.3), factionColor, "900");
-    glyph.anchor.set(0.5);
-    glyph.position.set(width / 2, height * 0.33);
     const name = label(def.name, Math.max(9, width * 0.09), COLORS.white, "900");
     name.anchor.set(0.5);
     name.position.set(width / 2, height - 34);
     const kind = label(def.type.toUpperCase(), 8, COLORS.slate, "bold");
     kind.anchor.set(0.5);
     kind.position.set(width / 2, height - 18);
-    node.addChild(bg, cost, costText, glyph, name, kind);
+    node.addChild(cost, costText, name, kind);
     node.alpha = disabled ? 0.48 : 1;
     return node;
+  }
+
+  private loadCardArt() {
+    if (this.loadingArt) return;
+    const urls = Array.from(new Set(CARD_DEFS.map((card) => card.art).filter((art): art is string => Boolean(art) && art.startsWith("/game/cards/"))));
+    const unloaded = urls.filter((url) => !this.cardArtTextures.has(url));
+    if (unloaded.length === 0) return;
+
+    this.loadingArt = true;
+    void Promise.all(
+      unloaded.map(async (url) => {
+        try {
+          this.cardArtTextures.set(url, await Assets.load<Texture>(url));
+        } catch {
+          this.match = { ...this.match, log: [...this.match.log.slice(-5), `Missing art asset: ${url}`] };
+        }
+      })
+    ).finally(() => {
+      this.loadingArt = false;
+      if (this.active) this.redraw();
+    });
   }
 
   private commanderHud(name: string, hp: number, maxHp: number, influence: number, side: "player" | "enemy", resonance?: number) {

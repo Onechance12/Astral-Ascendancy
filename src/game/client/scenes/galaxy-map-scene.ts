@@ -44,7 +44,6 @@ export class GalaxyMapScene extends BaseScene {
   update(deltaMS: number): void {
     this.time += deltaMS * 0.001;
     this.planetNodes.forEach((planet, index) => {
-      planet.rotation += (index % 2 === 0 ? 1 : -1) * deltaMS * 0.00018;
       planet.scale.set(1 + Math.sin(this.time * 1.7 + index) * 0.025);
     });
   }

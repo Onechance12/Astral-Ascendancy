@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import SiteHeader from "@/components/cosmic/site-header";
 import Starfield from "@/components/cosmic/starfield";
 import FactionShowcase from "@/components/cosmic/faction-showcase";
@@ -96,13 +97,13 @@ export default function Home() {
 
 /* ============ LANDING ============ */
 function Landing() {
-  const enterGame = useGame((s) => s.enterGame);
+  const router = useRouter();
   const openLogin = useGame((s) => s.openLogin);
   const commander = useGame((s) => s.commander);
   const setView = useGame((s) => s.setView);
 
-  // primary CTA: if logged in, go straight to hub; otherwise open login
-  const play = () => (commander ? enterGame() : openLogin());
+  // primary CTA: if logged in, launch the fullscreen game client.
+  const play = () => (commander ? router.push("/play") : openLogin());
 
   return (
     <>

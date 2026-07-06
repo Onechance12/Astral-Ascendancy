@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export default function LoginDialog() {
+  const router = useRouter();
   const open = useGame((s) => s.loginOpen);
   const close = useGame((s) => s.closeLogin);
   const onAuthed = useGame((s) => s.onAuthed);
@@ -46,7 +48,8 @@ export default function LoginDialog() {
       return;
     }
     toast.success(mode === "signup" ? "Commander registered" : "Welcome back");
-    onAuthed();
+    await onAuthed();
+    router.push("/play");
   };
 
   return (

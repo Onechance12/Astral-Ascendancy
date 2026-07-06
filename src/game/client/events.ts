@@ -2,6 +2,20 @@ export type GameClientEventMap = {
   scenechange: { scene: string };
   battlelog: { message: string };
   packopened: { rarity: string };
+  openoverlay: {
+    view:
+      | "hub"
+      | "deckbuilder"
+      | "profile"
+      | "multiplayer"
+      | "collection"
+      | "campaign"
+      | "operations"
+      | "domain"
+      | "headquarters"
+      | "codex";
+    label: string;
+  };
 };
 
 type Listener<T> = (payload: T) => void;

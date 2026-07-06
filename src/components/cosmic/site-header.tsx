@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useGame } from "@/store/game-store";
 
@@ -13,13 +14,13 @@ const LINKS = [
 ];
 
 export default function SiteHeader() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const commander = useGame((s) => s.commander);
-  const enterGame = useGame((s) => s.enterGame);
   const openLogin = useGame((s) => s.openLogin);
 
-  const onPlay = () => (commander ? enterGame() : openLogin());
+  const onPlay = () => (commander ? router.push("/play") : openLogin());
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);

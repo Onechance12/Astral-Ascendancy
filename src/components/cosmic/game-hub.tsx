@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useGame } from "@/store/game-store";
 import { FACTIONS } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
@@ -122,12 +123,12 @@ type DailyBriefing = {
 };
 
 export default function GameHub() {
+  const router = useRouter();
   const commander = useGame((s) => s.commander);
   const stats = useGame((s) => s.stats);
   const decks = useGame((s) => s.decks);
   const activeDeckId = useGame((s) => s.activeDeckId);
   const difficulty = useGame((s) => s.difficulty);
-  const playMatch = useGame((s) => s.playMatch);
   const exitToLanding = useGame((s) => s.exitToLanding);
   const logout = useGame((s) => s.logout);
   const setView = useGame((s) => s.setView);
@@ -173,6 +174,10 @@ export default function GameHub() {
     ? assignments.find((assignment) => assignment.deckId === activeDeck.id && (assignment.status === "active" || assignment.status === "ready"))
     : null;
   const canPlayActiveDeck = !activeDeckAssignment;
+  const launchGameClient = () => {
+    if (!canPlayActiveDeck) return;
+    router.push("/play");
+  };
 
   const startAssignment = async (type: "resource" | "study" | "rescue") => {
     if (type === "rescue" && !activeDeck) {
@@ -274,7 +279,7 @@ export default function GameHub() {
       return;
     }
     if (action.kind === "play_match") {
-      if (canPlayActiveDeck) playMatch();
+      launchGameClient();
       return;
     }
     const targetView = action.view ?? actionKindToView(action.kind);
@@ -368,11 +373,11 @@ export default function GameHub() {
             </div>
           </div>
           <Button
-            onClick={canPlayActiveDeck ? playMatch : undefined}
+            onClick={launchGameClient}
             disabled={!canPlayActiveDeck}
             className="shrink-0 bg-emerald-400 px-6 py-3 text-sm font-bold text-emerald-950 shadow-[0_0_30px_rgba(52,211,153,0.4)] hover:bg-emerald-300"
           >
-            {canPlayActiveDeck ? "▶ Play vs AI" : "Deck Away"}
+            {canPlayActiveDeck ? "▶ Launch Client" : "Deck Away"}
           </Button>
         </div>
         {activeDeckAssignment && (
