@@ -1,6 +1,7 @@
 import { Container, Graphics, Text } from "pixi.js";
 import { CARD_DEFS, type CardDef } from "@/lib/match-engine";
 import {
+  anomalyNeedsTarget,
   attackInMatch,
   attackCommanderInMatch,
   canAttackCommander,
@@ -14,7 +15,9 @@ import {
   legalMoveIndexes,
   legalStructureIndexes,
   legalWorldIndexes,
+  legalAnomalyIndexes,
   moveEntityInMatch,
+  playAnomalyCard,
   playWorldCard,
   buildStructureCard,
   attachCardToEntity,
@@ -28,15 +31,19 @@ import { COLORS, label, makeButton, roundedPanel } from "../pixi-ui";
 const STARTING_HAND = [
   "sector_surveyor",
   "carrion_bloom",
+  "smite",
+  "solar_writ",
   "concord_arbiter",
-  "helios_reactor",
   "hardlight_exoshell",
 ];
 
 const PLAYER_DRAW_DECK = [
   "acolyte",
+  "sunfire-cannon",
   "dawnknight",
   "solar-priest",
+  "surge",
+  "refract",
   "radiance",
   "survey_claim",
   "emergency_bulkhead",
@@ -194,6 +201,12 @@ export class BattleScene extends BaseScene {
     direct.position.set(width - direct.width - 18, height - 208);
     direct.alpha = selectedCanStrikeCommander ? 1 : 0.34;
     direct.eventMode = selectedCanStrikeCommander ? "static" : "none";
+    const selectedCard = this.selectedCardId ? getCard(this.selectedCardId) : null;
+    const canCast = selectedCard?.type === "Anomaly" && !anomalyNeedsTarget(selectedCard) && selectedCard.cost <= this.match.player.resonance && this.match.active === "player";
+    const cast = makeButton("CAST CARD", Math.min(170, width * 0.28), COLORS.gold, () => this.castSelectedCard());
+    cast.position.set(width - cast.width - 18, height - 264);
+    cast.alpha = canCast ? 1 : 0.34;
+    cast.eventMode = canCast ? "static" : "none";
 
     const logPanel = roundedPanel(Math.min(300, width - 36), 92, 0x030712, 0.72, COLORS.cyan);
     logPanel.position.set(width - logPanel.width - 18, 138);
@@ -203,7 +216,7 @@ export class BattleScene extends BaseScene {
     phase.position.set(Math.max(18, width / 2 - phase.width / 2), 22);
     const hint = this.actionHint();
     hint.position.set(22, Math.max(136, height - 208));
-    this.hudLayer.addChild(top, player, reset, menu, end, direct, logPanel, logTitle, phase, hint);
+    this.hudLayer.addChild(top, player, reset, menu, end, direct, cast, logPanel, logTitle, phase, hint);
     this.match.log.slice(-4).forEach((entry, index) => {
       const row = label(entry, 10, COLORS.slate, "bold");
       row.position.set(logPanel.x + 12, logPanel.y + 28 + index * 15);
@@ -232,7 +245,7 @@ export class BattleScene extends BaseScene {
 
   private drawHand() {
     const { width, height } = this.app.screen;
-    const cardW = Math.min(104, Math.max(76, (width - 36) / 5.35));
+    const cardW = Math.min(104, Math.max(62, (width - 36) / (this.hand.length + 0.35)));
     const cardH = cardW * 1.34;
     const totalW = this.hand.length * cardW + (this.hand.length - 1) * 8;
     const startX = Math.max(14, (width - totalW) / 2);
@@ -241,7 +254,7 @@ export class BattleScene extends BaseScene {
     this.hand.forEach((defId, index) => {
       const def = getCard(defId);
       const selected = this.selectedCardId === defId;
-      const disabled = this.match.active !== "player" || def.cost > this.match.player.resonance || def.type === "Anomaly";
+      const disabled = this.match.active !== "player" || def.cost > this.match.player.resonance;
       const card = this.handCard(def, cardW, cardH, selected, disabled);
       card.position.set(startX + index * (cardW + 8), y + (selected ? -10 : 0));
       card.eventMode = disabled ? "none" : "static";
@@ -360,6 +373,28 @@ export class BattleScene extends BaseScene {
         text.position.set(center.x, center.y + cell * 0.35);
         this.fxLayer.addChild(text);
       }
+      if (event.type === "cardEffect") {
+        const color = event.tone === "damage"
+          ? COLORS.rose
+          : event.tone === "shield"
+            ? COLORS.cyan
+            : event.tone === "heal"
+              ? COLORS.emerald
+              : event.tone === "world"
+                ? COLORS.gold
+                : COLORS.white;
+        const text = label(event.label, 15, color, "900");
+        text.anchor.set(0.5);
+        if (typeof event.targetIndex === "number") {
+          const center = this.cellCenter(event.targetIndex, originX, originY, cell, cellGap);
+          text.position.set(center.x, center.y - cell * 0.2);
+        } else if (event.commander) {
+          text.position.set(width / 2, event.commander === "enemy" ? 82 : height - 116);
+        } else {
+          text.position.set(width / 2, height / 2);
+        }
+        this.fxLayer.addChild(text);
+      }
     }
   }
 
@@ -385,7 +420,7 @@ export class BattleScene extends BaseScene {
     const costText = label(String(def.cost), 12, 0x041016, "900");
     costText.anchor.set(0.5);
     costText.position.set(17, 18);
-    const glyph = label(def.type === "World" ? "⬢" : def.type === "Structure" ? "▣" : def.type === "Attachment" ? "⚙" : "✦", Math.max(20, width * 0.3), factionColor, "900");
+    const glyph = label(def.type === "World" ? "⬢" : def.type === "Structure" ? "▣" : def.type === "Attachment" ? "⚙" : def.type === "Anomaly" ? "!" : "✦", Math.max(20, width * 0.3), factionColor, "900");
     glyph.anchor.set(0.5);
     glyph.position.set(width / 2, height * 0.33);
     const name = label(def.name, Math.max(9, width * 0.09), COLORS.white, "900");
@@ -445,7 +480,9 @@ export class BattleScene extends BaseScene {
     if (this.selectedCardId) {
       const card = getCard(this.selectedCardId);
       if (card.cost > this.match.player.resonance) return `Need ${card.cost} Resonance to play ${card.name}.`;
+      if (card.type === "Anomaly" && !anomalyNeedsTarget(card)) return "Use Cast Card to fire this anomaly.";
       if (this.targetIndexes().length === 0) return "No legal sectors for this card right now.";
+      if (card.type === "Anomaly" && anomalyNeedsTarget(card)) return "Tap a glowing target to cast this anomaly.";
       return "Tap a glowing sector to play the selected card.";
     }
     if (this.selectedActor !== null) {
@@ -470,6 +507,7 @@ export class BattleScene extends BaseScene {
       if (selectedCard.type === "Attachment") {
         return this.match.board.filter((sector) => sector.entity?.owner === "player").map((sector) => sector.index);
       }
+      if (selectedCard.type === "Anomaly") return legalAnomalyIndexes(this.match, selectedCard, "player");
       return [];
     }
     if (this.selectedActor !== null) {
@@ -501,6 +539,7 @@ export class BattleScene extends BaseScene {
       if (next !== before) {
         this.match = next;
         this.removeCardFromHand(selectedCard.defId);
+        this.applyDrawEvents();
         this.selectedCardId = null;
         this.bus.emit("battlelog", { message: `${selectedCard.name} played.` });
       }
@@ -533,7 +572,23 @@ export class BattleScene extends BaseScene {
     if (def.type === "World") return playWorldCard(this.match, def, "player", targetIndex);
     if (def.type === "Structure") return buildStructureCard(this.match, def, "player", targetIndex);
     if (def.type === "Attachment") return attachCardToEntity(this.match, def, "player", targetIndex);
+    if (def.type === "Anomaly") return playAnomalyCard(this.match, def, "player", targetIndex);
     return this.match;
+  }
+
+  private castSelectedCard() {
+    if (this.match.active !== "player" || !this.selectedCardId) return;
+    const selectedCard = getCard(this.selectedCardId);
+    if (selectedCard.type !== "Anomaly" || anomalyNeedsTarget(selectedCard) || selectedCard.cost > this.match.player.resonance) return;
+    const before = this.match;
+    const next = playAnomalyCard(this.match, selectedCard, "player", null);
+    if (next === before) return;
+    this.match = next;
+    this.removeCardFromHand(selectedCard.defId);
+    this.applyDrawEvents();
+    this.selectedCardId = null;
+    if (this.resolveWinner()) return;
+    this.redraw();
   }
 
   private endPlayerTurn() {
@@ -665,6 +720,14 @@ export class BattleScene extends BaseScene {
     const next = this.playerDeck.shift();
     if (!next || this.hand.length >= 7) return;
     this.hand.push(next);
+  }
+
+  private applyDrawEvents() {
+    const draws = this.match.lastEvents
+      .reduce((total, event) => event.type === "draw" && event.side === "player" ? total + event.count : total, 0);
+    for (let index = 0; index < draws; index++) {
+      this.drawPlayerCard();
+    }
   }
 
   private drawEnemyCard() {

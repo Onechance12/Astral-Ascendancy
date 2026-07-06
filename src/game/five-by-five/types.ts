@@ -196,6 +196,21 @@ export type BattleEvent =
       type: "resource";
       side: Side;
       resonance: number;
+    }
+  | {
+      type: "cardEffect";
+      sourceName: string;
+      label: string;
+      targetIndex?: number;
+      commander?: Side;
+      value?: number;
+      tone: "damage" | "shield" | "heal" | "buff" | "draw" | "world";
+    }
+  | {
+      type: "draw";
+      side: Side;
+      sourceName: string;
+      count: number;
     };
 
 export type FiveByFiveMatchState = {

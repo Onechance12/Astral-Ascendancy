@@ -205,6 +205,8 @@ function collectStructureKeywords(def: CardDef): string[] {
 }
 
 function parseSignedBonus(text: string, stat: "attack" | "hp"): number {
+  const compact = text.match(/\+(\d+)\/\+?(\d+)/);
+  if (compact) return Number(stat === "attack" ? compact[1] : compact[2]);
   const pattern = stat === "attack" ? /\+(\d+)\s+attack/i : /\+(\d+)\s+hp/i;
   const match = text.match(pattern);
   return match ? Number(match[1]) : 0;
