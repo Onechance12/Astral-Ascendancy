@@ -363,8 +363,12 @@ model UserCard {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   defId       String   // references CARD_DEFS defId
   count       Int      @default(1)
+  xp          Int      @default(0)
+  level       Int      @default(1)
+  matchesPlayed Int    @default(0)
   source      String   @default("drop") // drop | craft | quest | campaign | operation | starter
   acquiredAt  DateTime @default(now())
+  lastPlayedAt DateTime?
 
   @@unique([userId, defId])
   @@index([userId])

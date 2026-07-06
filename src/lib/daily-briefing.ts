@@ -64,6 +64,13 @@ export type DailyBriefing = {
     readyRewards: number;
     currentStreak: number;
     canClaimDaily: boolean;
+    lastBattle: {
+      result: string;
+      enemyName: string;
+      mode: string;
+      playedAt: string;
+      rewards: string;
+    } | null;
   };
   recommendedAction: DailyBriefingItem;
   secondaryActions: DailyBriefingItem[];
@@ -176,7 +183,7 @@ const FACTION_BRIEFING: Record<
 export async function buildDailyBriefing(userId: string): Promise<DailyBriefing | null> {
   await ensureDailyQuests(userId);
 
-  const [user, assignments, licenses, pendingResources, pvpRanks, rewardCenter] = await Promise.all([
+  const [user, assignments, licenses, pendingResources, pvpRanks, rewardCenter, latestMatch] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
       include: {
@@ -195,6 +202,7 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
     getPendingResources(userId),
     db.pvpRank.findMany({ where: { userId }, orderBy: { updatedAt: "desc" } }),
     getRewardCenter(userId),
+    db.matchRecord.findFirst({ where: { userId }, orderBy: { playedAt: "desc" } }),
   ]);
 
   if (!user?.commander) return null;
@@ -373,6 +381,24 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
     });
   }
 
+  if (latestMatch) {
+    const rewardText = formatMatchRewardSummary(latestMatch);
+    const won = latestMatch.result === "win";
+    recommendations.push({
+      id: `last-battle-${latestMatch.id}`,
+      title: won ? "Last battle created momentum" : "Last battle exposed a weakness",
+      body: won
+        ? `${latestMatch.enemyName} fell in ${latestMatch.turns} turns. ${rewardText} Push another match while your line is working.`
+        : `${latestMatch.enemyName} survived with ${latestMatch.enemyHpLeft} HP. Review the deck, then return with stronger board control.`,
+      score: won ? 58 : 88,
+      priority: won ? "medium" : "high",
+      source: "match_state",
+      action: won
+        ? { kind: "play_match", label: "Keep fighting" }
+        : { kind: "open_deckbuilder", label: "Tune deck", view: "deckbuilder" },
+    });
+  }
+
   if (commander.shards >= PACK_COST) {
     recommendations.push({
       id: "open-pack",
@@ -469,6 +495,15 @@ export async function buildDailyBriefing(userId: string): Promise<DailyBriefing 
       readyRewards: readyRewards.length,
       currentStreak: rewardCenter.streak.current,
       canClaimDaily: rewardCenter.streak.canClaimDaily,
+      lastBattle: latestMatch
+        ? {
+            result: latestMatch.result,
+            enemyName: latestMatch.enemyName,
+            mode: latestMatch.mode,
+            playedAt: latestMatch.playedAt.toISOString(),
+            rewards: formatMatchRewardSummary(latestMatch),
+          }
+        : null,
     },
     recommendedAction,
     secondaryActions,
@@ -498,11 +533,24 @@ function findFaction(factionId: string) {
 
 function pickFactionLine(source: string, voice: (typeof FACTION_BRIEFING)[string]) {
   if (source.includes("reward")) return voice.ready;
+  if (source.includes("match")) return voice.warning;
   if (source.includes("domain")) return voice.resource;
   if (source.includes("deck") || source.includes("license")) return voice.deck;
   if (source.includes("campaign")) return voice.campaign;
   if (source.includes("assignment")) return voice.assignment;
   return voice.warning;
+}
+
+function formatMatchRewardSummary(match: {
+  shardsEarned: number;
+  seasonXpEarned: number;
+  dropCardDefId: string | null;
+}) {
+  const parts: string[] = [];
+  if (match.shardsEarned > 0) parts.push(`${match.shardsEarned} shards`);
+  if (match.seasonXpEarned > 0) parts.push(`${match.seasonXpEarned} XP`);
+  if (match.dropCardDefId) parts.push("a card drop");
+  return parts.length > 0 ? `Rewards logged: ${parts.join(", ")}.` : "No major reward spike logged.";
 }
 
 function formatRewardSummary(reward: {

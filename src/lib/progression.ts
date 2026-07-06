@@ -36,11 +36,29 @@ const DROP_WEIGHTS: { rarity: Rarity; weight: number }[] = [
 ];
 
 const PITY_THRESHOLD = 10; // guaranteed Rare+ after 10 wins without one
+const CARD_XP_WIN = 18;
+const CARD_XP_LOSS = 8;
+const CARD_XP_REPEAT_PLAY = 4;
 
 export type DropResult = {
   defId: string;
   rarity: Rarity;
   isNew: boolean;
+};
+
+export type CardMasteryResult = {
+  defId: string;
+  xpGained: number;
+  totalXp: number;
+  level: number;
+  leveledUp: boolean;
+  isNew: boolean;
+};
+
+export type PackProgress = {
+  pityCounter: number;
+  nextRarePlusAt: number;
+  winsUntilRarePlus: number;
 };
 
 function rollRarity(forceRarePlus = false): Rarity {
@@ -153,6 +171,67 @@ export async function grantSeasonXp(userId: string, amount: number): Promise<voi
     where: { userId },
     data: { seasonXp: newXp, seasonTier: Math.max(cmdr.seasonTier, newTier) },
   });
+}
+
+export function cardLevelForXp(xp: number): number {
+  if (xp < 40) return 1;
+  if (xp < 100) return 2;
+  if (xp < 180) return 3;
+  if (xp < 300) return 4;
+  if (xp < 460) return 5;
+  return 6 + Math.floor((xp - 460) / 220);
+}
+
+export async function grantCardMasteryXp(
+  userId: string,
+  cardsPlayed: string[],
+  won: boolean
+): Promise<CardMasteryResult[]> {
+  const validDefs = new Set([...CARD_DEFS.map((card) => card.defId), ...ALL_WORLD_CARDS.map((card) => card.defId)]);
+  const playCounts = new Map<string, number>();
+  for (const defId of cardsPlayed.slice(0, 30)) {
+    if (typeof defId !== "string" || !validDefs.has(defId)) continue;
+    playCounts.set(defId, (playCounts.get(defId) ?? 0) + 1);
+  }
+
+  const results: CardMasteryResult[] = [];
+  for (const [defId, count] of playCounts) {
+    let card = await db.userCard.findUnique({
+      where: { userId_defId: { userId, defId } },
+    });
+    let isNew = false;
+    if (!card) {
+      await grantCard(userId, defId, "battle_mastery");
+      card = await db.userCard.findUnique({
+        where: { userId_defId: { userId, defId } },
+      });
+      isNew = true;
+    }
+    if (!card) continue;
+
+    const xpGained = (won ? CARD_XP_WIN : CARD_XP_LOSS) + Math.min(12, Math.max(0, count - 1) * CARD_XP_REPEAT_PLAY);
+    const totalXp = card.xp + xpGained;
+    const level = cardLevelForXp(totalXp);
+    const updated = await db.userCard.update({
+      where: { id: card.id },
+      data: {
+        xp: totalXp,
+        level,
+        matchesPlayed: { increment: 1 },
+        lastPlayedAt: new Date(),
+      },
+    });
+    results.push({
+      defId,
+      xpGained,
+      totalXp: updated.xp,
+      level: updated.level,
+      leveledUp: updated.level > card.level,
+      isNew,
+    });
+  }
+
+  return results;
 }
 
 // ---------- Quest progress ----------
@@ -281,6 +360,7 @@ export type MatchOutcome = {
   mode: string; // conquest | campaign | multiplayer
   deployedCount: number; // for "deploy" quests
   castCount: number; // for "cast" quests
+  cardsPlayed?: string[];
 };
 
 export async function processMatchRewards(outcome: MatchOutcome): Promise<{
@@ -288,6 +368,8 @@ export async function processMatchRewards(outcome: MatchOutcome): Promise<{
   shards: number;
   seasonXp: number;
   dailyBonus: boolean;
+  cardMastery: CardMasteryResult[];
+  packProgress: PackProgress;
 }> {
   // Check for daily login bonus (first match of the day)
   const today = new Date();
@@ -328,6 +410,9 @@ export async function processMatchRewards(outcome: MatchOutcome): Promise<{
   // 3. Card drop
   const drop = await rollMatchDrop(outcome.userId, outcome.won);
 
+  // 3b. Card mastery: played cards gain persistent XP.
+  const cardMastery = await grantCardMasteryXp(outcome.userId, outcome.cardsPlayed ?? [], outcome.won);
+
   // 4. Quest progress (skip for campaign mode — campaigns have their own rewards)
   if (outcome.mode !== "campaign") {
     await progressQuests(outcome.userId, {
@@ -350,7 +435,21 @@ export async function processMatchRewards(outcome: MatchOutcome): Promise<{
     }
   }
 
-  return { drop, shards, seasonXp, dailyBonus: isFirstOfDay };
+  const commander = await db.commander.findUnique({ where: { userId: outcome.userId } });
+  const pityCounter = commander?.pityCounter ?? 0;
+
+  return {
+    drop,
+    shards,
+    seasonXp,
+    dailyBonus: isFirstOfDay,
+    cardMastery,
+    packProgress: {
+      pityCounter,
+      nextRarePlusAt: PITY_THRESHOLD,
+      winsUntilRarePlus: Math.max(0, PITY_THRESHOLD - pityCounter),
+    },
+  };
 }
 
 // ---------- Crafting ----------

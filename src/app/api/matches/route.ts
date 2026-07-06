@@ -49,6 +49,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "no commander profile" }, { status: 400 });
   }
 
+  const cardsPlayed = Array.isArray(body.cardsPlayed)
+    ? body.cardsPlayed
+        .filter((defId: unknown): defId is string => typeof defId === "string" && defId.length > 0)
+        .slice(0, 30)
+    : [];
+
+  // Process progression before writing this match so "first match today" checks
+  // see the real prior state.
+  const { processMatchRewards } = await import("@/lib/progression");
+  const rewards = await processMatchRewards({
+    userId: user.id,
+    won: result === "win",
+    factionId: factionId || user.commander.factionId,
+    mode,
+    deployedCount: Number(body.deployedCount) || 0,
+    castCount: Number(body.castCount) || 0,
+    cardsPlayed,
+  });
+
   const record = await db.matchRecord.create({
     data: {
       userId: user.id,
@@ -62,10 +81,13 @@ export async function POST(req: NextRequest) {
       enemyHpLeft: Number(enemyHpLeft) ?? 0,
       mode,
       difficulty,
+      dropCardDefId: rewards.drop?.defId ?? null,
+      shardsEarned: rewards.shards,
+      seasonXpEarned: rewards.seasonXp,
     },
   });
 
-  await db.commander.update({
+  const commanderAfter = await db.commander.update({
     where: { userId: user.id },
     data: {
       wins: { increment: result === "win" ? 1 : 0 },
@@ -74,26 +96,20 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // Process progression rewards: drops, shards, season XP, quest + operation progress
-  const { processMatchRewards } = await import("@/lib/progression");
-  const rewards = await processMatchRewards({
-    userId: user.id,
-    won: result === "win",
-    factionId: factionId || user.commander.factionId,
-    mode,
-    deployedCount: Number(body.deployedCount) || 0,
-    castCount: Number(body.castCount) || 0,
-  });
-
-  // stamp the match record with the drop for display
-  const updated = await db.matchRecord.update({
-    where: { id: record.id },
-    data: {
-      dropCardDefId: rewards.drop?.defId ?? null,
-      shardsEarned: rewards.shards,
-      seasonXpEarned: rewards.seasonXp,
+  return NextResponse.json({
+    ok: true,
+    match: record,
+    rewards,
+    progression: {
+      commander: {
+        shards: commanderAfter.shards,
+        seasonXp: commanderAfter.seasonXp,
+        seasonTier: commanderAfter.seasonTier,
+        wins: commanderAfter.wins,
+        losses: commanderAfter.losses,
+        matches: commanderAfter.matches,
+      },
+      packProgress: rewards.packProgress,
     },
   });
-
-  return NextResponse.json({ ok: true, match: updated, rewards });
 }

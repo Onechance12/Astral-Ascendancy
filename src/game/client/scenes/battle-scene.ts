@@ -114,6 +114,10 @@ export class BattleScene extends BaseScene {
   private lastHeight = 0;
   private time = 0;
   private enemyTurnQueued = false;
+  private cardsPlayed: string[] = [];
+  private deployedCount = 0;
+  private castCount = 0;
+  private resultSubmitted = false;
 
   enter(): void {
     this.container.addChild(this.bgLayer, this.boardLayer, this.hudLayer, this.handLayer, this.fxLayer);
@@ -179,14 +183,7 @@ export class BattleScene extends BaseScene {
     );
     player.position.set(18, height - 166);
     const reset = makeButton("RESET", 94, COLORS.gold, () => {
-      this.match = createInitialBattleState();
-      this.hand = [...STARTING_HAND];
-      this.playerDeck = [...PLAYER_DRAW_DECK];
-      this.enemyHand = [...ENEMY_STARTING_HAND];
-      this.enemyDeck = [...ENEMY_DRAW_DECK];
-      this.selectedActor = null;
-      this.selectedCardId = null;
-      this.enemyTurnQueued = false;
+      this.resetBattle();
       this.redraw();
     });
     reset.position.set(width - 226, 78);
@@ -539,6 +536,7 @@ export class BattleScene extends BaseScene {
       if (next !== before) {
         this.match = next;
         this.removeCardFromHand(selectedCard.defId);
+        this.trackPlayedCard(selectedCard);
         this.applyDrawEvents();
         this.selectedCardId = null;
         this.bus.emit("battlelog", { message: `${selectedCard.name} played.` });
@@ -552,7 +550,7 @@ export class BattleScene extends BaseScene {
       this.match = attacks.includes(index)
         ? attackInMatch(this.match, this.selectedActor, index)
         : moveEntityInMatch(this.match, this.selectedActor, index);
-      if (this.match.winner) this.switchScene(this.match.winner === "player" ? "victory" : "defeat");
+      if (this.resolveWinner()) return;
       this.selectedActor = null;
       this.redraw();
     }
@@ -563,7 +561,7 @@ export class BattleScene extends BaseScene {
     this.match = attackCommanderInMatch(this.match, this.selectedActor);
     this.selectedActor = null;
     this.selectedCardId = null;
-    if (this.match.winner) this.switchScene(this.match.winner === "player" ? "victory" : "defeat");
+    if (this.resolveWinner()) return;
     this.redraw();
   }
 
@@ -585,6 +583,7 @@ export class BattleScene extends BaseScene {
     if (next === before) return;
     this.match = next;
     this.removeCardFromHand(selectedCard.defId);
+    this.trackPlayedCard(selectedCard);
     this.applyDrawEvents();
     this.selectedCardId = null;
     if (this.resolveWinner()) return;
@@ -747,8 +746,71 @@ export class BattleScene extends BaseScene {
   }
 
   private resolveWinner() {
-    if (this.match.winner) this.switchScene(this.match.winner === "player" ? "victory" : "defeat");
+    if (this.match.winner) this.finishMatch();
     return Boolean(this.match.winner);
+  }
+
+  private resetBattle() {
+    this.match = createInitialBattleState();
+    this.hand = [...STARTING_HAND];
+    this.playerDeck = [...PLAYER_DRAW_DECK];
+    this.enemyHand = [...ENEMY_STARTING_HAND];
+    this.enemyDeck = [...ENEMY_DRAW_DECK];
+    this.selectedActor = null;
+    this.selectedCardId = null;
+    this.enemyTurnQueued = false;
+    this.cardsPlayed = [];
+    this.deployedCount = 0;
+    this.castCount = 0;
+    this.resultSubmitted = false;
+  }
+
+  private trackPlayedCard(card: CardDef) {
+    this.cardsPlayed.push(card.defId);
+    if (card.type === "Entity") this.deployedCount += 1;
+    if (card.type === "Anomaly") this.castCount += 1;
+  }
+
+  private finishMatch() {
+    if (!this.match.winner) return;
+    const destination = this.match.winner === "player" ? "victory" : "defeat";
+    if (!this.resultSubmitted) {
+      this.resultSubmitted = true;
+      void this.submitMatchResult();
+    }
+    this.switchScene(destination);
+  }
+
+  private async submitMatchResult() {
+    if (!this.match.winner) return;
+    const payload = {
+      result: this.match.winner === "player" ? "win" : "loss",
+      commanderName: this.match.player.name,
+      factionId: this.match.player.faction,
+      enemyName: this.match.enemy.name,
+      enemyFactionId: this.match.enemy.faction,
+      turns: this.match.turn,
+      playerHpLeft: this.match.player.hp,
+      enemyHpLeft: this.match.enemy.hp,
+      mode: this.match.winCondition === "ascendancy" ? "ascension" : "conquest",
+      difficulty: "normal",
+      deployedCount: this.deployedCount,
+      castCount: this.castCount,
+      cardsPlayed: this.cardsPlayed,
+    };
+
+    try {
+      const response = await fetch("/api/matches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok && response.status !== 401) {
+        console.warn("Match result was not saved", await response.text());
+      }
+    } catch (error) {
+      console.warn("Match result submission failed", error);
+    }
   }
 
   private clearLayer(layer: Container) {
