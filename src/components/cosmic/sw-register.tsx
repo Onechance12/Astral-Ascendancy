@@ -3,30 +3,22 @@
 import { useEffect } from "react";
 
 /**
- * Registers the Astral Ascendancy service worker for offline support.
- * Runs only in production builds + browsers that support SW.
+ * Service workers are disabled during beta because stale cached game chunks can
+ * keep old Pixi scenes alive after a deploy. This component cleans up older SWs.
  */
 export default function ServiceWorkerRegister() {
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production") return;
     if (typeof window === "undefined") return;
     if (!("serviceWorker" in navigator)) return;
 
-    const register = () => {
-      navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
-        .catch((err) => {
-          // Silent fail — SW is a progressive enhancement
-          console.warn("[Astral] SW registration failed:", err);
-        });
-    };
-
-    if (document.readyState === "complete") {
-      register();
-    } else {
-      window.addEventListener("load", register, { once: true });
-      return () => window.removeEventListener("load", register);
-    }
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+      .then(() => caches?.keys?.())
+      .then((keys) => Promise.all((keys ?? []).filter((key) => key.startsWith("astral-")).map((key) => caches.delete(key))))
+      .catch((err) => {
+        console.warn("[Astral] SW cleanup failed:", err);
+      });
   }, []);
 
   return null;

@@ -197,63 +197,70 @@ export class BattleScene extends BaseScene {
 
   private drawHud() {
     const { width, height } = this.app.screen;
-    const top = this.commanderHud(this.match.enemy.name, this.match.enemy.hp, this.match.enemy.maxHp, this.match.enemy.influence, "enemy");
-    top.position.set(18, 78);
+    const compact = this.isCompact();
+    const top = this.commanderHud(this.match.enemy.name, this.match.enemy.hp, this.match.enemy.maxHp, this.match.enemy.influence, "enemy", undefined, compact);
+    top.position.set(18, compact ? 68 : 78);
     const player = this.commanderHud(
       this.match.player.name,
       this.match.player.hp,
       this.match.player.maxHp,
       this.match.player.influence,
       "player",
-      this.match.player.resonance
+      this.match.player.resonance,
+      compact
     );
-    player.position.set(18, height - 166);
+    player.position.set(18, compact ? height - 144 : height - 166);
     const reset = makeButton("RESET", 94, COLORS.gold, () => {
       this.resetBattle();
       this.redraw();
     });
-    reset.position.set(width - 226, 78);
+    reset.position.set(compact ? 18 : width - 226, compact ? 120 : 78);
     const menu = makeButton("MENU", 94, COLORS.cyan, () => this.switchScene("mainMenu"));
-    menu.position.set(width - 118, 78);
-    const end = makeButton("END TURN", Math.min(170, width * 0.28), COLORS.emerald, () => this.endPlayerTurn());
-    end.position.set(width - end.width - 18, height - 152);
+    menu.position.set(compact ? width - 112 : width - 118, compact ? 120 : 78);
+    const end = makeButton(compact ? "END" : "END TURN", compact ? 88 : Math.min(170, width * 0.28), COLORS.emerald, () => this.endPlayerTurn());
+    end.position.set(width - end.width - 18, compact ? height - 184 : height - 152);
     end.eventMode = this.match.active === "player" ? "static" : "none";
     end.alpha = this.match.active === "player" ? 1 : 0.34;
     const selectedCanStrikeCommander = this.selectedActor !== null && canAttackCommander(this.match.board, this.selectedActor);
-    const direct = makeButton("STRIKE COMMANDER", Math.min(210, width * 0.38), COLORS.rose, () => this.attackCommander());
-    direct.position.set(width - direct.width - 18, height - 208);
+    const direct = makeButton(compact ? "STRIKE" : "STRIKE COMMANDER", compact ? 96 : Math.min(210, width * 0.38), COLORS.rose, () => this.attackCommander());
+    direct.position.set(compact ? (width - direct.width) / 2 : width - direct.width - 18, compact ? height - 184 : height - 208);
     direct.alpha = selectedCanStrikeCommander ? 1 : 0.34;
     direct.eventMode = selectedCanStrikeCommander ? "static" : "none";
     const selectedCard = this.selectedCardId ? getCard(this.selectedCardId) : null;
     const canCast = selectedCard?.type === "Anomaly" && !anomalyNeedsTarget(selectedCard) && selectedCard.cost <= this.match.player.resonance && this.match.active === "player";
     const cast = makeButton("CAST CARD", Math.min(170, width * 0.28), COLORS.gold, () => this.castSelectedCard());
-    cast.position.set(width - cast.width - 18, height - 264);
+    cast.position.set(compact ? 18 : width - cast.width - 18, compact ? height - 184 : height - 264);
     cast.alpha = canCast ? 1 : 0.34;
     cast.eventMode = canCast ? "static" : "none";
 
-    const logPanel = roundedPanel(Math.min(300, width - 36), 92, 0x030712, 0.72, COLORS.cyan);
-    logPanel.position.set(width - logPanel.width - 18, 138);
-    const logTitle = label("BATTLE LOG", 9, COLORS.cyan, "900");
-    logTitle.position.set(logPanel.x + 12, logPanel.y + 10);
     const phase = this.turnBanner(width);
-    phase.position.set(Math.max(18, width / 2 - phase.width / 2), 22);
-    const hint = this.actionHint();
-    hint.position.set(22, Math.max(136, height - 208));
-    this.hudLayer.addChild(top, player, reset, menu, end, direct, cast, logPanel, logTitle, phase, hint);
-    this.match.log.slice(-4).forEach((entry, index) => {
-      const row = label(entry, 10, COLORS.slate, "bold");
-      row.position.set(logPanel.x + 12, logPanel.y + 28 + index * 15);
-      this.hudLayer.addChild(row);
-    });
+    phase.position.set(Math.max(18, width / 2 - phase.width / 2), compact ? 20 : 22);
+    this.hudLayer.addChild(top, player, reset, menu, end, direct, cast, phase);
+
+    if (!compact) {
+      const logPanel = roundedPanel(Math.min(300, width - 36), 92, 0x030712, 0.72, COLORS.cyan);
+      logPanel.position.set(width - logPanel.width - 18, 138);
+      const logTitle = label("BATTLE LOG", 9, COLORS.cyan, "900");
+      logTitle.position.set(logPanel.x + 12, logPanel.y + 10);
+      const hint = this.actionHint();
+      hint.position.set(22, Math.max(136, height - 208));
+      this.hudLayer.addChild(logPanel, logTitle, hint);
+      this.match.log.slice(-4).forEach((entry, index) => {
+        const row = label(entry, 10, COLORS.slate, "bold");
+        row.position.set(logPanel.x + 12, logPanel.y + 28 + index * 15);
+        this.hudLayer.addChild(row);
+      });
+    }
   }
 
   private drawBoard() {
     const { width, height } = this.app.screen;
-    const boardSize = Math.min(width - 26, height - 260, 760);
+    const compact = this.isCompact();
+    const boardSize = Math.min(width - 26, compact ? height - 360 : height - 260, 760);
     const cellGap = Math.max(5, boardSize * 0.012);
     const cell = (boardSize - cellGap * 4) / 5;
     const originX = (width - boardSize) / 2;
-    const originY = Math.max(112, (height - boardSize) / 2 - 16);
+    const originY = compact ? 168 : Math.max(112, (height - boardSize) / 2 - 16);
     const targets = this.targetIndexes();
 
     for (const sector of this.match.board) {
@@ -268,18 +275,20 @@ export class BattleScene extends BaseScene {
 
   private drawHand() {
     const { width, height } = this.app.screen;
-    const cardW = Math.min(104, Math.max(62, (width - 36) / (this.hand.length + 0.35)));
-    const cardH = cardW * 1.34;
-    const totalW = this.hand.length * cardW + (this.hand.length - 1) * 8;
-    const startX = Math.max(14, (width - totalW) / 2);
-    const y = height - cardH - 18;
+    const compact = this.isCompact();
+    const gap = compact ? 5 : 8;
+    const cardW = compact ? Math.min(70, Math.max(54, (width - 28) / Math.max(this.hand.length, 1) - gap)) : Math.min(104, Math.max(62, (width - 36) / (this.hand.length + 0.35)));
+    const cardH = cardW * (compact ? 1.25 : 1.34);
+    const totalW = this.hand.length * cardW + (this.hand.length - 1) * gap;
+    const startX = Math.max(10, (width - totalW) / 2);
+    const y = height - cardH - 10;
 
     this.hand.forEach((defId, index) => {
       const def = getCard(defId);
       const selected = this.selectedCardId === defId;
       const disabled = this.match.active !== "player" || def.cost > this.match.player.resonance;
       const card = this.handCard(def, cardW, cardH, selected, disabled);
-      card.position.set(startX + index * (cardW + 8), y + (selected ? -10 : 0));
+      card.position.set(startX + index * (cardW + gap), y + (selected ? -12 : 0));
       card.eventMode = disabled ? "none" : "static";
       card.cursor = disabled ? "default" : "pointer";
       card.on("pointertap", () => {
@@ -353,11 +362,12 @@ export class BattleScene extends BaseScene {
   private drawBattleEvents() {
     if (this.match.lastEvents.length === 0) return;
     const { width, height } = this.app.screen;
-    const boardSize = Math.min(width - 26, height - 260, 760);
+    const compact = this.isCompact();
+    const boardSize = Math.min(width - 26, compact ? height - 360 : height - 260, 760);
     const cellGap = Math.max(5, boardSize * 0.012);
     const cell = (boardSize - cellGap * 4) / 5;
     const originX = (width - boardSize) / 2;
-    const originY = Math.max(112, (height - boardSize) / 2 - 16);
+    const originY = compact ? 168 : Math.max(112, (height - boardSize) / 2 - 16);
 
     for (const event of this.match.lastEvents) {
       if (event.type === "attack") {
@@ -504,22 +514,22 @@ export class BattleScene extends BaseScene {
     });
   }
 
-  private commanderHud(name: string, hp: number, maxHp: number, influence: number, side: "player" | "enemy", resonance?: number) {
+  private commanderHud(name: string, hp: number, maxHp: number, influence: number, side: "player" | "enemy", resonance?: number, compact = false) {
     const width = Math.min(340, this.app.screen.width - 36);
     const hud = new Container();
     const accent = side === "player" ? COLORS.emerald : COLORS.fuchsia;
-    hud.addChild(roundedPanel(width, 68, 0x030712, 0.72, accent));
-    const title = label(name, 13, COLORS.white, "900");
-    title.position.set(12, 9);
+    hud.addChild(roundedPanel(width, compact ? 54 : 68, 0x030712, 0.72, accent));
+    const title = label(name, compact ? 11 : 13, COLORS.white, "900");
+    title.position.set(12, compact ? 7 : 9);
     const hpBar = new Graphics()
-      .roundRect(12, 32, width - 24, 8, 8)
+      .roundRect(12, compact ? 26 : 32, width - 24, 8, 8)
       .fill({ color: 0xffffff, alpha: 0.08 })
-      .roundRect(12, 32, (width - 24) * Math.max(0, Math.min(1, hp / maxHp)), 8, 8)
+      .roundRect(12, compact ? 26 : 32, (width - 24) * Math.max(0, Math.min(1, hp / maxHp)), 8, 8)
       .fill({ color: COLORS.rose, alpha: 0.95 });
-    const stats = label(`${hp}/${maxHp} HP · ${influence}/30 INF${typeof resonance === "number" ? ` · ${resonance}R` : ""}`, 10, COLORS.slate, "bold");
-    stats.position.set(12, 43);
-    const zone = label(this.zoneSummary(side), 9, COLORS.slate, "bold");
-    zone.position.set(12, 55);
+    const stats = label(`${hp}/${maxHp} HP · ${influence}/30 INF${typeof resonance === "number" ? ` · ${resonance}R` : ""}`, compact ? 9 : 10, COLORS.slate, "bold");
+    stats.position.set(12, compact ? 37 : 43);
+    const zone = label(this.zoneSummary(side), compact ? 8 : 9, COLORS.slate, "bold");
+    zone.position.set(12, compact ? 46 : 55);
     hud.addChild(title, hpBar, stats, zone);
     return hud;
   }
@@ -792,6 +802,11 @@ export class BattleScene extends BaseScene {
 
   private closestDistance(index: number, targets: number[]) {
     return Math.min(...targets.map((target) => Math.abs(Math.floor(index / 5) - Math.floor(target / 5)) + Math.abs((index % 5) - (target % 5))));
+  }
+
+  private isCompact() {
+    if (typeof window === "undefined") return this.app.screen.width < 520 || this.app.screen.height < 760;
+    return window.innerWidth < 520 || window.innerHeight < 760;
   }
 
   private drawPlayerCard() {
