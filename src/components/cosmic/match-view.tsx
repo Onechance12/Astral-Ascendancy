@@ -14,8 +14,7 @@ import {
 import MatchBoard from "@/components/cosmic/match-board";
 import MatchHand from "@/components/cosmic/match-hand";
 import MatchEffects from "@/components/cosmic/match-effects";
-import { CARD_DEFS } from "@/lib/match-engine";
-import { ALL_WORLD_CARDS } from "@/lib/world-cards";
+import MatchResultScene from "@/components/cosmic/match-result-scene";
 import { cn } from "@/lib/utils";
 
 const FACTION_COLOR: Record<string, string> = Object.fromEntries(
@@ -200,7 +199,21 @@ export default function MatchView() {
 
       {/* victory / defeat overlay */}
       {phase === "over" && (
-        <ResultOverlay winner={winner} winCondition={winCondition} rewards={lastRewards} isCampaign={isCampaign} onReplay={replay} onExit={exitToHub} />
+        <MatchResultScene
+          winner={winner}
+          winCondition={winCondition}
+          rewards={lastRewards}
+          isCampaign={isCampaign}
+          playerName={player.name}
+          enemyName={enemy.name}
+          playerFactionId={player.factionId}
+          enemyFactionId={enemy.factionId}
+          turns={turn}
+          playerHpLeft={player.hp}
+          enemyHpLeft={enemy.hp}
+          onReplay={replay}
+          onExit={exitToHub}
+        />
       )}
     </div>
   );
@@ -337,100 +350,6 @@ function BattleLogPanel({
             {e.text}
           </p>
         ))}
-      </div>
-    </div>
-  );
-}
-
-function ResultOverlay({
-  winner,
-  winCondition,
-  rewards,
-  isCampaign,
-  onReplay,
-  onExit,
-}: {
-  winner: "player" | "enemy" | null;
-  winCondition: string | null;
-  rewards: { drop: { defId: string; rarity: string; isNew: boolean } | null; shards: number; seasonXp: number; dailyBonus: boolean } | null;
-  isCampaign: boolean;
-  onReplay: () => void;
-  onExit: () => void;
-}) {
-  const win = winner === "player";
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div
-        className="relative w-full max-w-md overflow-hidden rounded-2xl border p-7 text-center sm:p-8"
-        style={{
-          borderColor: win ? "rgba(52,211,153,0.4)" : "rgba(244,63,94,0.4)",
-          background: win
-            ? "linear-gradient(160deg, rgba(52,211,153,0.12), rgba(0,0,0,0.6))"
-            : "linear-gradient(160deg, rgba(244,63,94,0.12), rgba(0,0,0,0.6))",
-        }}
-      >
-        <div className="pointer-events-none absolute inset-0 nebula-radial opacity-50" />
-        <div className="relative">
-          <div className="text-5xl sm:text-6xl">{win ? "✦" : "☣"}</div>
-          <h2 className="mt-3 text-3xl font-black sm:text-4xl" style={{ color: win ? "#34d399" : "#fb7185" }}>
-            {win ? "VICTORY" : "DEFEAT"}
-          </h2>
-          {win && winCondition && winCondition !== "conquest" && (
-            <p className="mt-1 text-xs font-bold uppercase tracking-widest text-amber-300">
-              {winCondition === "ascension" ? "✦ Ascension Victory" : "◉ Singularity Victory"}
-            </p>
-          )}
-          <p className="mt-2 text-sm text-foreground/75">
-            {win
-              ? isCampaign
-                ? "Chapter complete. The Cluster remembers your name."
-                : "The enemy Commander is unmade. The Cluster bends to your will."
-              : "Your Commander falls. The swarm spreads unchecked across the stars."}
-          </p>
-
-          {/* rewards (only for non-campaign matches — campaign rewards granted separately) */}
-          {win && rewards && !isCampaign && (
-            <div className="mt-4 rounded-xl border border-white/10 bg-black/30 p-3">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Rewards Earned</p>
-              {rewards.dailyBonus && (
-                <p className="mb-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[10px] font-bold text-amber-300">
-                  ✦ DAILY BONUS: +100 Shards, +50 XP (first match of the day)
-                </p>
-              )}
-              <div className="flex items-center justify-center gap-3 text-xs">
-                <span className="flex items-center gap-1">
-                  <span className="text-cyan-300">◈</span>
-                  <span className="font-bold tabular-nums">{rewards.shards}</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="text-amber-300">✦</span>
-                  <span className="font-bold tabular-nums">{rewards.seasonXp} XP</span>
-                </span>
-              </div>
-              {rewards.drop && (
-                <div className="mt-2 rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-2">
-                  <p className="text-[10px] text-muted-foreground">Card Drop!</p>
-                  <p className="text-sm font-bold text-emerald-300">
-                    {rewards.drop.isNew ? "✨ NEW " : ""}
-                    {CARD_DEFS.find((c) => c.defId === rewards.drop!.defId)?.name ||
-                     ALL_WORLD_CARDS.find((c) => c.defId === rewards.drop!.defId)?.name ||
-                     rewards.drop.defId}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">{rewards.drop.rarity}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
-            <Button onClick={onReplay} className="bg-emerald-400 text-emerald-950 hover:bg-emerald-300">
-              {isCampaign ? "Replay" : "Rematch"}
-            </Button>
-            <Button onClick={onExit} variant="outline" className="border-white/15 bg-white/5 text-foreground/90 hover:bg-white/10">
-              Return to hub
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import {
   buildDeckFromIds,
 } from "@/lib/match-engine";
 import type { DeckData } from "@/lib/match-engine";
+import type { MatchRewardPayload } from "@/components/cosmic/match-result-scene";
 
 export type View = "landing" | "hub" | "game" | "deckbuilder" | "profile" | "multiplayer" | "collection" | "campaign" | "operations" | "domain" | "headquarters" | "codex";
 
@@ -54,7 +55,7 @@ type GameState = {
   // campaign match context (set when starting a campaign chapter)
   campaignChapterId: string | null;
   packOpen: boolean;
-  lastRewards: { drop: { defId: string; rarity: string; isNew: boolean } | null; shards: number; seasonXp: number; dailyBonus: boolean } | null;
+  lastRewards: MatchRewardPayload | null;
 
   // auth
   openLogin: () => void;
@@ -192,7 +193,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (!c) return;
     const deck = getActiveDeck(get);
     const match = createMatch(c.name, c.factionId, undefined, undefined, deck, get().difficulty);
-    set({ match, view: "game", resultCounted: false, campaignChapterId: null, mode: "conquest" });
+    set({ match, view: "game", resultCounted: false, campaignChapterId: null, mode: "conquest", lastRewards: null });
   },
 
   startCampaignChapter: (chapter: {
@@ -221,6 +222,7 @@ export const useGame = create<GameState>((set, get) => ({
       resultCounted: false,
       campaignChapterId: chapter.id,
       mode: "campaign",
+      lastRewards: null,
     });
   },
 
@@ -229,7 +231,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (!c) return;
     const deck = getActiveDeck(get);
     const match = createMatch(c.name, c.factionId, undefined, undefined, deck, get().difficulty);
-    set({ match, resultCounted: false });
+    set({ match, resultCounted: false, lastRewards: null });
   },
 
   selectHand: (idx) =>
@@ -399,7 +401,9 @@ function maybeCountResult(
   });
 
   // count deployed + cast for quest progress (entities on board + anomalies implied by log)
-  const deployedCount = match.sectors.filter((s) => s && s.ownerSide === "player").length;
+  const survivingPlayerCards = match.sectors.filter((s) => s && s.ownerSide === "player");
+  const deployedCount = survivingPlayerCards.length;
+  const cardsPlayed = survivingPlayerCards.map((card) => card!.defId);
 
   // persist to DB (fire-and-forget) and capture rewards
   const c = get().commander;
@@ -421,12 +425,24 @@ function maybeCountResult(
         difficulty: get().difficulty,
         deployedCount,
         castCount: 0, // anomalies count not tracked in state; could parse log
+        cardsPlayed,
       }),
     })
       .then((r) => r.json())
       .then((data) => {
         if (data.rewards) {
           set({ lastRewards: data.rewards });
+        }
+        if (data.progression?.commander) {
+          const current = get().commander;
+          if (current) {
+            set({
+              commander: {
+                ...current,
+                ...data.progression.commander,
+              },
+            });
+          }
         }
         // if this was a campaign chapter win, mark it complete
         const chapterId = get().campaignChapterId;

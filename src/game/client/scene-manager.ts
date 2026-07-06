@@ -6,6 +6,7 @@ import { BootScene } from "./scenes/boot-scene";
 import { GalaxyMapScene } from "./scenes/galaxy-map-scene";
 import { MainMenuScene } from "./scenes/main-menu-scene";
 import { PackOpeningScene } from "./scenes/pack-opening-scene";
+import { ResultScene } from "./scenes/result-scene";
 import { SplashScene } from "./scenes/splash-scene";
 import type { GameSceneId } from "./types";
 
@@ -53,7 +54,7 @@ export class SceneManager {
     if (sceneId === "galaxyMap") return new GalaxyMapScene(context);
     if (sceneId === "battle") return new BattleScene(context);
     if (sceneId === "packOpening") return new PackOpeningScene(context);
-    if (sceneId === "victory") return new SplashScene(context, "VICTORY", "Ascendancy signal secured.", "mainMenu");
-    return new SplashScene(context, "DEFEAT", "The sector collapses. Rebuild and return.", "mainMenu");
+    if (sceneId === "victory") return new ResultScene(context, "victory");
+    return new ResultScene(context, "defeat");
   }
 }

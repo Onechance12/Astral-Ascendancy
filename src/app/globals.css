@@ -344,3 +344,43 @@
   animation: command-scan 4.8s ease-in-out infinite;
 }
 .command-link-pulse { animation: command-link 2.6s ease-in-out infinite; }
+
+/* ===== Result scene graphics ===== */
+@keyframes result-stars {
+  0% { background-position: 0 0, 40px 70px, 0 0; transform: scale(1); }
+  100% { background-position: 120px 260px, -100px 180px, 0 0; transform: scale(1.04); }
+}
+@keyframes result-shockwave {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.18); }
+  18% { opacity: 0.65; }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.45); }
+}
+@keyframes result-core-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.06); filter: brightness(1.45); }
+}
+.result-starfield {
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.58) 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(34,211,238,0.42) 1px, transparent 1.4px),
+    linear-gradient(180deg, #02040a 0%, #07101d 45%, #02040a 100%);
+  background-size: 96px 96px, 142px 142px, 100% 100%;
+  animation: result-stars 10s linear infinite;
+}
+.result-victory-wash {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(52,211,153,0.25), transparent 32%),
+    radial-gradient(circle at 82% 72%, rgba(34,211,238,0.18), transparent 34%),
+    radial-gradient(circle at 12% 80%, rgba(251,191,36,0.12), transparent 28%);
+}
+.result-defeat-wash {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(251,113,133,0.24), transparent 32%),
+    radial-gradient(circle at 82% 72%, rgba(217,70,239,0.18), transparent 34%),
+    radial-gradient(circle at 12% 80%, rgba(15,23,42,0.45), transparent 30%);
+}
+.result-shockwave {
+  border: 1px solid;
+  animation: result-shockwave 1.25s ease-out forwards;
+}
+.result-core-pulse { animation: result-core-pulse 2.3s ease-in-out infinite; }
