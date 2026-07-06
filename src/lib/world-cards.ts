@@ -388,38 +388,58 @@ export async function deployPlanetCard(userId: string, planetCardDefId: string, 
   );
   const startingLevel = cardDef.startingStructureLevel;
 
-  // create the planet
-  const planet = await db.planet.create({
-    data: {
-      userId,
-      name: customName?.trim() || cardDef.name,
-      planetType: cardDef.planetType,
-      sector: "home",
-      slot,
-      structureType: startingLevel > 0 ? structureType?.type || null : null,
-      structureLevel: startingLevel,
-      sourceCardDefId: planetCardDefId,
-    },
-  });
+  const planet = await db
+    .$transaction(async (tx) => {
+      const created = await tx.planet.create({
+        data: {
+          userId,
+          name: customName?.trim() || cardDef.name,
+          planetType: cardDef.planetType,
+          sector: "home",
+          slot,
+          structureType: startingLevel > 0 ? structureType?.type || null : null,
+          structureLevel: startingLevel,
+          sourceCardDefId: planetCardDefId,
+        },
+      });
 
-  // consume the card (decrement count, delete if 0)
-  if (userCard.count <= 1) {
-    await db.userCard.delete({ where: { id: userCard.id } });
-  } else {
-    await db.userCard.update({
-      where: { id: userCard.id },
-      data: { count: { decrement: 1 } },
+      const consumed = await tx.userCard.updateMany({
+        where: { id: userCard.id, userId, defId: planetCardDefId, count: { gt: 0 } },
+        data: { count: { decrement: 1 } },
+      });
+      if (consumed.count !== 1) throw new Error("CARD_CONSUME_FAILED");
+      await tx.userCard.deleteMany({ where: { id: userCard.id, count: { lte: 0 } } });
+
+      const moved = await tx.cardInstance.updateMany({
+        where: {
+          id: instanceResult.instance.id,
+          userId,
+          location: "collection",
+          status: "available",
+          condition: { in: ["healthy", "fatigued"] },
+        },
+        data: {
+          location: "world",
+          status: "unavailable",
+          planetId: created.id,
+          lastStateChangeAt: new Date(),
+        },
+      });
+      if (moved.count !== 1) throw new Error("CARD_INSTANCE_LOCK_FAILED");
+
+      return created;
+    })
+    .catch((error) => {
+      if (
+        error instanceof Error &&
+        (error.message === "CARD_INSTANCE_LOCK_FAILED" || error.message === "CARD_CONSUME_FAILED")
+      ) {
+        return null;
+      }
+      throw error;
     });
-  }
-  await db.cardInstance.update({
-    where: { id: instanceResult.instance.id },
-    data: {
-      location: "world",
-      status: "unavailable",
-      planetId: planet.id,
-      lastStateChangeAt: new Date(),
-    },
-  });
+
+  if (!planet) return { ok: false, error: "card is already busy" };
 
   return { ok: true, planetId: planet.id };
 }
@@ -446,29 +466,49 @@ export async function activateDevelopmentCard(userId: string, devCardDefId: stri
   });
   if (existing) return { ok: false, error: "already activated" };
 
-  // activate
-  await db.developmentProgress.create({
-    data: { userId, devCardDefId },
-  });
+  const activated = await db
+    .$transaction(async (tx) => {
+      await tx.developmentProgress.create({
+        data: { userId, devCardDefId },
+      });
 
-  // consume the card
-  if (userCard.count <= 1) {
-    await db.userCard.delete({ where: { id: userCard.id } });
-  } else {
-    await db.userCard.update({
-      where: { id: userCard.id },
-      data: { count: { decrement: 1 } },
+      const consumed = await tx.userCard.updateMany({
+        where: { id: userCard.id, userId, defId: devCardDefId, count: { gt: 0 } },
+        data: { count: { decrement: 1 } },
+      });
+      if (consumed.count !== 1) throw new Error("CARD_CONSUME_FAILED");
+      await tx.userCard.deleteMany({ where: { id: userCard.id, count: { lte: 0 } } });
+
+      const moved = await tx.cardInstance.updateMany({
+        where: {
+          id: instanceResult.instance.id,
+          userId,
+          location: "collection",
+          status: "available",
+          condition: { in: ["healthy", "fatigued"] },
+        },
+        data: {
+          location: "headquarters",
+          status: "unavailable",
+          lastStateChangeAt: new Date(),
+          metadataJson: JSON.stringify({ activatedDevelopment: devCardDefId }),
+        },
+      });
+      if (moved.count !== 1) throw new Error("CARD_INSTANCE_LOCK_FAILED");
+
+      return true;
+    })
+    .catch((error) => {
+      if (
+        error instanceof Error &&
+        (error.message === "CARD_INSTANCE_LOCK_FAILED" || error.message === "CARD_CONSUME_FAILED")
+      ) {
+        return false;
+      }
+      throw error;
     });
-  }
-  await db.cardInstance.update({
-    where: { id: instanceResult.instance.id },
-    data: {
-      location: "headquarters",
-      status: "unavailable",
-      lastStateChangeAt: new Date(),
-      metadataJson: JSON.stringify({ activatedDevelopment: devCardDefId }),
-    },
-  });
+
+  if (!activated) return { ok: false, error: "card is already busy" };
 
   return { ok: true };
 }
@@ -497,39 +537,63 @@ export async function assignCrewToPlanet(userId: string, planetId: string, crewC
     where: { userId_defId: { userId, defId: crewCardDefId } },
   });
   if (!userCard || userCard.count < 1) return { ok: false, error: "you don't own this crew card" };
+
+  if (planet.crewCardDefId === crewCardDefId && planet.crewCardInstanceId) {
+    return { ok: true };
+  }
+
   const instanceResult = await findAvailableCardInstance({ userId, defId: crewCardDefId });
   if (!instanceResult.ok) return instanceResult;
 
-  if (planet.crewCardInstanceId) {
-    await db.cardInstance.updateMany({
-      where: { userId, id: planet.crewCardInstanceId },
-      data: {
-        location: "collection",
-        status: "available",
-        planetId: null,
-        lastStateChangeAt: new Date(),
-      },
-    });
-  }
+  const assigned = await db
+    .$transaction(async (tx) => {
+      if (planet.crewCardInstanceId) {
+        await tx.cardInstance.updateMany({
+          where: { userId, id: planet.crewCardInstanceId },
+          data: {
+            location: "collection",
+            status: "available",
+            planetId: null,
+            lastStateChangeAt: new Date(),
+          },
+        });
+      }
 
-  // assign (replaces any existing crew)
-  await db.planet.update({
-    where: { id: planetId },
-    data: {
-      crewCardDefId,
-      crewCardInstanceId: instanceResult.instance.id,
-      crewAssignedAt: new Date(),
-    },
-  });
-  await db.cardInstance.update({
-    where: { id: instanceResult.instance.id },
-    data: {
-      location: "world",
-      status: "busy",
-      planetId,
-      lastStateChangeAt: new Date(),
-    },
-  });
+      await tx.planet.update({
+        where: { id: planetId },
+        data: {
+          crewCardDefId,
+          crewCardInstanceId: instanceResult.instance.id,
+          crewAssignedAt: new Date(),
+        },
+      });
+      const moved = await tx.cardInstance.updateMany({
+        where: {
+          id: instanceResult.instance.id,
+          userId,
+          location: "collection",
+          status: "available",
+          condition: { in: ["healthy", "fatigued"] },
+        },
+        data: {
+          location: "world",
+          status: "busy",
+          planetId,
+          lastStateChangeAt: new Date(),
+        },
+      });
+      if (moved.count !== 1) throw new Error("CARD_INSTANCE_LOCK_FAILED");
+
+      return true;
+    })
+    .catch((error) => {
+      if (error instanceof Error && error.message === "CARD_INSTANCE_LOCK_FAILED") {
+        return false;
+      }
+      throw error;
+    });
+
+  if (!assigned) return { ok: false, error: "card is already busy" };
 
   return { ok: true };
 }
@@ -537,21 +601,23 @@ export async function assignCrewToPlanet(userId: string, planetId: string, crewC
 export async function unassignCrew(userId: string, planetId: string): Promise<{ ok: boolean }> {
   const planet = await db.planet.findUnique({ where: { id: planetId } });
   if (!planet || planet.userId !== userId) return { ok: false };
-  await db.planet.update({
-    where: { id: planetId },
-    data: { crewCardDefId: null, crewCardInstanceId: null, crewAssignedAt: null },
-  });
-  if (planet.crewCardInstanceId) {
-    await db.cardInstance.updateMany({
-      where: { userId, id: planet.crewCardInstanceId },
-      data: {
-        location: "collection",
-        status: "available",
-        planetId: null,
-        lastStateChangeAt: new Date(),
-      },
+  await db.$transaction(async (tx) => {
+    await tx.planet.update({
+      where: { id: planetId },
+      data: { crewCardDefId: null, crewCardInstanceId: null, crewAssignedAt: null },
     });
-  }
+    if (planet.crewCardInstanceId) {
+      await tx.cardInstance.updateMany({
+        where: { userId, id: planet.crewCardInstanceId },
+        data: {
+          location: "collection",
+          status: "available",
+          planetId: null,
+          lastStateChangeAt: new Date(),
+        },
+      });
+    }
+  });
   return { ok: true };
 }
 

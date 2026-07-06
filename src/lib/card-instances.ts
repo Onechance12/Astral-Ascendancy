@@ -137,31 +137,3 @@ export async function findAvailableCardInstance(input: {
 
   return { ok: true as const, instance };
 }
-
-export async function lockCardInstanceForAssignment(input: {
-  userId: string;
-  cardInstanceId: string;
-  assignmentId: string;
-}) {
-  await db.cardInstance.update({
-    where: { id: input.cardInstanceId },
-    data: {
-      location: "assignment",
-      status: "busy",
-      currentAssignmentId: input.assignmentId,
-      lastStateChangeAt: new Date(),
-    },
-  });
-}
-
-export async function releaseAssignmentCardInstances(userId: string, assignmentId: string) {
-  await db.cardInstance.updateMany({
-    where: { userId, currentAssignmentId: assignmentId },
-    data: {
-      location: "collection",
-      status: "available",
-      currentAssignmentId: null,
-      lastStateChangeAt: new Date(),
-    },
-  });
-}

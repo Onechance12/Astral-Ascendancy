@@ -1,9 +1,5 @@
 import { db } from "@/lib/db";
-import {
-  findAvailableCardInstance,
-  lockCardInstanceForAssignment,
-  releaseAssignmentCardInstances,
-} from "@/lib/card-instances";
+import { findAvailableCardInstance } from "@/lib/card-instances";
 
 export type AssignmentType = "resource" | "study" | "rescue" | "training" | "defense" | "expedition" | "project";
 
@@ -204,8 +200,9 @@ export async function createAssignment(input: {
     cardDefId = cardResult.instance.defId;
     cardInstanceId = cardResult.instance.id;
 
-    const busyCardConditions: Array<{ cardInstanceId?: string; cardDefId?: string }> = [{ cardInstanceId }];
-    if (cardDefId) busyCardConditions.push({ cardDefId });
+    const busyCardConditions = cardDefId
+      ? [{ cardInstanceId }, { cardDefId, cardInstanceId: null }]
+      : [{ cardInstanceId }];
     const busyCard = await db.assignment.findFirst({
       where: {
         userId: input.userId,
@@ -217,29 +214,53 @@ export async function createAssignment(input: {
   }
 
   const now = new Date();
-  const assignment = await db.assignment.create({
-    data: {
-      userId: input.userId,
-      type: input.type,
-      title: def.title,
-      assetType: def.assetType,
-      cardDefId,
-      cardInstanceId,
-      deckId: input.deckId,
-      planetId,
-      description: def.description,
-      rewardsJson: JSON.stringify(def.rewards),
-      completesAt: new Date(now.getTime() + def.durationMinutes * 60 * 1000),
-    },
-  });
+  const assignment = await db
+    .$transaction(async (tx) => {
+      const created = await tx.assignment.create({
+        data: {
+          userId: input.userId,
+          type: input.type,
+          title: def.title,
+          assetType: def.assetType,
+          cardDefId,
+          cardInstanceId,
+          deckId: input.deckId,
+          planetId,
+          description: def.description,
+          rewardsJson: JSON.stringify(def.rewards),
+          completesAt: new Date(now.getTime() + def.durationMinutes * 60 * 1000),
+        },
+      });
 
-  if (cardInstanceId) {
-    await lockCardInstanceForAssignment({
-      userId: input.userId,
-      cardInstanceId,
-      assignmentId: assignment.id,
+      if (cardInstanceId) {
+        const moved = await tx.cardInstance.updateMany({
+          where: {
+            id: cardInstanceId,
+            userId: input.userId,
+            location: "collection",
+            status: "available",
+            condition: { in: ["healthy", "fatigued"] },
+          },
+          data: {
+            location: "assignment",
+            status: "busy",
+            currentAssignmentId: created.id,
+            lastStateChangeAt: new Date(),
+          },
+        });
+        if (moved.count !== 1) throw new Error("CARD_INSTANCE_LOCK_FAILED");
+      }
+
+      return created;
+    })
+    .catch((error) => {
+      if (error instanceof Error && error.message === "CARD_INSTANCE_LOCK_FAILED") {
+        return null;
+      }
+      throw error;
     });
-  }
+
+  if (!assignment) return { ok: false as const, error: "card is already busy" };
 
   return { ok: true as const, assignment };
 }
@@ -292,9 +313,17 @@ export async function claimAssignment(userId: string, assignmentId: string) {
         }
       }
     }
-  });
 
-  await releaseAssignmentCardInstances(userId, assignment.id);
+    await tx.cardInstance.updateMany({
+      where: { userId, currentAssignmentId: assignment.id },
+      data: {
+        location: "collection",
+        status: "available",
+        currentAssignmentId: null,
+        lastStateChangeAt: new Date(),
+      },
+    });
+  });
 
   return { ok: true as const, rewards };
 }
