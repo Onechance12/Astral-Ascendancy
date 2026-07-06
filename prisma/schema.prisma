@@ -25,6 +25,7 @@ model User {
   decks         Deck[]
   cards         UserCard[]
   cardInstances CardInstance[]
+  structureInstances StructureInstance[]
   quests        UserQuest[]
   campaignProg  CampaignProgress[]
   opProg        OperationProgress[]
@@ -576,8 +577,40 @@ model Planet {
   crewCardInstanceId String?
   crewAssignedAt DateTime?
 
+  structureInstances StructureInstance[]
+
   @@index([userId])
   @@index([userId, crewCardInstanceId])
+}
+
+// A built domain structure as a real container. Planet.structureType/level remains
+// the resource-production summary; StructureInstance is where living cards can be stationed.
+model StructureInstance {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planetId    String
+  planet      Planet   @relation(fields: [planetId], references: [id], onDelete: Cascade)
+
+  type        String   // solar_harvester | biomass_farm | crystal_mine | gas_refinery | quantum_array
+  name        String
+  level       Int      @default(1)
+  slot        Int      @default(0)
+  status      String   @default("active") // active | damaged | disabled | destroyed | repairing
+  integrity   Int      @default(100)
+  maxIntegrity Int     @default(100)
+  capacity    Int      @default(1)
+
+  sourceCardDefId String?
+  sourceCardInstanceId String?
+  metadataJson String   @default("{}")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([planetId, type])
+  @@index([userId, status])
+  @@index([userId, planetId])
 }
 
 // ---------- Developments (tech tree, activated from cards) ----------

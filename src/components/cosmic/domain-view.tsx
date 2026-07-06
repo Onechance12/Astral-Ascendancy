@@ -80,6 +80,41 @@ type WorldOperationsData = {
   eligibleCards: OperationCard[];
 };
 
+type StructureContainer = {
+  id: string;
+  planetId: string;
+  planetName: string;
+  planetType: string;
+  type: string;
+  name: string;
+  glyph: string;
+  color: string;
+  resourceType: ResourceType | null;
+  level: number;
+  status: string;
+  integrity: number;
+  maxIntegrity: number;
+  capacity: number;
+  occupied: number;
+  description: string;
+  stationedCards: StructureCard[];
+};
+
+type StructureCard = {
+  id: string;
+  defId: string;
+  name: string;
+  category: string;
+  rarity: string;
+  level: number;
+  condition: string;
+};
+
+type StructureContainerData = {
+  structures: StructureContainer[];
+  eligibleCards: StructureCard[];
+};
+
 type WorldCard = {
   defId: string;
   name: string;
@@ -148,18 +183,22 @@ export default function DomainView() {
   const [data, setData] = useState<DomainData | null>(null);
   const [loading, setLoading] = useState(true);
   const [harvesting, setHarvesting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"planets" | "operations" | "cards">("planets");
+  const [activeTab, setActiveTab] = useState<"planets" | "operations" | "structures" | "cards">("planets");
   const [worldOps, setWorldOps] = useState<WorldOperationsData | null>(null);
+  const [structureData, setStructureData] = useState<StructureContainerData | null>(null);
   const [operationBusy, setOperationBusy] = useState(false);
+  const [structureBusy, setStructureBusy] = useState(false);
 
   const load = useCallback(() => {
     Promise.all([
       fetch("/api/domain").then((r) => (r.ok ? r.json() : null)),
       fetch("/api/world-operations").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/structure-containers").then((r) => (r.ok ? r.json() : null)),
     ])
-      .then(([domainData, operationData]) => {
+      .then(([domainData, operationData, containerData]) => {
         setData(domainData);
         setWorldOps(operationData);
+        setStructureData(containerData);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -289,6 +328,46 @@ export default function DomainView() {
     setOperationBusy(false);
   };
 
+  const stationCard = async (structureId: string, cardInstanceId: string) => {
+    if (!cardInstanceId) {
+      toast.error("Choose a card to station");
+      return;
+    }
+    setStructureBusy(true);
+    const res = await fetch("/api/structure-containers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ structureId, cardInstanceId }),
+    });
+    if (res.ok) {
+      toast.success("Card stationed in structure");
+      load();
+      hydrateSession();
+    } else {
+      const e = await res.json().catch(() => ({}));
+      toast.error(e.error || "Cannot station card");
+    }
+    setStructureBusy(false);
+  };
+
+  const unstationCard = async (cardInstanceId: string) => {
+    setStructureBusy(true);
+    const res = await fetch("/api/structure-containers", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "unstation", cardInstanceId }),
+    });
+    if (res.ok) {
+      toast.success("Card returned to collection");
+      load();
+      hydrateSession();
+    } else {
+      const e = await res.json().catch(() => ({}));
+      toast.error(e.error || "Cannot remove card");
+    }
+    setStructureBusy(false);
+  };
+
   if (!commander) return null;
 
   const totalPending = data ? Object.values(data.pending).reduce((s, v) => s + (v || 0), 0) : 0;
@@ -340,12 +419,15 @@ export default function DomainView() {
       )}
 
       {/* tab switcher: planets / operations / world cards */}
-      <div className="mb-3 grid grid-cols-3 rounded-lg border border-white/10 bg-black/30 p-0.5 text-xs">
+      <div className="mb-3 grid grid-cols-4 rounded-lg border border-white/10 bg-black/30 p-0.5 text-xs">
         <button onClick={() => setActiveTab("planets")} className={cn("flex-1 rounded-md py-1.5 font-bold transition", activeTab === "planets" ? "bg-emerald-400 text-emerald-950" : "text-foreground/60")}>
           🪐 Planets ({data?.planets.length || 0})
         </button>
         <button onClick={() => setActiveTab("operations")} className={cn("flex-1 rounded-md py-1.5 font-bold transition", activeTab === "operations" ? "bg-emerald-400 text-emerald-950" : "text-foreground/60")}>
           ⚔ Ops ({worldOps?.operations.length || 0})
+        </button>
+        <button onClick={() => setActiveTab("structures")} className={cn("flex-1 rounded-md py-1.5 font-bold transition", activeTab === "structures" ? "bg-emerald-400 text-emerald-950" : "text-foreground/60")}>
+          ▣ Structures ({structureData?.structures.length || 0})
         </button>
         <button onClick={() => setActiveTab("cards")} className={cn("flex-1 rounded-md py-1.5 font-bold transition", activeTab === "cards" ? "bg-emerald-400 text-emerald-950" : "text-foreground/60")}>
           🃏 World Cards ({(data?.ownedPlanetCards.length || 0) + (data?.ownedDevelopmentCards.length || 0) + (data?.ownedCrewCards.length || 0)})
@@ -368,6 +450,13 @@ export default function DomainView() {
           busy={operationBusy}
           onStart={startWorldOperation}
           onClaim={claimWorldOperation}
+        />
+      ) : activeTab === "structures" ? (
+        <StructureContainersPanel
+          data={structureData}
+          busy={structureBusy}
+          onStation={stationCard}
+          onUnstation={unstationCard}
         />
       ) : (
         /* WORLD CARDS TAB */
@@ -431,6 +520,153 @@ export default function DomainView() {
       <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-3 text-[11px] text-muted-foreground">
         <p className="mb-1 font-bold text-foreground/70">⚡ How it works</p>
         <p>Build structures on planets to passively generate resources. Deploy planet cards to claim new worlds. Send exact card copies on timed world operations. Assigned cards become unavailable until they return. Resources are needed to craft faction cards.</p>
+      </div>
+    </div>
+  );
+}
+
+function StructureContainersPanel({
+  data,
+  busy,
+  onStation,
+  onUnstation,
+}: {
+  data: StructureContainerData | null;
+  busy: boolean;
+  onStation: (structureId: string, cardInstanceId: string) => void;
+  onUnstation: (cardInstanceId: string) => void;
+}) {
+  if (!data) {
+    return <p className="py-8 text-center text-xs text-muted-foreground">Scanning structure interiors...</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-3">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-300/80">Structure Containers</p>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          Built structures are now real places. Station living card copies inside them to prepare future production, repair, research, and defense systems.
+        </p>
+      </div>
+
+      {data.structures.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-white/15 p-6 text-center text-xs text-muted-foreground">
+          No built structures yet. Build a planet structure first, then it becomes a stationable container.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {data.structures.map((structure) => (
+            <StructureContainerCard
+              key={structure.id}
+              structure={structure}
+              eligibleCards={data.eligibleCards}
+              busy={busy}
+              onStation={onStation}
+              onUnstation={onUnstation}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StructureContainerCard({
+  structure,
+  eligibleCards,
+  busy,
+  onStation,
+  onUnstation,
+}: {
+  structure: StructureContainer;
+  eligibleCards: StructureCard[];
+  busy: boolean;
+  onStation: (structureId: string, cardInstanceId: string) => void;
+  onUnstation: (cardInstanceId: string) => void;
+}) {
+  const [selectedCardId, setSelectedCardId] = useState("");
+  const effectiveSelectedCardId = eligibleCards.some((card) => card.id === selectedCardId)
+    ? selectedCardId
+    : eligibleCards[0]?.id || "";
+  const isFull = structure.occupied >= structure.capacity;
+  const integrityPct = Math.max(0, Math.min(100, (structure.integrity / Math.max(1, structure.maxIntegrity)) * 100));
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3" style={{ boxShadow: `inset 0 0 24px ${structure.color}10` }}>
+      <div className="flex items-start gap-3">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-2xl" style={{ color: structure.color }}>
+          {structure.glyph}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-black" style={{ color: structure.color }}>{structure.name}</p>
+              <p className="text-[10px] text-muted-foreground">{structure.planetName} · Lv.{structure.level} · {structure.status}</p>
+            </div>
+            <span className="shrink-0 rounded-md bg-white/10 px-1.5 py-0.5 text-[9px] font-bold text-foreground/70">
+              {structure.occupied}/{structure.capacity}
+            </span>
+          </div>
+          <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">{structure.description}</p>
+        </div>
+      </div>
+
+      <div className="mt-3">
+        <div className="mb-1 flex justify-between text-[9px] text-muted-foreground">
+          <span>Integrity</span>
+          <span>{structure.integrity}/{structure.maxIntegrity}</span>
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-black/40">
+          <div className="h-full rounded-full" style={{ width: `${integrityPct}%`, background: structure.color }} />
+        </div>
+      </div>
+
+      <div className="mt-3 space-y-1.5">
+        {structure.stationedCards.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-white/10 px-2 py-2 text-center text-[10px] text-muted-foreground">No cards stationed</p>
+        ) : (
+          structure.stationedCards.map((card) => (
+            <div key={card.id} className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-black/25 px-2 py-1.5">
+              <div className="min-w-0">
+                <p className="truncate text-[10px] font-black">{card.name}</p>
+                <p className="text-[9px] text-muted-foreground">Lv.{card.level} · {card.rarity} · {card.category}</p>
+              </div>
+              <button
+                onClick={() => onUnstation(card.id)}
+                disabled={busy}
+                className="shrink-0 rounded-md border border-white/10 px-2 py-1 text-[9px] font-bold text-foreground/60 hover:bg-white/10 disabled:opacity-50"
+              >
+                Remove
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="mt-3 space-y-2">
+        <select
+          value={effectiveSelectedCardId}
+          onChange={(event) => setSelectedCardId(event.target.value)}
+          disabled={isFull || eligibleCards.length === 0}
+          className="w-full rounded-lg border border-white/10 bg-black/50 px-2 py-2 text-xs text-foreground outline-none disabled:opacity-50"
+        >
+          {eligibleCards.length === 0 ? (
+            <option value="">No eligible available cards</option>
+          ) : (
+            eligibleCards.map((card) => (
+              <option key={card.id} value={card.id}>
+                {card.name} · Lv.{card.level} · {card.rarity} · {card.category}
+              </option>
+            ))
+          )}
+        </select>
+        <button
+          onClick={() => onStation(structure.id, effectiveSelectedCardId)}
+          disabled={busy || isFull || !effectiveSelectedCardId}
+          className="w-full rounded-lg bg-cyan-400/20 px-3 py-2 text-xs font-black text-cyan-300 transition hover:bg-cyan-400/30 disabled:bg-white/5 disabled:text-muted-foreground"
+        >
+          {isFull ? "Structure Full" : "Station Card"}
+        </button>
       </div>
     </div>
   );
