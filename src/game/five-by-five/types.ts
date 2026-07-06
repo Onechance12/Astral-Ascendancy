@@ -184,6 +184,7 @@ export type BattleEvent =
   | {
       type: "destroyed";
       sectorIndex: number;
+      defId: string;
       name: string;
       owner: Side;
     }

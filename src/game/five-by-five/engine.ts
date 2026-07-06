@@ -363,7 +363,7 @@ export function attackInMatch(
   ];
 
   if (destroyed) {
-    events.push({ type: "destroyed", sectorIndex: targetIndex, name: target.name, owner: target.owner });
+    events.push({ type: "destroyed", sectorIndex: targetIndex, defId: target.defId, name: target.name, owner: target.owner });
   }
   if (overflowDamage > 0) {
     events.push({
@@ -492,7 +492,7 @@ function damageSector(
     log: [...state.log, `${sourceName} deals ${amount} damage to ${target.name}.${destroyed ? " Target destroyed." : ""}`],
     lastEvents: [
       { type: "cardEffect", sourceName, label: `-${amount}`, targetIndex, value: amount, tone: "damage" },
-      ...(destroyed ? [{ type: "destroyed" as const, sectorIndex: targetIndex, name: target.name, owner: target.owner }] : []),
+      ...(destroyed ? [{ type: "destroyed" as const, sectorIndex: targetIndex, defId: target.defId, name: target.name, owner: target.owner }] : []),
     ],
   });
 }
@@ -637,7 +637,7 @@ function destroyEnemyEntitiesByAttack(
   const destroyed: FiveByFiveMatchState["lastEvents"] = [];
   const board = state.board.map((sector) => {
     if (sector.entity?.owner === enemy && sector.entity.attack <= maxAttack) {
-      destroyed.push({ type: "destroyed", sectorIndex: sector.index, name: sector.entity.name, owner: sector.entity.owner });
+      destroyed.push({ type: "destroyed", sectorIndex: sector.index, defId: sector.entity.defId, name: sector.entity.name, owner: sector.entity.owner });
       destroyed.push({ type: "cardEffect", sourceName, label: "Purged", targetIndex: sector.index, tone: "damage" });
       return { ...sector, entity: null };
     }

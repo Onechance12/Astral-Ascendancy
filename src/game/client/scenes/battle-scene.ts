@@ -28,16 +28,13 @@ import {
 import { BaseScene } from "./base-scene";
 import { COLORS, label, makeButton, roundedPanel } from "../pixi-ui";
 
-const STARTING_HAND = [
+const PLAYER_DECKLIST = [
   "sector_surveyor",
   "carrion_bloom",
   "smite",
   "solar_writ",
   "concord_arbiter",
   "hardlight_exoshell",
-];
-
-const PLAYER_DRAW_DECK = [
   "acolyte",
   "sunfire-cannon",
   "dawnknight",
@@ -52,8 +49,8 @@ const PLAYER_DRAW_DECK = [
   "artifact_recovery_team",
 ];
 
-const ENEMY_STARTING_HAND = ["broodling", "spitter", "infestor"];
-const ENEMY_DRAW_DECK = ["larval_tide", "tyrant", "harvester", "maw_apostle", "spawning_pit", "black_bloom"];
+const ENEMY_DECKLIST = ["broodling", "spitter", "infestor", "larval_tide", "tyrant", "harvester", "maw_apostle", "spawning_pit", "black_bloom"];
+const OPENING_HAND_SIZE = 5;
 
 const WORLD_COLOR: Record<string, number> = {
   barren: 0x64748b,
@@ -72,6 +69,22 @@ function getCard(defId: string): CardDef {
   const def = CARD_DEFS.find((card) => card.defId === defId);
   if (!def) throw new Error(`Missing card definition: ${defId}`);
   return def;
+}
+
+function shuffleDeck(deck: string[]): string[] {
+  const shuffled = [...deck];
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function drawCards(deck: string[], count: number): { hand: string[]; deck: string[] } {
+  return {
+    hand: deck.slice(0, count),
+    deck: deck.slice(count),
+  };
 }
 
 function createInitialBattleState(): FiveByFiveMatchState {
@@ -99,10 +112,12 @@ function createInitialBattleState(): FiveByFiveMatchState {
 
 export class BattleScene extends BaseScene {
   private match = createInitialBattleState();
-  private hand = [...STARTING_HAND];
-  private playerDeck = [...PLAYER_DRAW_DECK];
-  private enemyHand = [...ENEMY_STARTING_HAND];
-  private enemyDeck = [...ENEMY_DRAW_DECK];
+  private hand: string[] = [];
+  private playerDeck: string[] = [];
+  private playerVoid: string[] = [];
+  private enemyHand: string[] = [];
+  private enemyDeck: string[] = [];
+  private enemyVoid: string[] = [];
   private selectedCardId: string | null = null;
   private selectedActor: number | null = null;
   private bgLayer = new Container();
@@ -120,6 +135,7 @@ export class BattleScene extends BaseScene {
   private resultSubmitted = false;
 
   enter(): void {
+    if (this.hand.length === 0 && this.playerDeck.length === 0) this.resetBattle();
     this.container.addChild(this.bgLayer, this.boardLayer, this.hudLayer, this.handLayer, this.fxLayer);
     this.redraw();
   }
@@ -435,7 +451,7 @@ export class BattleScene extends BaseScene {
     const width = Math.min(340, this.app.screen.width - 36);
     const hud = new Container();
     const accent = side === "player" ? COLORS.emerald : COLORS.fuchsia;
-    hud.addChild(roundedPanel(width, 58, 0x030712, 0.72, accent));
+    hud.addChild(roundedPanel(width, 68, 0x030712, 0.72, accent));
     const title = label(name, 13, COLORS.white, "900");
     title.position.set(12, 9);
     const hpBar = new Graphics()
@@ -445,7 +461,9 @@ export class BattleScene extends BaseScene {
       .fill({ color: COLORS.rose, alpha: 0.95 });
     const stats = label(`${hp}/${maxHp} HP · ${influence}/30 INF${typeof resonance === "number" ? ` · ${resonance}R` : ""}`, 10, COLORS.slate, "bold");
     stats.position.set(12, 43);
-    hud.addChild(title, hpBar, stats);
+    const zone = label(this.zoneSummary(side), 9, COLORS.slate, "bold");
+    zone.position.set(12, 55);
+    hud.addChild(title, hpBar, stats, zone);
     return hud;
   }
 
@@ -537,6 +555,7 @@ export class BattleScene extends BaseScene {
         this.match = next;
         this.removeCardFromHand(selectedCard.defId);
         this.trackPlayedCard(selectedCard);
+        this.collectDestroyedCards(this.match.lastEvents);
         this.applyDrawEvents();
         this.selectedCardId = null;
         this.bus.emit("battlelog", { message: `${selectedCard.name} played.` });
@@ -550,6 +569,7 @@ export class BattleScene extends BaseScene {
       this.match = attacks.includes(index)
         ? attackInMatch(this.match, this.selectedActor, index)
         : moveEntityInMatch(this.match, this.selectedActor, index);
+      this.collectDestroyedCards(this.match.lastEvents);
       if (this.resolveWinner()) return;
       this.selectedActor = null;
       this.redraw();
@@ -584,6 +604,7 @@ export class BattleScene extends BaseScene {
     this.match = next;
     this.removeCardFromHand(selectedCard.defId);
     this.trackPlayedCard(selectedCard);
+    this.collectDestroyedCards(this.match.lastEvents);
     this.applyDrawEvents();
     this.selectedCardId = null;
     if (this.resolveWinner()) return;
@@ -632,6 +653,7 @@ export class BattleScene extends BaseScene {
     }
     this.match = next;
     this.enemyTurnQueued = false;
+    this.collectDestroyedCards(this.match.lastEvents);
     if (this.resolveWinner()) return;
     this.redraw();
   }
@@ -716,8 +738,12 @@ export class BattleScene extends BaseScene {
   }
 
   private drawPlayerCard() {
+    if (this.hand.length >= 7) return;
     const next = this.playerDeck.shift();
-    if (!next || this.hand.length >= 7) return;
+    if (!next) {
+      this.match = { ...this.match, log: [...this.match.log, "Your deck is empty."] };
+      return;
+    }
     this.hand.push(next);
   }
 
@@ -730,8 +756,12 @@ export class BattleScene extends BaseScene {
   }
 
   private drawEnemyCard() {
+    if (this.enemyHand.length >= 6) return;
     const next = this.enemyDeck.shift();
-    if (!next || this.enemyHand.length >= 6) return;
+    if (!next) {
+      this.match = { ...this.match, log: [...this.match.log, "Enemy deck is empty."] };
+      return;
+    }
     this.enemyHand.push(next);
   }
 
@@ -751,11 +781,15 @@ export class BattleScene extends BaseScene {
   }
 
   private resetBattle() {
+    const playerOpening = drawCards(shuffleDeck(PLAYER_DECKLIST), OPENING_HAND_SIZE);
+    const enemyOpening = drawCards(shuffleDeck(ENEMY_DECKLIST), 3);
     this.match = createInitialBattleState();
-    this.hand = [...STARTING_HAND];
-    this.playerDeck = [...PLAYER_DRAW_DECK];
-    this.enemyHand = [...ENEMY_STARTING_HAND];
-    this.enemyDeck = [...ENEMY_DRAW_DECK];
+    this.hand = playerOpening.hand;
+    this.playerDeck = playerOpening.deck;
+    this.playerVoid = [];
+    this.enemyHand = enemyOpening.hand;
+    this.enemyDeck = enemyOpening.deck;
+    this.enemyVoid = [];
     this.selectedActor = null;
     this.selectedCardId = null;
     this.enemyTurnQueued = false;
@@ -768,7 +802,29 @@ export class BattleScene extends BaseScene {
   private trackPlayedCard(card: CardDef) {
     this.cardsPlayed.push(card.defId);
     if (card.type === "Entity") this.deployedCount += 1;
-    if (card.type === "Anomaly") this.castCount += 1;
+    if (card.type === "Anomaly") {
+      this.castCount += 1;
+      this.playerVoid.push(card.defId);
+    }
+  }
+
+  private collectDestroyedCards(events: FiveByFiveMatchState["lastEvents"]) {
+    for (const event of events) {
+      if (event.type !== "destroyed") continue;
+      if (event.owner === "player") this.playerVoid.push(event.defId);
+      if (event.owner === "enemy") this.enemyVoid.push(event.defId);
+    }
+  }
+
+  private zoneSummary(side: "player" | "enemy") {
+    const deck = side === "player" ? this.playerDeck.length : this.enemyDeck.length;
+    const hand = side === "player" ? this.hand.length : this.enemyHand.length;
+    const voidCount = side === "player" ? this.playerVoid.length : this.enemyVoid.length;
+    const field = this.match.board.filter((sector) => {
+      const occupant = sector.entity ?? sector.structure;
+      return occupant?.owner === side;
+    }).length;
+    return `DECK ${deck} · HAND ${hand} · FIELD ${field} · VOID ${voidCount}`;
   }
 
   private finishMatch() {
