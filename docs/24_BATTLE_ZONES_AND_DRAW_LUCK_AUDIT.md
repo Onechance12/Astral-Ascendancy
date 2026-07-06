@@ -9,7 +9,7 @@ The missing system was battle zones. A serious card game needs every card to hav
 - Deck: hidden draw pile.
 - Hand: available tactical options.
 - Field: entities, structures, attachments, and transformed worlds.
-- Void: destroyed or spent cards.
+- Recovery: defeated entities, spent crews, damaged assets, and spent tactical cards waiting for after-battle handling.
 - Exile: removed-from-match cards for future high-power effects.
 - Reveal/forecast: temporary visible top-deck information.
 
@@ -56,12 +56,14 @@ This is closer to a tactical card battler than pure chess. Chess-level positioni
 - World cards transform sectors and become map state, not normal graveyard cards.
 - Future world-card provenance should be stored so effects can care which card created the world.
 
-### Void
+### Recovery
 
-- Destroyed entities and structures go to Void.
-- Spent Anomalies go to Void after resolving.
-- Void should be visible as a count first, then inspectable later.
-- Quantum, Voidborn, and Astral cards should care about Void heavily.
+- Defeated entities go to Recovery as casualties.
+- Destroyed structures become damaged infrastructure.
+- Spent Anomalies go to Recovery/Archive after resolving.
+- Recovery should be visible as a count first, then inspectable later.
+- Quantum, Voidborn, Astral, medical, engineering, and home-world systems should care about Recovery heavily.
+- Recovery is not automatically healed between serious modes once the RPG layer is enabled.
 
 ### Exile
 
@@ -77,13 +79,13 @@ This is closer to a tactical card battler than pure chess. Chess-level positioni
 
 ## Why This Matters
 
-Deck, hand, field, and void create the emotional card-game loop:
+Deck, hand, field, and recovery create the emotional card-game loop:
 
 1. I need an answer.
 2. I draw.
 3. The card is playable or not.
 4. I commit it to the board.
-5. It survives, evolves, dies, or becomes fuel for another effect.
+5. It survives, evolves, gets injured, needs repair, or becomes fuel for another effect.
 
 That is where the luck and drama come from.
 
@@ -94,18 +96,18 @@ Added now:
 - Shuffled draw piles in the Pixi battle prototype.
 - Random opening hand for the player.
 - Enemy draw pile and hand count.
-- Visible Deck / Hand / Field / Void counters.
+- Visible Deck / Hand / Field / Recovery counters.
 - Destroyed card events now preserve card definition id.
-- Destroyed player/enemy cards move into Void counters.
-- Spent player Anomalies move into Void.
+- Destroyed player/enemy cards move into Recovery counters.
+- Spent player Anomalies move into Recovery counters.
 - Full hand no longer burns the next draw.
 
 Still needed:
 
 - Engine-level zone state instead of scene-level arrays.
-- Inspectable graveyard/void overlay.
+- Inspectable recovery, medical, and repair overlay.
 - Real constructed deck loading from saved decks.
 - Mulligan.
 - Fatigue or deck-empty rule.
-- Effects that interact with Void, forecast, discard, search, and resurrection.
+- Effects that interact with recovery, forecast, discard, search, healing, repair, and revival.
 - World provenance so a sector remembers which card transformed it.

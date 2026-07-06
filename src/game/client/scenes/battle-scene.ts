@@ -114,10 +114,10 @@ export class BattleScene extends BaseScene {
   private match = createInitialBattleState();
   private hand: string[] = [];
   private playerDeck: string[] = [];
-  private playerVoid: string[] = [];
+  private playerRecovery: string[] = [];
   private enemyHand: string[] = [];
   private enemyDeck: string[] = [];
-  private enemyVoid: string[] = [];
+  private enemyRecovery: string[] = [];
   private selectedCardId: string | null = null;
   private selectedActor: number | null = null;
   private bgLayer = new Container();
@@ -786,10 +786,10 @@ export class BattleScene extends BaseScene {
     this.match = createInitialBattleState();
     this.hand = playerOpening.hand;
     this.playerDeck = playerOpening.deck;
-    this.playerVoid = [];
+    this.playerRecovery = [];
     this.enemyHand = enemyOpening.hand;
     this.enemyDeck = enemyOpening.deck;
-    this.enemyVoid = [];
+    this.enemyRecovery = [];
     this.selectedActor = null;
     this.selectedCardId = null;
     this.enemyTurnQueued = false;
@@ -804,27 +804,27 @@ export class BattleScene extends BaseScene {
     if (card.type === "Entity") this.deployedCount += 1;
     if (card.type === "Anomaly") {
       this.castCount += 1;
-      this.playerVoid.push(card.defId);
+      this.playerRecovery.push(card.defId);
     }
   }
 
   private collectDestroyedCards(events: FiveByFiveMatchState["lastEvents"]) {
     for (const event of events) {
       if (event.type !== "destroyed") continue;
-      if (event.owner === "player") this.playerVoid.push(event.defId);
-      if (event.owner === "enemy") this.enemyVoid.push(event.defId);
+      if (event.owner === "player") this.playerRecovery.push(event.defId);
+      if (event.owner === "enemy") this.enemyRecovery.push(event.defId);
     }
   }
 
   private zoneSummary(side: "player" | "enemy") {
     const deck = side === "player" ? this.playerDeck.length : this.enemyDeck.length;
     const hand = side === "player" ? this.hand.length : this.enemyHand.length;
-    const voidCount = side === "player" ? this.playerVoid.length : this.enemyVoid.length;
+    const recoveryCount = side === "player" ? this.playerRecovery.length : this.enemyRecovery.length;
     const field = this.match.board.filter((sector) => {
       const occupant = sector.entity ?? sector.structure;
       return occupant?.owner === side;
     }).length;
-    return `DECK ${deck} · HAND ${hand} · FIELD ${field} · VOID ${voidCount}`;
+    return `DECK ${deck} · HAND ${hand} · FIELD ${field} · RECOVERY ${recoveryCount}`;
   }
 
   private finishMatch() {
