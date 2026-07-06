@@ -19,6 +19,6 @@ services:
 
 databases:
   - name: astral-ascendancy-db
-    plan: starter
+    plan: basic-256mb
     databaseName: astral_ascendancy
     user: astral
