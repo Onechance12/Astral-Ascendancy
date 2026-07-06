@@ -45,6 +45,7 @@ model User {
   deckLicenses  DeckLicense[]
   loginStreak   LoginStreak?
   rewards       RewardInbox[]
+  petitions     Petition[]
 }
 
 // A player's in-game identity (chosen at signup)
@@ -232,6 +233,30 @@ model RewardInbox {
 
   @@unique([userId, sourceType, sourceId])
   @@index([userId, status, createdAt])
+  @@index([userId, sourceType, sourceId])
+}
+
+model Petition {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceType  String   // card | world | structure | headquarters | reward | assignment | system
+  sourceId    String?
+  title       String
+  body        String
+  tone        String   @default("neutral") // urgent | opportunity | warning | request | neutral
+  status      String   @default("open") // open | approved | dismissed | expired
+  actionType  String   // open_headquarters | open_domain | open_operations | open_pack
+  actionPayloadJson String @default("{}")
+  priority    Int      @default(50)
+  generatedKey String
+  expiresAt   DateTime?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, generatedKey])
+  @@index([userId, status, priority])
   @@index([userId, sourceType, sourceId])
 }
 

@@ -63,6 +63,21 @@ type BriefingAction = {
   view?: string;
 };
 
+type Petition = {
+  id: string;
+  sourceType: string;
+  sourceId: string | null;
+  title: string;
+  body: string;
+  tone: "urgent" | "opportunity" | "warning" | "request" | "neutral" | string;
+  status: string;
+  actionType: "open_headquarters" | "open_domain" | "open_operations" | "open_pack" | string;
+  actionPayload: Record<string, unknown>;
+  priority: number;
+  createdAt: string;
+  expiresAt: string | null;
+};
+
 type BriefingItem = {
   id: string;
   title: string;
@@ -123,7 +138,9 @@ export default function GameHub() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [licenses, setLicenses] = useState<DeckLicense[]>([]);
   const [briefing, setBriefing] = useState<DailyBriefing | null>(null);
+  const [petitions, setPetitions] = useState<Petition[]>([]);
   const [assignmentBusy, setAssignmentBusy] = useState<string | null>(null);
+  const [petitionBusy, setPetitionBusy] = useState<string | null>(null);
   const activeDeck = decks.find((d) => d.id === activeDeckId) ?? decks[0];
 
   const loadBetaStatus = useCallback(() => {
@@ -131,10 +148,12 @@ export default function GameHub() {
       fetch("/api/assignments").then((r) => (r.ok ? r.json() : { assignments: [] })),
       fetch("/api/deck-licenses").then((r) => (r.ok ? r.json() : { licenses: [] })),
       fetch("/api/daily-briefing").then((r) => (r.ok ? r.json() : { briefing: null })),
-    ]).then(([assignmentData, licenseData, briefingData]) => {
+      fetch("/api/petitions").then((r) => (r.ok ? r.json() : { petitions: [] })),
+    ]).then(([assignmentData, licenseData, briefingData, petitionData]) => {
       setAssignments(assignmentData.assignments || []);
       setLicenses(licenseData.licenses || []);
       setBriefing(briefingData.briefing || null);
+      setPetitions(petitionData.petitions || []);
     });
   }, []);
 
@@ -262,6 +281,36 @@ export default function GameHub() {
     if (targetView) setView(targetView as Parameters<typeof setView>[0]);
   };
 
+  const resolvePetitionAction = async (petition: Petition, action: "approve" | "dismiss") => {
+    setPetitionBusy(petition.id);
+    try {
+      const res = await fetch("/api/petitions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ petitionId: petition.id, action }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(data.error || "Petition could not be resolved");
+        return;
+      }
+      toast.success(action === "approve" ? "Petition approved" : "Petition dismissed");
+      if (action === "approve") routePetitionAction(petition);
+      loadBetaStatus();
+    } finally {
+      setPetitionBusy(null);
+    }
+  };
+
+  const routePetitionAction = (petition: Petition) => {
+    if (petition.actionType === "open_pack") {
+      setPackOpen(true);
+      return;
+    }
+    const view = petitionActionToView(petition.actionType);
+    if (view) setView(view as Parameters<typeof setView>[0]);
+  };
+
   return (
     <div className="mx-auto w-full max-w-5xl px-3 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:pb-6 sm:pt-[max(1.5rem,env(safe-area-inset-top))]">
       {/* top bar */}
@@ -372,6 +421,13 @@ export default function GameHub() {
       {briefing && (
         <CommandBrief briefing={briefing} color={color} onAction={runBriefingAction} />
       )}
+
+      <PetitionsPanel
+        petitions={petitions}
+        color={color}
+        busyId={petitionBusy}
+        onResolve={resolvePetitionAction}
+      />
 
       {/* beta live loop */}
       <div className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
@@ -723,6 +779,89 @@ function CommandBrief({
   );
 }
 
+function PetitionsPanel({
+  petitions,
+  color,
+  busyId,
+  onResolve,
+}: {
+  petitions: Petition[];
+  color: string;
+  busyId: string | null;
+  onResolve: (petition: Petition, action: "approve" | "dismiss") => void;
+}) {
+  if (petitions.length === 0) return null;
+
+  return (
+    <section
+      className="relative mt-4 overflow-hidden rounded-2xl border bg-black/30 p-4"
+      style={{
+        borderColor: `${color}33`,
+        boxShadow: `inset 0 0 34px ${color}10`,
+      }}
+    >
+      <div className="grid-pattern absolute inset-0 opacity-10" />
+      <div className="relative mb-3 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground">
+            Command Petitions
+          </p>
+          <h2 className="text-sm font-black text-foreground">Requests Awaiting Approval</h2>
+        </div>
+        <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-black text-foreground/60">
+          {petitions.length} open
+        </span>
+      </div>
+
+      <div className="relative grid gap-2">
+        {petitions.slice(0, 3).map((petition) => (
+          <div
+            key={petition.id}
+            className={cn(
+              "rounded-xl border bg-black/25 p-3",
+              petition.tone === "urgent"
+                ? "border-rose-300/25 shadow-[inset_0_0_24px_rgba(251,113,133,0.08)]"
+                : petition.tone === "opportunity"
+                  ? "border-emerald-300/20 shadow-[inset_0_0_24px_rgba(52,211,153,0.08)]"
+                  : "border-white/10"
+            )}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="mb-1 flex items-center gap-2">
+                  <span className={cn("h-2 w-2 rounded-full", petitionToneDot(petition.tone))} />
+                  <p className="truncate text-xs font-black text-foreground">{petition.title}</p>
+                </div>
+                <p className="line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">{petition.body}</p>
+                <p className="mt-1 text-[9px] font-bold uppercase tracking-widest text-foreground/40">
+                  {petition.sourceType} · priority {petition.priority}
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-col gap-1">
+                <Button
+                  size="sm"
+                  disabled={busyId === petition.id}
+                  onClick={() => onResolve(petition, "approve")}
+                  className="h-7 bg-emerald-400 px-2 text-[10px] font-black text-emerald-950 hover:bg-emerald-300"
+                >
+                  Approve
+                </Button>
+                <button
+                  disabled={busyId === petition.id}
+                  onClick={() => onResolve(petition, "dismiss")}
+                  className="h-7 rounded-md border border-white/10 px-2 text-[10px] font-bold text-foreground/55 transition hover:bg-white/[0.06] disabled:opacity-50"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function BriefMetric({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="rounded-lg border border-white/10 bg-black/25 p-2 text-center">
@@ -756,6 +895,21 @@ function actionKindToView(kind: BriefingAction["kind"]) {
   if (kind === "open_headquarters") return "headquarters";
   if (kind === "open_operations") return "operations";
   return null;
+}
+
+function petitionActionToView(kind: Petition["actionType"]) {
+  if (kind === "open_domain") return "domain";
+  if (kind === "open_headquarters") return "headquarters";
+  if (kind === "open_operations") return "operations";
+  return null;
+}
+
+function petitionToneDot(tone: Petition["tone"]) {
+  if (tone === "urgent") return "bg-rose-300 shadow-[0_0_14px_rgba(251,113,133,0.8)]";
+  if (tone === "opportunity") return "bg-emerald-300 shadow-[0_0_14px_rgba(52,211,153,0.8)]";
+  if (tone === "warning") return "bg-amber-300 shadow-[0_0_14px_rgba(251,191,36,0.8)]";
+  if (tone === "request") return "bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.8)]";
+  return "bg-white/40";
 }
 
 function StatCard({ label, value, accent }: { label: string; value: string | number; accent: string }) {
