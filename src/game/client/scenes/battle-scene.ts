@@ -495,7 +495,7 @@ export class BattleScene extends BaseScene {
 
   private loadCardArt() {
     if (this.loadingArt) return;
-    const urls = Array.from(new Set(CARD_DEFS.map((card) => card.art).filter((art): art is string => Boolean(art) && art.startsWith("/game/cards/"))));
+    const urls = Array.from(new Set(CARD_DEFS.map((card) => card.art).filter((art): art is string => typeof art === "string" && art.startsWith("/game/cards/"))));
     const unloaded = urls.filter((url) => !this.cardArtTextures.has(url));
     if (unloaded.length === 0) return;
 
